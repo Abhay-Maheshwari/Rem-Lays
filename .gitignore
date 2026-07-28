@@ -1,0 +1,33 @@
+# Workspace Root .gitignore
+
+# Dependencies
+node_modules/
+
+# Build Outputs
+dist/
+.angular/
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs
+*.log
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor Settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary Files
+supabase/.temp/
+.supabase/

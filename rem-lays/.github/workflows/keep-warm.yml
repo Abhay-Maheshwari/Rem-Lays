@@ -1,0 +1,28 @@
+# Keeps the prod Supabase project from auto-pausing after 7 days of no
+# API traffic (the free-tier behavior mentioned in the design doc's
+# hosting plan). One lightweight GET a day is enough — this is not a
+# health check or a monitoring tool, just a heartbeat.
+#
+# Requires two repo secrets (Settings -> Secrets and variables ->
+# Actions): SUPABASE_URL and SUPABASE_ANON_KEY, both from your PROD
+# project's Settings -> API. Dev pausing isn't worth solving the same
+# way — a ~20-30s cold-wake delay next time you run `npm run tauri dev`
+# is a non-issue; duplicate this workflow for dev too if that ever
+# actually bothers you.
+name: keep-warm
+
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          curl -sf -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -o /dev/null

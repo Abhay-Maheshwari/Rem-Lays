@@ -1,0 +1,38 @@
+<div data-tauri-drag-region class="titlebar" *ngIf="isDesktop">
+  <div class="window-controls">
+    <button class="win-btn" (click)="minimize()" title="Minimize">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="22" y2="12"/></svg>
+    </button>
+    <button class="win-btn" (click)="maximize()" title="Maximize">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+    </button>
+    <button class="win-btn close" (click)="close()" title="Close">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+</div>
+
+<main class="shell" *ngIf="!auth.session()">
+  <div class="card">
+    <h1>Rem-Lays</h1>
+    <p class="muted">Sign in to see your inbox.</p>
+    <button class="primary" (click)="signIn()">Sign in with Google</button>
+  </div>
+</main>
+
+<div class="app" *ngIf="auth.session()">
+  <button class="mobile-menu-btn" (click)="toggleSidebar()" aria-label="Open menu">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+  <div class="backdrop" [class.visible]="sidebarOpen()" (click)="closeSidebar()"></div>
+  <app-sidebar [open]="sidebarOpen()" (navigated)="closeSidebar()"></app-sidebar>
+  <main class="main-pane">
+    <app-feed></app-feed>
+    <app-quick-action-bar></app-quick-action-bar>
+  </main>
+</div>
+
+<app-item-viewer></app-item-viewer>
+<app-device-nickname-modal></app-device-nickname-modal>

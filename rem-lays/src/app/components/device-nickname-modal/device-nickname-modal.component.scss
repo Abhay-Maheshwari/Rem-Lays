@@ -1,0 +1,115 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: var(--panel-main);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  width: 90vw;
+  max-width: 400px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-body p {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.nickname-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .15s ease, background .15s ease;
+}
+
+.nickname-input:focus {
+  border-color: var(--accent);
+  background: rgba(255,255,255,0.06);
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  background: rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.btn-secondary, .btn-primary {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-primary);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(62,142,247,0.3);
+}
+
+.btn-primary:hover {
+  background: #5a9cf9;
+  box-shadow: 0 4px 12px rgba(62,142,247,0.4);
+}

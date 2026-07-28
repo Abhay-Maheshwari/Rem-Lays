@@ -1,0 +1,222 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.modal {
+  position: relative;
+  background: var(--bg-sidebar);
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.15s;
+}
+
+.close-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.media-content {
+  max-width: 100%;
+  max-height: calc(90vh - 40px);
+  object-fit: contain;
+  display: block;
+}
+
+.loading {
+  padding: 60px 100px;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
+.text-content {
+  padding: 24px;
+  max-width: 600px;
+  width: 100%;
+  overflow-y: auto;
+  max-height: calc(90vh - 40px);
+}
+
+.text-meta {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-bottom: 20px;
+  padding-right: 120px;
+}
+
+.text-body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+.link-content {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  width: 400px;
+  max-width: 100%;
+}
+
+.link-favicon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.link-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.open-link-btn {
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.15s;
+}
+
+.open-link-btn:hover {
+  background: #5299FF;
+}
+
+.modal-actions {
+  position: absolute;
+  top: 16px;
+  right: 60px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 0 16px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.action-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.action-btn.primary:hover {
+  background: #5299FF;
+}
+
+.edit-textarea {
+  width: 100%;
+  min-height: 200px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.6;
+  padding: 16px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.edit-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.edit-input {
+  width: 100%;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 10px 16px;
+  text-align: center;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.link-url-display {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  word-break: break-all;
+  margin-top: -10px;
+}

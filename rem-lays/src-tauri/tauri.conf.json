@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Rem-Lays",
+  "version": "0.1.0",
+  "identifier": "app.remlays.desktop",
+  "build": {
+    "beforeDevCommand": "npm run start",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:4200",
+    "frontendDist": "../dist/rem-lays/browser"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Rem-Lays",
+        "width": 1100,
+        "height": 720,
+        "minWidth": 720,
+        "minHeight": 480,
+        "decorations": false
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "withGlobalTauri": true
+  },
+  "plugins": {
+    "deep-link": {
+      "schemes": ["remlays"]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

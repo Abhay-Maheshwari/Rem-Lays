@@ -1,0 +1,14 @@
+{
+  "name": "rem-lays-scaffold",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "npm run --prefix rem-lays start",
+    "build": "npm run --prefix rem-lays build",
+    "watch": "npm run --prefix rem-lays watch",
+    "tauri": "npm run --prefix rem-lays tauri"
+  },
+  "devDependencies": {
+    "supabase": "^2.109.1"
+  }
+}

@@ -1,0 +1,38 @@
+<div class="action-bar">
+  <div class="action-inner">
+    <input type="file" accept="image/*,video/*" #fileInput style="display:none" (change)="onFileSelected($event)" />
+    <button
+      class="action-icon-btn"
+      title="Attach an image or video"
+      [disabled]="uploading()"
+      (click)="fileInput.click()"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M21.44 11.05 12.25 20.24a5 5 0 0 1-7.07-7.07L14.36 4a3.5 3.5 0 0 1 4.95 4.95L10.13 18.1a2 2 0 0 1-2.83-2.83l8.49-8.49"/>
+      </svg>
+    </button>
+    <input
+      class="action-input"
+      [(ngModel)]="value"
+      (keydown.enter)="submit()"
+      [placeholder]="uploading() ? 'Uploading…' : 'Paste a link, or write a quick note…'"
+      [disabled]="uploading()"
+    />
+    <button class="send-btn" [class.sent]="isSent()" (click)="submit()" [disabled]="uploading()">{{ isSent() ? 'Sent!' : 'Send' }}</button>
+  </div>
+  <div class="tags-input-wrap">
+    <input
+      class="action-input tags-input"
+      [(ngModel)]="tags"
+      (keydown.enter)="submit()"
+      placeholder="Add tags (comma separated, e.g. work, ideas)"
+      [disabled]="uploading()"
+    />
+  </div>
+  <p class="hint" *ngIf="offlineQueue.pendingCount() === 0">
+    Text, links, and images/video all save now.
+  </p>
+  <p class="hint pending" *ngIf="offlineQueue.pendingCount() > 0">
+    {{ offlineQueue.pendingCount() }} {{ offlineQueue.pendingCount() === 1 ? 'share' : 'shares' }} waiting to send once you're back online.
+  </p>
+</div>

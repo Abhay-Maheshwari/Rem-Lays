@@ -1,0 +1,33 @@
+# Minimal CI stub for Phase 3 (Desktop packaging + Android share intent).
+# This just proves the Angular + Tauri desktop build succeeds on every push.
+# Android build (needs SDK/NDK setup + your signing key as a secret) is
+# intentionally left out here — add it when you get to Phase 3, since it
+# needs your keystore in place first.
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  desktop-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend deps
+        run: npm ci
+
+      - name: Build Angular
+        run: npm run build
+
+      - name: Build Tauri (Linux target, smoke test only)
+        run: npm run tauri:build

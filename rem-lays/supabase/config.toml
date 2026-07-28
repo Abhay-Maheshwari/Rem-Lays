@@ -1,0 +1,18 @@
+# Minimal Supabase CLI config. Run `supabase init` locally if your installed
+# CLI version wants a different/newer shape for this file — this is just
+# enough to get `supabase link` and `supabase db push` working.
+project_id = "zrwsntszylgkkmtlhmrf"
+
+[api]
+enabled = true
+port = 54321
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
+[realtime]
+enabled = true

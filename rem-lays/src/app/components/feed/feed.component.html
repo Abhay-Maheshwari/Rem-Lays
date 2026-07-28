@@ -1,0 +1,58 @@
+<div class="main-header" data-tauri-drag-region>
+  <div data-tauri-drag-region>
+    <div class="main-title" data-tauri-drag-region>
+      {{ itemsSvc.filter() === 'all' ? 'All Items'
+         : itemsSvc.filter() === 'unseen' ? 'Unseen'
+         : itemsSvc.filter() === 'link' ? 'Links'
+         : 'Media' }}
+    </div>
+    <div class="main-sub" data-tauri-drag-region>Everything shared to your inbox, across every device</div>
+  </div>
+  <div class="header-actions">
+    <button class="demo-btn" *ngIf="itemsSvc.unseenCount() > 0" (click)="markAllAsRead()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+      <span class="btn-text">Mark All Read</span>
+    </button>
+    <button class="demo-btn" (click)="refresh()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+      <span class="btn-text">Refresh</span>
+    </button>
+  </div>
+</div>
+
+<div class="mobile-search-bar">
+  <input type="search" class="search-input" placeholder="Search items" [ngModel]="itemsSvc.searchQuery()" (ngModelChange)="itemsSvc.searchQuery.set($event)" />
+  <svg *ngIf="!itemsSvc.searchQuery()" class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  <button *ngIf="itemsSvc.searchQuery()" class="clear-search-btn" (click)="itemsSvc.searchQuery.set('')" title="Clear search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+</div>
+
+<div class="feed-scroll">
+  <div class="away-banner" *ngIf="itemsSvc.unseenCount() > 0 && itemsSvc.filter() !== 'unseen'" (click)="itemsSvc.filter.set('unseen')">
+    <div class="away-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </div>
+    <div class="away-text">
+      <div class="away-title">While you were away</div>
+      <div class="away-sub">New items were sent from your other devices</div>
+    </div>
+    <div class="away-count">{{ itemsSvc.unseenCount() }} new</div>
+  </div>
+
+  <div class="feed-day-label" *ngIf="itemsSvc.filteredItems().length > 0">Today</div>
+  <div class="feed-grid" *ngIf="itemsSvc.filteredItems().length > 0; else empty">
+    <app-item-card *ngFor="let item of itemsSvc.filteredItems()" [item]="item"></app-item-card>
+  </div>
+
+  <ng-template #empty>
+    <div class="inbox-zero-state">
+      <div class="inbox-zero-icon">✨</div>
+      <div class="inbox-zero-title">You're all caught up!</div>
+      <div class="inbox-zero-sub">Inbox Zero Achieved</div>
+      <div class="inbox-zero-streak" *ngIf="streakCount > 0">
+        🔥 {{ streakCount }} Session Streak
+      </div>
+    </div>
+  </ng-template>
+</div>

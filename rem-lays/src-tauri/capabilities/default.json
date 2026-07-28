@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "identifier": "default",
+  "description": "Default permissions for the Rem-Lays main window",
+  "windows": [
+    "main",
+    "notification-*"
+  ],
+  "permissions": [
+    "core:default",
+    "notification:default",
+    "autostart:default",
+    "fcm:default",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-close",
+    "core:window:allow-start-dragging",
+    "core:window:allow-create",
+    "core:webview:allow-create-webview-window",
+    "shell:default",
+    "opener:default",
+    "deep-link:default"
+  ]
+}

@@ -1,0 +1,57 @@
+<div class="card" [class.unseen]="item.status === 'unseen'" [class.incoming]="isNew" (click)="onOpen()">
+  <button class="remove-btn" (click)="remove($event)" title="Delete">×</button>
+
+  <ng-container [ngSwitch]="item.type">
+    <p *ngSwitchCase="'text'" class="body text">{{ noteText }}</p>
+
+    <div *ngSwitchCase="'link'" class="body link">
+      <img *ngIf="linkImage" [src]="linkImage" class="link-image" alt="" />
+      <a [href]="linkUrl" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="link-title">
+        {{ linkTitle }}
+      </a>
+      <span class="link-url-text" *ngIf="linkUrl && linkUrl !== linkTitle">{{ linkUrl }}</span>
+    </div>
+
+    <div *ngSwitchCase="'image'" class="body media">
+      <img *ngIf="mediaUrl" [src]="mediaUrl" [alt]="mediaFilename" />
+      <div *ngIf="!mediaUrl" class="media-loading">Loading image…</div>
+    </div>
+
+    <div *ngSwitchCase="'video'" class="body media">
+      <video *ngIf="mediaUrl" [src]="mediaUrl" controls (click)="$event.stopPropagation()"></video>
+      <div *ngIf="!mediaUrl" class="media-loading">Loading video…</div>
+    </div>
+
+    <div *ngSwitchCase="'reel'" class="body reel">
+      <div *ngIf="reelEmbedHtml; else reelLoading" class="reel-embed" [innerHTML]="reelEmbedHtml" (click)="$event.stopPropagation()"></div>
+      <ng-template #reelLoading>
+        <div class="media-loading">Loading reel from {{ reelAuthorName }}…</div>
+      </ng-template>
+    </div>
+
+    <div *ngSwitchDefault class="body media-placeholder">
+      <span class="type-label">{{ item.type }}</span>
+      <span class="note">Unsupported item type</span>
+    </div>
+  </ng-container>
+
+  <div class="tags-container" *ngIf="itemTags.length > 0 && !editingTags" (click)="$event.stopPropagation()">
+    <span class="card-tag" *ngFor="let t of itemTags" (click)="itemsSvc.selectedTag() === t ? itemsSvc.selectedTag.set(null) : itemsSvc.selectedTag.set(t)">#{{t}}</span>
+    <button class="edit-tags-btn" (click)="startEditTags($event)" title="Edit tags">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+    </button>
+  </div>
+  <div class="tags-container empty" *ngIf="itemTags.length === 0 && !editingTags" (click)="$event.stopPropagation()">
+    <button class="add-tags-btn" (click)="startEditTags($event)">+ Add tags</button>
+  </div>
+  <div class="tags-edit-container" *ngIf="editingTags" (click)="$event.stopPropagation()">
+    <input class="tags-edit-input" [(ngModel)]="editTagsValue" (keydown.enter)="saveTags($event)" (keydown.escape)="cancelEditTags($event)" placeholder="Tags (comma separated)" autoFocus />
+    <button class="tags-action-btn save" (click)="saveTags($event)">Save</button>
+    <button class="tags-action-btn" (click)="cancelEditTags($event)">Cancel</button>
+  </div>
+
+  <div class="meta">
+    <span class="new-badge" *ngIf="item.status === 'unseen'" (click)="markAsRead($event)" style="cursor: pointer;" title="Mark as read">NEW</span>
+    <span class="time">{{ item.created_at | date:'MMM d, h:mm a' }}</span>
+  </div>
+</div>

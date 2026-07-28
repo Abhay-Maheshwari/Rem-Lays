@@ -1,0 +1,53 @@
+<div class="backdrop" *ngIf="viewerSvc.currentItem() as item" (click)="close()" (window:keydown.escape)="close()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    
+    <div class="modal-actions">
+      <ng-container *ngIf="item.type === 'text' || item.type === 'link'">
+        <button class="action-btn" *ngIf="!isEditing()" (click)="startEdit()">Edit</button>
+        <button class="action-btn primary" *ngIf="isEditing()" (click)="saveEdit()">Save</button>
+        <button class="action-btn" *ngIf="isEditing()" (click)="cancelEdit()">Cancel</button>
+      </ng-container>
+    </div>
+
+    <button class="close-btn" (click)="close()" title="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <!-- Image -->
+    <ng-container *ngIf="item.type === 'image'">
+      <img *ngIf="mediaUrl()" [src]="mediaUrl()" class="media-content">
+      <div *ngIf="!mediaUrl()" class="loading">Loading...</div>
+    </ng-container>
+
+    <!-- Video -->
+    <ng-container *ngIf="item.type === 'video'">
+      <video *ngIf="mediaUrl()" [src]="mediaUrl()" controls autoplay class="media-content"></video>
+      <div *ngIf="!mediaUrl()" class="loading">Loading...</div>
+    </ng-container>
+
+    <!-- Text -->
+    <ng-container *ngIf="item.type === 'text'">
+      <div class="text-content">
+        <div class="text-meta">
+          <span>{{ sourceDeviceName }}</span> • <span>{{ item.created_at | date:'MMM d, h:mm a' }}</span>
+        </div>
+        <p class="text-body" *ngIf="!isEditing()">{{ noteText }}</p>
+        <textarea class="edit-textarea" *ngIf="isEditing()" [ngModel]="editNoteText()" (ngModelChange)="editNoteText.set($event)"></textarea>
+      </div>
+    </ng-container>
+
+    <!-- Link -->
+    <ng-container *ngIf="item.type === 'link'">
+      <div class="link-content">
+        <div class="link-favicon">{{ (linkDomain || linkUrl).charAt(0).toUpperCase() }}</div>
+        
+        <div class="link-title" *ngIf="!isEditing()">{{ linkTitle }}</div>
+        <input class="edit-input" type="text" *ngIf="isEditing()" [ngModel]="editLinkTitle()" (ngModelChange)="editLinkTitle.set($event)" placeholder="Edit Title" />
+
+        <a [href]="linkUrl" target="_blank" rel="noopener" class="open-link-btn" (click)="close()">Open in Browser</a>
+        <div class="link-url-display">{{ linkUrl }}</div>
+      </div>
+    </ng-container>
+
+  </div>
+</div>
