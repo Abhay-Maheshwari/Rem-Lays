@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Item } from '../../models/item.model';
@@ -16,12 +16,15 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './item-card.component.html',
   styleUrl: './item-card.component.scss'
 })
-export class ItemCardComponent implements OnInit, AfterViewInit {
+export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input({ required: true }) item!: Item;
   mediaUrl: string | null = null;
   reelEmbedHtml: SafeHtml | null = null;
   editingTags = false;
   editTagsValue = '';
+  showExpireMenu = false;
+  expireText = '';
+  private timerId: any;
 
   constructor(
     public itemsSvc: ItemsService,
@@ -45,6 +48,43 @@ export class ItemCardComponent implements OnInit, AfterViewInit {
         this.reelEmbedHtml = this.sanitizer.bypassSecurityTrustHtml(html);
       }
     }
+
+    this.updateExpireText();
+    this.timerId = setInterval(() => this.updateExpireText(), 60000); // Update every minute
+  }
+
+  ngOnDestroy() {
+    if (this.timerId) {
+      clearInterval(this.timerId);
+    }
+  }
+
+  updateExpireText() {
+    if (!this.item || !this.item.expires_at) {
+      this.expireText = '';
+      return;
+    }
+    const expiresAt = new Date(this.item.expires_at).getTime();
+    const now = new Date().getTime();
+    const diffMs = expiresAt - now;
+    
+    if (diffMs <= 0) {
+      this.expireText = 'Expired';
+      return;
+    }
+    
+    const diffMins = Math.floor(diffMs / 60000);
+    const hours = Math.floor(diffMins / 60);
+    const mins = diffMins % 60;
+    
+    if (hours >= 24) {
+      const days = Math.floor(hours / 24);
+      this.expireText = `Expires in ${days}d`;
+    } else if (hours > 0) {
+      this.expireText = `Expires in ${hours}h ${mins}m`;
+    } else {
+      this.expireText = `Expires in ${mins}m`;
+    }
   }
 
   ngAfterViewInit() {
@@ -53,6 +93,13 @@ export class ItemCardComponent implements OnInit, AfterViewInit {
       // Give Angular a tick to actually insert the innerHTML before
       // asking Instagram's own script to look for it and process it.
       setTimeout(() => this.igEmbedSvc.reprocessEmbeds(), 50);
+    }
+  }
+
+  @HostListener('document:click')
+  onDocumentClick() {
+    if (this.showExpireMenu) {
+      this.showExpireMenu = false;
     }
   }
 
@@ -142,5 +189,46 @@ export class ItemCardComponent implements OnInit, AfterViewInit {
   remove(ev: Event) {
     ev.stopPropagation();
     this.itemsSvc.remove(this.item.id);
+  }
+
+  togglePin(ev: Event) {
+    ev.stopPropagation();
+    const newPinState = !this.item.is_pinned;
+    // Optimistic UI update
+    this.item = { ...this.item, is_pinned: newPinState };
+    
+    // Fire and forget network call
+    this.itemsSvc.togglePin(this.item.id, newPinState);
+  }
+
+  toggleExpireMenu(ev: Event) {
+    ev.stopPropagation();
+    this.showExpireMenu = !this.showExpireMenu;
+  }
+
+  setExpire(ev: Event, hours: number) {
+    ev.stopPropagation();
+    this.showExpireMenu = false;
+
+    if (hours === 0) {
+      this.item = { ...this.item, expires_at: null };
+      this.itemsSvc.updateExpire(this.item.id, null);
+    } else {
+      const targetDate = new Date();
+      targetDate.setHours(targetDate.getHours() + hours);
+      const expiresAt = targetDate.toISOString();
+      this.item = { ...this.item, expires_at: expiresAt };
+      this.itemsSvc.updateExpire(this.item.id, expiresAt);
+    }
+    this.updateExpireText();
+  }
+
+  markUnread(ev: Event) {
+    ev.stopPropagation();
+    // Optimistic UI update
+    this.item = { ...this.item, status: 'unseen', seen_at: null };
+    
+    // Fire and forget network call
+    this.itemsSvc.markUnread(this.item.id);
   }
 }

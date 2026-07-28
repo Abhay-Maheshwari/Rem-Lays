@@ -126,18 +126,67 @@
 }
 
 .open-link-btn {
-  background: var(--accent);
-  color: #fff;
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
   text-decoration: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  transition: background 0.15s;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: all .15s ease;
+  margin-bottom: 12px;
+}
+.open-link-btn:hover { background: rgba(255, 255, 255, 0.08); }
+
+.link-url-display {
+  color: var(--text-tertiary);
+  font-size: 11px;
+  word-break: break-all;
 }
 
-.open-link-btn:hover {
-  background: #5299FF;
+.modal-footer {
+  margin-top: 0;
+  padding: 16px 24px 24px 24px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tags-container {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+}
+
+.card-tag {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px; padding: 3px 8px; font-size: 11.5px; color: var(--text-secondary);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.new-badge {
+  background: var(--accent); color: #fff; font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 99px;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+.expire-badge {
+  color: #f59e0b;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(245, 158, 11, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 11px;
 }
 
 .modal-actions {

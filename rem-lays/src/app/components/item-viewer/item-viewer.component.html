@@ -49,5 +49,18 @@
       </div>
     </ng-container>
 
+    <div class="modal-footer">
+      <div class="tags-container" *ngIf="itemTags.length > 0">
+        <span class="card-tag" *ngFor="let t of itemTags">#{{t}}</span>
+      </div>
+      <div class="meta" *ngIf="item.status === 'unseen' || item.expires_at">
+        <span class="new-badge" *ngIf="item.status === 'unseen'">NEW</span>
+        <span class="expire-badge" *ngIf="item.expires_at">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px; vertical-align:middle"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          {{ expireText }}
+        </span>
+      </div>
+    </div>
+
   </div>
 </div>

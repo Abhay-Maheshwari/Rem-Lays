@@ -62,4 +62,31 @@ export class QuickActionBarComponent {
       this.uploading.set(false);
     }
   }
+
+  async onPaste(event: ClipboardEvent) {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          event.preventDefault(); // Stop text paste
+          this.uploading.set(true);
+          try {
+            const parsedTags = this.tags.split(',').map(t => t.trim().replace(/^#/, '')).filter(t => t.length > 0);
+            const tagsArray = parsedTags.length > 0 ? parsedTags : undefined;
+            const ext = file.type.split('/')[1] || 'png';
+            const filename = `Pasted_Image_${new Date().toISOString().replace(/[:.]/g, '-')}.${ext}`;
+            const namedFile = new File([file], filename, { type: file.type });
+            await this.itemsSvc.addMedia(namedFile, tagsArray);
+            this.tags = '';
+          } finally {
+            this.uploading.set(false);
+          }
+          break;
+        }
+      }
+    }
+  }
 }

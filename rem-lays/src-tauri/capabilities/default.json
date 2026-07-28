@@ -19,6 +19,9 @@
     "core:webview:allow-create-webview-window",
     "shell:default",
     "opener:default",
-    "deep-link:default"
+    "deep-link:default",
+    "dialog:default",
+    "fs:default",
+    "fs:allow-write-text-file"
   ]
 }

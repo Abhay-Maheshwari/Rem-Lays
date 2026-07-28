@@ -1,7 +1,6 @@
 :host {
   display: block;
   break-inside: avoid;
-  margin-bottom: 12px;
 }
 
 .card {
@@ -13,6 +12,9 @@
   padding: 16px 16px 12px 16px;
   cursor: pointer;
   transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 .card:hover { transform: translateY(-1px); border-color: var(--border-strong); }
 .card.unseen { border-color: rgba(62,142,247,0.45); }
@@ -23,12 +25,82 @@
   100% { box-shadow: 0 0 0 0 rgba(62,142,247,0); }
 }
 
-.remove-btn {
+.card-actions {
   position: absolute; top: 8px; right: 8px;
-  background: none; border: none; color: var(--text-tertiary);
-  font-size: 16px; line-height: 1; width: 22px; height: 22px; border-radius: 6px;
+  display: flex; gap: 4px;
+  opacity: 0; transition: opacity .15s ease;
 }
-.remove-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+.card:hover .card-actions { opacity: 1; }
+
+.action-icon-btn {
+  background: none; border: none; color: var(--text-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 6px; cursor: pointer;
+}
+.action-icon-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+.action-icon-btn.remove:hover {
+  background: rgba(255, 60, 60, 0.15);
+  color: #ff4444;
+}
+.action-icon-btn.active {
+  color: #f59e0b;
+}
+.action-icon-btn.pinned { color: var(--accent); opacity: 1; }
+.card .action-icon-btn.pinned { opacity: 1; } /* override if needed */
+.card-actions:has(.pinned) { opacity: 1; }
+
+.expire-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: rgba(22, 24, 28, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  z-index: 100;
+  overflow: hidden;
+  animation: scale-up 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top right;
+}
+
+@keyframes scale-up {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.expire-menu button {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.expire-menu button:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.expire-menu button.remove {
+  color: #ff4444;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.expire-menu button.remove:hover {
+  background: rgba(255, 60, 60, 0.1);
+}
+
+.action-icon-btn.remove { font-size: 16px; line-height: 1; }
 
 .body { margin: 0 0 10px 0; font-size: 13.5px; line-height: 1.6; padding-right: 20px; }
 .body.text {
@@ -139,8 +211,33 @@
 .tags-action-btn:hover { color: var(--text-primary); }
 .tags-action-btn.save { color: var(--accent); font-weight: 600; }
 
-.meta { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-tertiary); }
+.meta { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: flex-start; 
+  gap: 6px; 
+  font-size: 11px; 
+  color: var(--text-tertiary); 
+  margin-top: auto; 
+}
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .new-badge {
   background: var(--accent); color: #fff; font-size: 10px; font-weight: 700;
   padding: 1px 6px; border-radius: 99px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.expire-badge {
+  color: #f59e0b;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(245, 158, 11, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }

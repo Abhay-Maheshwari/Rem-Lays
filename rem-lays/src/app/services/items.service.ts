@@ -3,6 +3,9 @@ import { supabase } from './supabase-client';
 import { Item, ItemType } from '../models/item.model';
 import { OfflineQueueService } from './offline-queue.service';
 import { DevicesService } from './devices.service';
+import { ToastService } from './toast.service';
+import { save } from '@tauri-apps/plugin-dialog';
+import { writeTextFile } from '@tauri-apps/plugin-fs';
 
 export type FeedFilter = 'all' | 'unseen' | 'link' | 'media';
 
@@ -13,7 +16,11 @@ export class ItemsService {
   searchQuery = signal('');
   selectedTag = signal<string | null>(null);
 
-  constructor(private offlineQueue: OfflineQueueService, private devicesService: DevicesService) {}
+  constructor(
+    private offlineQueue: OfflineQueueService, 
+    private devicesService: DevicesService,
+    private toastSvc: ToastService
+  ) {}
 
   allTags = computed(() => {
     const tags = new Set<string>();
@@ -31,6 +38,10 @@ export class ItemsService {
   // with a computed() layered on top since the feed needs filtering.
   filteredItems = computed(() => {
     let all = this.items();
+    const now = new Date().toISOString();
+    
+    // Filter out expired items locally
+    all = all.filter(i => !i.expires_at || i.expires_at > now);
     
     const tag = this.selectedTag();
     if (tag) {
@@ -48,27 +59,46 @@ export class ItemsService {
       });
     }
 
+    let result = all;
     switch (this.filter()) {
       case 'unseen':
-        return all.filter((i) => i.status === 'unseen');
+        result = all.filter((i) => i.status === 'unseen');
+        break;
       case 'link':
-        return all.filter((i) => i.type === 'link');
+        result = all.filter((i) => i.type === 'link');
+        break;
       case 'media':
-        return all.filter((i) => i.type === 'image' || i.type === 'video' || i.type === 'reel');
-      default:
-        return all;
+        result = all.filter((i) => i.type === 'image' || i.type === 'video' || i.type === 'reel');
+        break;
     }
+
+    // Stable sort: Pinned first, then by date (newest first), then by ID
+    return result.sort((a, b) => {
+      if (a.is_pinned && !b.is_pinned) return -1;
+      if (!a.is_pinned && b.is_pinned) return 1;
+
+      const diff = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      return diff !== 0 ? diff : b.id.localeCompare(a.id);
+    });
   });
 
-
-
-  unseenCount = computed(() => this.items().filter((i) => i.status === 'unseen').length);
+  unseenCount = computed(() => {
+    const now = new Date().toISOString();
+    return this.items().filter((i) => i.status === 'unseen' && (!i.expires_at || i.expires_at > now)).length;
+  });
 
   async refresh() {
+    const now = new Date().toISOString();
+
+    // Background cleanup of expired items (fire and forget)
+    supabase.from('items').delete().lt('expires_at', now).then();
+
     const { data, error } = await supabase
       .from('items')
       .select('*')
       .neq('status', 'deleted')
+      .or(`expires_at.is.null,expires_at.gt.${now}`)
+      .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(100);
 
@@ -101,6 +131,41 @@ export class ItemsService {
 
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
+
+    // Duplicate detection for text notes
+    const { data: existing } = await supabase
+      .from('items')
+      .select('id, payload, status')
+      .eq('user_id', userData.user.id)
+      .neq('status', 'deleted')
+      .eq('type', 'text');
+
+    const duplicate = existing?.find(i => (i.payload as any)?.note === trimmed);
+
+    if (duplicate) {
+      const existingTags = Array.isArray((duplicate.payload as any)?.tags) ? (duplicate.payload as any).tags : [];
+      const newTags = tags || [];
+      const mergedTags = Array.from(new Set([...existingTags, ...newTags]));
+
+      const { error: updateError } = await supabase
+        .from('items')
+        .update({
+          created_at: new Date().toISOString(),
+          status: 'unseen', // Bring it back to attention
+          seen_at: null,
+          payload: { ...(duplicate.payload as any), tags: mergedTags.length > 0 ? mergedTags : undefined }
+        })
+        .eq('id', duplicate.id);
+
+      if (updateError) {
+        console.error('duplicate update failed, queuing for retry', updateError);
+        this.offlineQueue.enqueue({ kind: 'text', note: trimmed, tags, queuedAt: new Date().toISOString() });
+      } else {
+        await this.refresh();
+        this.toastSvc.show('Note already exists! Timestamp updated.');
+      }
+      return;
+    }
 
     const { error } = await supabase.from('items').insert({
       user_id: userData.user.id,
@@ -139,6 +204,41 @@ export class ItemsService {
     // to a plain link — Instagram's oEmbed doesn't support those anyway.
     const isInstagramPost = /instagram\.com\/(reel|p|tv)\//i.test(rawUrl);
     const type: ItemType = isInstagramPost ? 'reel' : 'link';
+
+    // Duplicate detection
+    const { data: existing } = await supabase
+      .from('items')
+      .select('id, payload, status')
+      .eq('user_id', userData.user.id)
+      .neq('status', 'deleted')
+      .in('type', ['link', 'reel']);
+
+    const duplicate = existing?.find(i => (i.payload as any)?.url === rawUrl);
+
+    if (duplicate) {
+      const existingTags = Array.isArray((duplicate.payload as any)?.tags) ? (duplicate.payload as any).tags : [];
+      const newTags = tags || [];
+      const mergedTags = Array.from(new Set([...existingTags, ...newTags]));
+
+      const { error: updateError } = await supabase
+        .from('items')
+        .update({
+          created_at: new Date().toISOString(),
+          status: 'unseen', // Bring it back to attention
+          seen_at: null,
+          payload: { ...(duplicate.payload as any), tags: mergedTags.length > 0 ? mergedTags : undefined }
+        })
+        .eq('id', duplicate.id);
+
+      if (updateError) {
+        console.error('duplicate update failed, queuing for retry', updateError);
+        this.offlineQueue.enqueue({ kind: 'link', url: rawUrl, tags, queuedAt: new Date().toISOString() });
+      } else {
+        await this.refresh();
+        this.toastSvc.show('Link already exists! Timestamp updated.');
+      }
+      return;
+    }
 
     const { data: inserted, error } = await supabase
       .from('items')
@@ -321,6 +421,33 @@ export class ItemsService {
     await this.refresh();
   }
 
+  async markUnread(id: string) {
+    const { error } = await supabase
+      .from('items')
+      .update({ status: 'unseen', seen_at: null })
+      .eq('id', id);
+    if (error) console.error('markUnread failed', error);
+    await this.refresh();
+  }
+
+  async togglePin(id: string, newPinState: boolean) {
+    const { error } = await supabase
+      .from('items')
+      .update({ is_pinned: newPinState })
+      .eq('id', id);
+    if (error) console.error('togglePin failed', error);
+    await this.refresh();
+  }
+
+  async updateExpire(id: string, expiresAt: string | null) {
+    const { error } = await supabase
+      .from('items')
+      .update({ expires_at: expiresAt })
+      .eq('id', id);
+    if (error) console.error('updateExpire failed', error);
+    await this.refresh();
+  }
+
   async remove(id: string) {
     const { error } = await supabase.from('items').update({ status: 'deleted' }).eq('id', id);
     if (error) console.error('remove failed', error);
@@ -363,5 +490,75 @@ export class ItemsService {
       return;
     }
     await this.refresh();
+  }
+
+  async exportData() {
+    // Fetch all items (up to a reasonable limit for now, or handle pagination if needed)
+    const { data, error } = await supabase
+      .from('items')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(10000);
+
+    if (error) {
+      console.error('Export failed', error);
+      return;
+    }
+
+    const dataStr = JSON.stringify(data, null, 2);
+    
+    if ((window as any).__TAURI_INTERNALS__) {
+      try {
+        const filePath = await save({
+          defaultPath: `remlays_export_${new Date().toISOString().split('T')[0]}.md`,
+          filters: [
+            { name: 'Markdown', extensions: ['md'] },
+            { name: 'JSON', extensions: ['json'] },
+            { name: 'CSV', extensions: ['csv'] }
+          ]
+        });
+        
+        if (filePath) {
+          let outputData = dataStr;
+          
+          if (filePath.endsWith('.csv')) {
+            const header = 'ID,Type,Created At,Content,URL,Tags\n';
+            const rows = data.map(item => {
+              const content = ((item.payload as any)?.note || (item.payload as any)?.title || '').replace(/"/g, '""');
+              const url = ((item.payload as any)?.url || '').replace(/"/g, '""');
+              const tags = ((item.payload as any)?.tags || []).join('; ');
+              return `"${item.id}","${item.type}","${item.created_at}","${content}","${url}","${tags}"`;
+            }).join('\n');
+            outputData = header + rows;
+          } else if (filePath.endsWith('.md')) {
+            outputData = '# Rem-Lays Export\n\n' + data.map(item => {
+              const content = (item.payload as any)?.note || (item.payload as any)?.title || '';
+              const url = (item.payload as any)?.url || '';
+              const tags = ((item.payload as any)?.tags || []).map((t: string) => `#${t}`).join(' ');
+              return `### ${item.type.toUpperCase()} - ${new Date(item.created_at).toLocaleString()}\n${content}\n${url ? `[Link](${url})\n` : ''}${tags ? `\nTags: ${tags}\n` : ''}`;
+            }).join('\n---\n\n');
+          }
+
+          await writeTextFile(filePath, outputData);
+          this.toastSvc.show('Data successfully exported!');
+        }
+      } catch (err: any) {
+        console.error('Tauri save failed', err);
+        const errMsg = err?.message || err || 'Unknown error';
+        this.toastSvc.show('Error: ' + errMsg, 'error');
+      }
+    } else {
+      // Fallback for non-Tauri browser environments
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `remlays_export_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      this.toastSvc.show('Data download started');
+    }
   }
 }

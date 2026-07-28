@@ -1,7 +1,7 @@
 <aside class="sidebar" [class.open]="open">
   <div class="brand" data-tauri-drag-region>
-    <div class="brand-mark" data-tauri-drag-region>R</div>
-    <div class="brand-name" data-tauri-drag-region>Rem-Lays</div>
+    <img src="assets/logo_light_mode.png" class="brand-logo light-mode-logo" data-tauri-drag-region alt="RemLays" />
+    <img src="assets/logo_dark_mode.png" class="brand-logo dark-mode-logo" data-tauri-drag-region alt="RemLays" />
     <div class="brand-spacer" data-tauri-drag-region></div>
     <button class="icon-btn" title="Settings">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -79,7 +79,15 @@
   </div>
 
   <div class="sidebar-footer">
-    <span class="email">{{ auth.session()?.user?.email }}</span>
-    <button class="signout-btn" (click)="auth.signOut()">Sign out</button>
+    <button class="export-btn" (click)="itemsSvc.exportData()" title="Export all items as JSON">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+      </svg>
+      Export Data
+    </button>
+    <div class="footer-bottom">
+      <span class="email">{{ auth.session()?.user?.email }}</span>
+      <button class="signout-btn" (click)="auth.signOut()">Sign out</button>
+    </div>
   </div>
 </aside>

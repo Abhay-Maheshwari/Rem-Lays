@@ -65,6 +65,26 @@ export class ItemViewerComponent {
     return typeof v === 'string' && v ? v : this.linkDomain || this.linkUrl;
   }
 
+  get itemTags(): string[] {
+    const item = this.viewerSvc.currentItem();
+    if (!item || !item.payload || !item.payload['tags']) return [];
+    return Array.isArray(item.payload['tags']) ? item.payload['tags'] : [];
+  }
+
+  get expireText(): string {
+    const item = this.viewerSvc.currentItem();
+    if (!item || !item.expires_at) return '';
+    const expiresAt = new Date(item.expires_at).getTime();
+    const now = new Date().getTime();
+    const diffMs = expiresAt - now;
+    if (diffMs <= 0) return 'Expired';
+    const hours = Math.floor(diffMs / 3600000);
+    const mins = Math.floor((diffMs % 3600000) / 60000);
+    if (hours >= 24) return `Expires in ${Math.floor(hours / 24)}d`;
+    if (hours > 0) return `Expires in ${hours}h ${mins}m`;
+    return `Expires in ${mins}m`;
+  }
+
   startEdit() {
     this.isEditing.set(true);
     this.editNoteText.set(this.noteText);

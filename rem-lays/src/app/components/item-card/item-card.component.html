@@ -1,5 +1,34 @@
-<div class="card" [class.unseen]="item.status === 'unseen'" [class.incoming]="isNew" (click)="onOpen()">
-  <button class="remove-btn" (click)="remove($event)" title="Delete">×</button>
+<div class="card" [class.unseen]="item.status === 'unseen'" [class.incoming]="isNew" (click)="onOpen()" [style.z-index]="showExpireMenu ? 100 : 1">
+  <div class="card-actions" (click)="$event.stopPropagation()">
+    <button class="action-icon-btn" [class.pinned]="item.is_pinned" (click)="togglePin($event)" [title]="item.is_pinned ? 'Unpin' : 'Pin to top'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 17v5" />
+        <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+      </svg>
+    </button>
+    <button class="action-icon-btn" *ngIf="item.status === 'seen'" (click)="markUnread($event)" title="Mark as unread">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5-5-5 5M12 12.8V2.5" />
+      </svg>
+    </button>
+    <div style="position: relative; display: inline-block;">
+      <button class="action-icon-btn" [class.active]="item.expires_at" (click)="toggleExpireMenu($event)" [title]="item.expires_at ? 'Edit Expiration' : 'Auto-delete'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </button>
+      <div class="expire-menu" *ngIf="showExpireMenu" (click)="$event.stopPropagation()">
+        <button (click)="setExpire($event, 1)">1 Hour</button>
+        <button (click)="setExpire($event, 6)">6 Hours</button>
+        <button (click)="setExpire($event, 24)">24 Hours</button>
+        <button (click)="setExpire($event, 168)">7 Days</button>
+        <button (click)="setExpire($event, 720)">1 Month</button>
+        <button *ngIf="item.expires_at" (click)="setExpire($event, 0)" class="remove">Remove Expiration</button>
+      </div>
+    </div>
+    <button class="action-icon-btn remove" (click)="remove($event)" title="Delete">×</button>
+  </div>
 
   <ng-container [ngSwitch]="item.type">
     <p *ngSwitchCase="'text'" class="body text">{{ noteText }}</p>
@@ -51,7 +80,13 @@
   </div>
 
   <div class="meta">
-    <span class="new-badge" *ngIf="item.status === 'unseen'" (click)="markAsRead($event)" style="cursor: pointer;" title="Mark as read">NEW</span>
     <span class="time">{{ item.created_at | date:'MMM d, h:mm a' }}</span>
+    <div class="meta-row" *ngIf="item.status === 'unseen' || item.expires_at">
+      <span class="new-badge" *ngIf="item.status === 'unseen'" (click)="markAsRead($event)" style="cursor: pointer;" title="Mark as read">NEW</span>
+      <span class="expire-badge" *ngIf="item.expires_at" title="Expiring soon">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px; vertical-align:middle"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        {{ expireText }}
+      </span>
+    </div>
   </div>
 </div>

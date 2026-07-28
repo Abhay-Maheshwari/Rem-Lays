@@ -1,4 +1,4 @@
-import { Component, effect, signal } from '@angular/core';
+import { Component, effect, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth.service';
 import { RealtimeService } from './services/realtime.service';
@@ -8,6 +8,7 @@ import { NativeNotificationService } from './services/native-notification.servic
 import { ShareIntentService } from './services/share-intent.service';
 import { ItemsService } from './services/items.service';
 import { OfflineQueueService } from './services/offline-queue.service';
+import { ToastService } from './services/toast.service';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { FeedComponent } from './components/feed/feed.component';
 import { QuickActionBarComponent } from './components/quick-action-bar/quick-action-bar.component';
@@ -45,7 +46,8 @@ export class AppComponent {
     private notificationSvc: NativeNotificationService,
     private shareIntentSvc: ShareIntentService,
     private itemsSvc: ItemsService,
-    private offlineQueue: OfflineQueueService
+    private offlineQueue: OfflineQueueService,
+    public toastSvc: ToastService
   ) {
     // Flush whatever's queued the moment connectivity actually returns —
     // not gated on sign-in state below, since 'online' can fire at any
@@ -86,6 +88,8 @@ export class AppComponent {
   // Mobile off-canvas drawer state — inert on desktop widths, where the
   // sidebar's own CSS ignores the .open class entirely above the breakpoint.
   sidebarOpen = signal(false);
+  
+  showShortcuts = signal(false);
 
   toggleSidebar() {
     this.sidebarOpen.update((v) => !v);
@@ -97,5 +101,51 @@ export class AppComponent {
 
   async signIn() {
     await this.auth.signInWithGoogle();
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    // Don't intercept if user is already typing in an input/textarea
+    // unless it's the Escape key to blur.
+    const activeEl = document.activeElement;
+    const isInputActive = activeEl?.tagName === 'INPUT' || activeEl?.tagName === 'TEXTAREA' || activeEl?.hasAttribute('contenteditable');
+
+    if (event.key === 'Escape') {
+      if (this.showShortcuts()) {
+        this.showShortcuts.set(false);
+        return;
+      }
+      if (isInputActive) {
+        (activeEl as HTMLElement).blur();
+      }
+      return;
+    }
+
+    if (isInputActive) {
+      return;
+    }
+
+    // '?' -> Toggle shortcuts modal
+    if (event.key === '?') {
+      event.preventDefault();
+      this.showShortcuts.update(v => !v);
+      return;
+    }
+
+    // Ctrl/Cmd + K or '/' -> Focus Search
+    if ((event.key === 'k' && (event.metaKey || event.ctrlKey)) || event.key === '/') {
+      event.preventDefault();
+      const searchInput = document.querySelector('.search-input') as HTMLInputElement | null;
+      searchInput?.focus();
+      return;
+    }
+
+    // Ctrl/Cmd + N or 'c' -> Focus New Note (Quick Action Bar)
+    if ((event.key === 'n' && (event.metaKey || event.ctrlKey)) || event.key === 'c') {
+      event.preventDefault();
+      const actionInput = document.querySelector('.action-input') as HTMLInputElement | null;
+      actionInput?.focus();
+      return;
+    }
   }
 }

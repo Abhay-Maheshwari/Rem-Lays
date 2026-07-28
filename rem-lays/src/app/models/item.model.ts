@@ -12,4 +12,6 @@ export interface Item {
   status: ItemStatus;
   created_at: string;
   seen_at: string | null;
+  is_pinned: boolean;
+  expires_at: string | null;
 }

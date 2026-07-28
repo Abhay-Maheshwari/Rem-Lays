@@ -15,6 +15,7 @@
       class="action-input"
       [(ngModel)]="value"
       (keydown.enter)="submit()"
+      (paste)="onPaste($event)"
       [placeholder]="uploading() ? 'Uploading…' : 'Paste a link, or write a quick note…'"
       [disabled]="uploading()"
     />
