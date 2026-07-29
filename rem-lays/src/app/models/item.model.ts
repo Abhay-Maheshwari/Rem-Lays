@@ -1,5 +1,5 @@
 export type ItemType = 'image' | 'video' | 'reel' | 'link' | 'text';
-export type ItemStatus = 'unseen' | 'seen' | 'deleted';
+export type ItemStatus = 'unseen' | 'seen' | 'deleted' | 'archived';
 
 export interface Item {
   id: string;
@@ -14,4 +14,5 @@ export interface Item {
   seen_at: string | null;
   is_pinned: boolean;
   expires_at: string | null;
+  snooze_until: string | null;
 }

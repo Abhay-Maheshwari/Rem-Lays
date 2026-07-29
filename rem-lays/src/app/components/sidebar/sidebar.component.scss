@@ -32,19 +32,7 @@
   margin-left: 6px;
 }
 
-.dark-mode-logo {
-  display: none;
-}
 
-@media (prefers-color-scheme: dark) {
-  .light-mode-logo {
-    display: none;
-  }
-
-  .dark-mode-logo {
-    display: block;
-  }
-}
 
 .brand-spacer {
   flex: 1;
@@ -405,7 +393,12 @@
     transform: translateX(-100%);
     transition: transform .22s ease;
     box-shadow: 24px 0 48px rgba(0, 0, 0, 0.45);
-    padding-top: calc(52px + env(safe-area-inset-top, 0px));
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  }
+
+  .brand {
+    padding-left: 54px;
+    padding-bottom: 12px;
   }
 
   .sidebar.open {

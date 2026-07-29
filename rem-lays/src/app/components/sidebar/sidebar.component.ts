@@ -21,6 +21,7 @@ export class SidebarComponent implements OnInit {
   // widths, see the @media block in this component's own stylesheet.
   @Input() open = false;
   @Output() navigated = new EventEmitter<void>();
+  @Output() openDigest = new EventEmitter<void>();
 
   editingDeviceId: string | null = null;
   editDeviceName: string = '';

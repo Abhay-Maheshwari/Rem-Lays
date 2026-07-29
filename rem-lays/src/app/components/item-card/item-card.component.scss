@@ -16,38 +16,93 @@
   flex-direction: column;
   height: 100%;
 }
-.card:hover { transform: translateY(-1px); border-color: var(--border-strong); }
-.card.unseen { border-color: rgba(62,142,247,0.45); }
-.card.incoming { animation: incoming 1s ease; }
+
+.card:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-strong);
+}
+
+.card.unseen {
+  border-color: rgba(62, 142, 247, 0.45);
+}
+
+.card.incoming {
+  animation: incoming 1s ease;
+}
+
 @keyframes incoming {
-  0% { box-shadow: 0 0 0 0 rgba(62,142,247,0.55); }
-  60% { box-shadow: 0 0 0 10px rgba(62,142,247,0); }
-  100% { box-shadow: 0 0 0 0 rgba(62,142,247,0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(62, 142, 247, 0.55);
+  }
+
+  60% {
+    box-shadow: 0 0 0 10px rgba(62, 142, 247, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(62, 142, 247, 0);
+  }
 }
 
 .card-actions {
-  position: absolute; top: 8px; right: 8px;
-  display: flex; gap: 4px;
-  opacity: 0; transition: opacity .15s ease;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity .15s ease;
 }
-.card:hover .card-actions { opacity: 1; }
+
+.card:hover .card-actions,
+.card-actions:focus-within {
+  opacity: 1;
+}
+
+.pin-indicator {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: var(--accent);
+  transition: opacity .15s ease;
+  pointer-events: none;
+  display: flex;
+}
+
+.card:hover .pin-indicator {
+  opacity: 0;
+}
 
 .action-icon-btn {
-  background: none; border: none; color: var(--text-tertiary);
-  display: flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px; border-radius: 6px; cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  cursor: pointer;
 }
-.action-icon-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+
+.action-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
 .action-icon-btn.remove:hover {
   background: rgba(255, 60, 60, 0.15);
   color: #ff4444;
 }
+
 .action-icon-btn.active {
   color: #f59e0b;
 }
-.action-icon-btn.pinned { color: var(--accent); opacity: 1; }
-.card .action-icon-btn.pinned { opacity: 1; } /* override if needed */
-.card-actions:has(.pinned) { opacity: 1; }
+
+.action-icon-btn.pinned {
+  color: var(--accent);
+}
 
 .expire-menu {
   position: absolute;
@@ -59,7 +114,7 @@
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
   min-width: 160px;
@@ -70,8 +125,15 @@
 }
 
 @keyframes scale-up {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .expire-menu button {
@@ -88,7 +150,7 @@
 }
 
 .expire-menu button:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .expire-menu button.remove {
@@ -100,10 +162,20 @@
   background: rgba(255, 60, 60, 0.1);
 }
 
-.action-icon-btn.remove { font-size: 16px; line-height: 1; }
+.action-icon-btn.remove {
+  font-size: 16px;
+  line-height: 1;
+}
 
-.body { margin: 0 0 10px 0; font-size: 13.5px; line-height: 1.6; padding-right: 20px; }
+.body {
+  margin: 0 0 10px 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  padding-right: 20px;
+}
+
 .body.text {
+  margin-top: 15px;
   color: var(--text-primary);
   white-space: pre-wrap;
   display: -webkit-box;
@@ -112,7 +184,12 @@
   overflow: hidden;
 }
 
-.body.link { display: flex; flex-direction: column; gap: 4px; }
+.body.link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .body.link .link-image {
   width: 100%;
   height: 110px;
@@ -120,20 +197,50 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.03);
 }
+
 .body.link .link-title {
   color: var(--accent);
   text-decoration: none;
   word-break: break-word;
   font-weight: 500;
 }
-.body.link .link-title:hover { text-decoration: underline; }
-.body.link .link-url-text { color: var(--text-secondary); font-size: 11px; word-break: break-all; opacity: 0.8; }
-.body.link .link-domain { color: var(--text-tertiary); font-size: 11.5px; }
 
-.media-placeholder { display: flex; flex-direction: column; gap: 2px; color: var(--text-tertiary); }
-.type-label { text-transform: uppercase; font-size: 10px; letter-spacing: .05em; color: var(--text-secondary); }
+.body.link .link-title:hover {
+  text-decoration: underline;
+}
 
-.body.media { padding-right: 0; margin-bottom: 8px; }
+.body.link .link-url-text {
+  color: var(--text-secondary);
+  font-size: 11px;
+  word-break: break-all;
+  opacity: 0.8;
+}
+
+.body.link .link-domain {
+  color: var(--text-tertiary);
+  font-size: 11.5px;
+}
+
+.media-placeholder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--text-tertiary);
+}
+
+.type-label {
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: .05em;
+  color: var(--text-secondary);
+}
+
+.body.media {
+  padding-right: 0;
+  margin-bottom: 8px;
+  margin-top: 15px;
+}
+
 .body.media img,
 .body.media video {
   width: 100%;
@@ -143,6 +250,7 @@
   display: block;
   background: rgba(255, 255, 255, 0.03);
 }
+
 .media-loading {
   height: 140px;
   display: flex;
@@ -157,79 +265,164 @@
 // Instagram's own embed CSS controls the inner card's look — this just
 // keeps it from overflowing the feed grid's fixed-width cards, since its
 // default embed width otherwise assumes a much wider page layout.
-.body.reel { padding-right: 0; margin-bottom: 8px; }
+.body.reel {
+  padding-right: 0;
+  margin-bottom: 8px;
+  margin-top: 15px;
+}
+
 .reel-embed {
   border-radius: 8px;
   overflow: hidden;
+  height: 140px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+
+  // Prevents the iframe from capturing clicks so the user can click the card to open the viewer
   ::ng-deep iframe,
   ::ng-deep blockquote {
     max-width: 100% !important;
     width: 100% !important;
+    margin: 0 !important;
+    pointer-events: none;
   }
 }
 
 .tags-container {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
 }
-.tags-container.empty { opacity: 0; transition: opacity .15s ease; }
-.card:hover .tags-container.empty { opacity: 1; }
+
+.tags-container.empty {
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+
+.card:hover .tags-container.empty {
+  opacity: 1;
+}
 
 .card-tag {
   background: rgba(255, 255, 255, 0.06);
-  border-radius: 4px; padding: 2px 6px; font-size: 11px; color: var(--text-secondary);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
   transition: all .15s ease;
 }
-.card-tag:hover { background: rgba(255, 255, 255, 0.1); color: var(--text-primary); }
+
+.card-tag:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
 
 .add-tags-btn {
-  background: none; border: 1px dashed var(--border-subtle); color: var(--text-tertiary);
-  font-size: 11px; padding: 2px 6px; border-radius: 4px; cursor: pointer;
+  background: none;
+  border: 1px dashed var(--border-subtle);
+  color: var(--text-tertiary);
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
   transition: all .15s ease;
 }
-.add-tags-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+
+.add-tags-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
 
 .edit-tags-btn {
-  background: none; border: none; color: var(--text-tertiary); cursor: pointer;
-  padding: 2px; border-radius: 4px; opacity: 0; transition: all .15s ease;
-  display: flex; align-items: center; justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all .15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.card:hover .edit-tags-btn { opacity: 1; }
-.edit-tags-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+
+.card:hover .edit-tags-btn {
+  opacity: 1;
+}
+
+.edit-tags-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
 
 .tags-edit-container {
-  display: flex; align-items: center; gap: 6px; margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
 }
-.tags-edit-input {
-  flex: 1; background: rgba(0,0,0,0.2); border: 1px solid var(--accent);
-  border-radius: 4px; color: var(--text-primary); font-size: 11.5px; font-family: inherit;
-  padding: 4px 6px; outline: none; min-width: 0;
-}
-.tags-action-btn {
-  background: none; border: none; color: var(--text-tertiary); font-size: 11px;
-  cursor: pointer; padding: 4px;
-}
-.tags-action-btn:hover { color: var(--text-primary); }
-.tags-action-btn.save { color: var(--accent); font-weight: 600; }
 
-.meta { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: flex-start; 
-  gap: 6px; 
-  font-size: 11px; 
-  color: var(--text-tertiary); 
-  margin-top: auto; 
+.tags-edit-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 11.5px;
+  font-family: inherit;
+  padding: 4px 6px;
+  outline: none;
+  min-width: 0;
 }
+
+.tags-action-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.tags-action-btn:hover {
+  color: var(--text-primary);
+}
+
+.tags-action-btn.save {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: auto;
+}
+
 .meta-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 .new-badge {
-  background: var(--accent); color: #fff; font-size: 10px; font-weight: 700;
-  padding: 1px 6px; border-radius: 99px;
-  white-space: nowrap; flex-shrink: 0;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 99px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
+
 .expire-badge {
   color: #f59e0b;
   font-weight: 500;
@@ -240,4 +433,80 @@
   border-radius: 4px;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+@media (max-width: 760px) {
+  .card-actions {
+    opacity: 1;
+  }
+
+  .pin-indicator {
+    display: none;
+  }
+
+  .tags-container.empty {
+    opacity: 1;
+  }
+
+  .edit-tags-btn {
+    opacity: 1;
+  }
+}
+
+.swipe-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  height: 100%;
+}
+
+.swipe-actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px; /* maximum reveal width */
+  color: white;
+  font-weight: bold;
+  z-index: 0;
+  border-radius: 12px;
+  transition: opacity 0.2s ease;
+  opacity: 0.5;
+
+  &.active {
+    opacity: 1;
+  }
+}
+
+.swipe-actions.left {
+  left: 0;
+  background: #ff4444; /* Archive/Delete color */
+  justify-content: flex-start;
+  padding-left: 24px;
+}
+
+.swipe-actions.right {
+  right: 0;
+  background: var(--accent); /* Pin color */
+  justify-content: flex-end;
+  padding-right: 24px;
+}
+
+.card {
+  z-index: 1; /* keep above swipe actions */
+  position: relative;
+  /* preserve existing layout */
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 16px 16px 12px 16px;
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease; /* removed transform transition from here to handle it dynamically */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  will-change: transform;
 }

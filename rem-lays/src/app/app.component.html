@@ -27,7 +27,7 @@
     </svg>
   </button>
   <div class="backdrop" [class.visible]="sidebarOpen()" (click)="closeSidebar()"></div>
-  <app-sidebar [open]="sidebarOpen()" (navigated)="closeSidebar()"></app-sidebar>
+  <app-sidebar [open]="sidebarOpen()" (navigated)="closeSidebar()" (openDigest)="showWeeklyDigest.set(true); closeSidebar()"></app-sidebar>
   <main class="main-pane">
     <app-feed></app-feed>
     <app-quick-action-bar></app-quick-action-bar>
@@ -36,6 +36,7 @@
 
 <app-item-viewer></app-item-viewer>
 <app-device-nickname-modal></app-device-nickname-modal>
+<app-weekly-digest [open]="showWeeklyDigest()" (close)="showWeeklyDigest.set(false)"></app-weekly-digest>
 
 <!-- Shortcuts Modal -->
 <div class="modal-overlay" *ngIf="showShortcuts()" (click)="showShortcuts.set(false)">
@@ -90,3 +91,5 @@
   </svg>
   {{ toastSvc.toast().message }}
 </div>
+
+<app-context-menu></app-context-menu>

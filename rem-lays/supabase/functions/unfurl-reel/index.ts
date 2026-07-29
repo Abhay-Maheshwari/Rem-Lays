@@ -1,40 +1,32 @@
 // Edge Function: unfurl-reel
-// Fetches Instagram's oEmbed data for a public reel/post URL, using
-// Meta's tokenless oEmbed endpoint. Confirmed current as of this
-// writing: Meta reversed their 2020 access-token requirement on
-// June 15, 2026, so this works with a plain GET, no Facebook app or
-// App Review needed. This is a recent policy reversal though — worth a
-// quick check if it stops working, since Meta has changed this exact
-// endpoint's rules before and could again.
-//
-// Only works for PUBLIC posts/reels — private accounts and profile URLs
-// (as opposed to individual post/reel URLs) aren't supported.
-//
-// Deploy: supabase functions deploy unfurl-reel
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 Deno.serve(async (req) => {
-  const { url } = await req.json();
-  if (!url || typeof url !== "string") {
-    return new Response(JSON.stringify({ error: "Missing url" }), { status: 400 });
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
   }
 
-  // omitscript=true: we load Instagram's embed.js once ourselves on the
-  // client (InstagramEmbedService) rather than per-card, since a feed can
-  // show many reels at once — that's the documented recommended pattern
-  // for embedding more than one item on a page.
-  const oembedUrl = `https://graph.facebook.com/v25.0/instagram_oembed?url=${encodeURIComponent(url)}&omitscript=true`;
-
   try {
-    const res = await fetch(oembedUrl);
-    if (!res.ok) {
-      return new Response(JSON.stringify({ error: `oEmbed fetch failed: ${res.status}` }), { status: 502 });
+    const { url } = await req.json();
+    if (!url || typeof url !== "string") {
+      return new Response(JSON.stringify({ error: "Missing url" }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 });
     }
-    const data = await res.json();
+
+    // Synthesize the oEmbed HTML
+    const cleanUrl = url.split('?')[0].replace(/\/$/, '') + '/';
+    
+    const syntheticHtml = `<blockquote class="instagram-media" data-instgrm-permalink="${cleanUrl}" data-instgrm-version="14" style="background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"><div style="padding:16px;"> <a href="${cleanUrl}" style="background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;" target="_blank">View on Instagram</a></div></blockquote>`;
+
     return new Response(
-      JSON.stringify({ authorName: data.author_name ?? null, html: data.html ?? null }),
-      { headers: { "Content-Type": "application/json" } },
+      JSON.stringify({ authorName: 'Instagram', html: syntheticHtml }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-  } catch (err) {
-    return new Response(JSON.stringify({ error: `${err}` }), { status: 502 });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 });
   }
 });

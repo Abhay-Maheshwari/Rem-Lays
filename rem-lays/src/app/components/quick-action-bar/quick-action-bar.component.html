@@ -11,14 +11,17 @@
         <path d="M21.44 11.05 12.25 20.24a5 5 0 0 1-7.07-7.07L14.36 4a3.5 3.5 0 0 1 4.95 4.95L10.13 18.1a2 2 0 0 1-2.83-2.83l8.49-8.49"/>
       </svg>
     </button>
-    <input
+    <textarea
+      #noteInput
       class="action-input"
       [(ngModel)]="value"
-      (keydown.enter)="submit()"
+      (keydown)="onKeyDown($event)"
       (paste)="onPaste($event)"
+      (input)="autoGrow($event)"
       [placeholder]="uploading() ? 'Uploading…' : 'Paste a link, or write a quick note…'"
       [disabled]="uploading()"
-    />
+      rows="1"
+    ></textarea>
     <button class="send-btn" [class.sent]="isSent()" (click)="submit()" [disabled]="uploading()">{{ isSent() ? 'Sent!' : 'Send' }}</button>
   </div>
   <div class="tags-input-wrap">

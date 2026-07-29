@@ -6,8 +6,9 @@ import { DevicesService } from './devices.service';
 import { ToastService } from './toast.service';
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeTextFile } from '@tauri-apps/plugin-fs';
+import { NativeNotificationService } from './native-notification.service';
 
-export type FeedFilter = 'all' | 'unseen' | 'link' | 'media';
+export type FeedFilter = 'all' | 'unseen' | 'link' | 'media' | 'archived' | 'snoozed';
 
 @Injectable({ providedIn: 'root' })
 export class ItemsService {
@@ -16,11 +17,38 @@ export class ItemsService {
   searchQuery = signal('');
   selectedTag = signal<string | null>(null);
 
+  currentTime = signal<number>(Date.now());
+  private snoozeCheckInterval: any;
+  private lastSnoozeCheck = Date.now();
+
   constructor(
     private offlineQueue: OfflineQueueService, 
     private devicesService: DevicesService,
-    private toastSvc: ToastService
-  ) {}
+    private toastSvc: ToastService,
+    private notificationSvc: NativeNotificationService
+  ) {
+    this.snoozeCheckInterval = setInterval(() => {
+      this.checkSnoozes();
+    }, 60000);
+  }
+
+  checkSnoozes() {
+    const now = Date.now();
+    this.currentTime.set(now);
+    
+    for (const item of this.items()) {
+      if (item.snooze_until && item.status !== 'archived') {
+        const snoozeTime = new Date(item.snooze_until).getTime();
+        if (snoozeTime <= now && snoozeTime > this.lastSnoozeCheck) {
+          this.notificationSvc.notifyIfBackgrounded(
+            'Snoozed Item Woke Up',
+            item.type === 'text' ? (item.payload as any)['text'] : 'Check your inbox.'
+          );
+        }
+      }
+    }
+    this.lastSnoozeCheck = now;
+  }
 
   allTags = computed(() => {
     const tags = new Set<string>();
@@ -38,10 +66,20 @@ export class ItemsService {
   // with a computed() layered on top since the feed needs filtering.
   filteredItems = computed(() => {
     let all = this.items();
-    const now = new Date().toISOString();
+    const nowStr = new Date(this.currentTime()).toISOString();
     
-    // Filter out expired items locally
-    all = all.filter(i => !i.expires_at || i.expires_at > now);
+    // Filter out expired and archived items locally, unless viewing archive
+    if (this.filter() === 'archived') {
+      all = all.filter(i => i.status === 'archived');
+    } else if (this.filter() === 'snoozed') {
+      all = all.filter(i => i.snooze_until && i.snooze_until > nowStr && i.status !== 'archived');
+    } else {
+      all = all.filter(i => 
+        (!i.expires_at || i.expires_at > nowStr) && 
+        i.status !== 'archived' &&
+        (!i.snooze_until || i.snooze_until <= nowStr)
+      );
+    }
     
     const tag = this.selectedTag();
     if (tag) {
@@ -297,12 +335,24 @@ export class ItemsService {
   private async enrichReel(itemId: string, url: string) {
     try {
       const { data, error } = await supabase.functions.invoke('unfurl-reel', { body: { url } });
-      if (error || !data) return;
-      const result = data as { authorName?: string; html?: string };
       
       const item = this.items().find(i => i.id === itemId);
       const dataPayload = item ? item.payload : {};
 
+      if (error || !data) {
+        // Fallback HTML if reel is private, deleted, or oEmbed fails
+        const fallbackHtml = '<div style="padding: 30px 20px; text-align: center; color: var(--text-tertiary); font-size: 14px; background: rgba(0,0,0,0.2); border-radius: 8px;">Reel unavailable<br><span style="font-size: 12px; opacity: 0.7;">(It may be private or deleted)</span></div>';
+        await supabase
+          .from('items')
+          .update({
+            payload: { ...dataPayload, url, embedHtml: fallbackHtml }
+          })
+          .eq('id', itemId);
+        return;
+      }
+      
+      const result = data as { authorName?: string; html?: string };
+      
       await supabase
         .from('items')
         .update({
@@ -311,6 +361,19 @@ export class ItemsService {
         .eq('id', itemId);
     } catch (err) {
       console.error('enrichReel failed', err);
+      const fallbackHtml = '<div style="padding: 30px 20px; text-align: center; color: var(--text-tertiary); font-size: 14px; background: rgba(0,0,0,0.2); border-radius: 8px;">Reel unavailable<br><span style="font-size: 12px; opacity: 0.7;">(It may be private or deleted)</span></div>';
+      const item = this.items().find(i => i.id === itemId);
+      const dataPayload = item ? item.payload : {};
+      try {
+        await supabase
+          .from('items')
+          .update({
+            payload: { ...dataPayload, url, embedHtml: fallbackHtml }
+          })
+          .eq('id', itemId);
+      } catch (e) {
+        console.error('fallback failed', e);
+      }
     }
   }
 
@@ -448,9 +511,24 @@ export class ItemsService {
     await this.refresh();
   }
 
+  async setSnooze(id: string, snoozeUntil: string | null) {
+    const { error } = await supabase
+      .from('items')
+      .update({ snooze_until: snoozeUntil })
+      .eq('id', id);
+    if (error) console.error('snooze failed', error);
+    await this.refresh();
+  }
+
   async remove(id: string) {
     const { error } = await supabase.from('items').update({ status: 'deleted' }).eq('id', id);
     if (error) console.error('remove failed', error);
+    await this.refresh();
+  }
+
+  async archive(id: string) {
+    const { error } = await supabase.from('items').update({ status: 'archived' }).eq('id', id);
+    if (error) console.error('archive failed', error);
     await this.refresh();
   }
 

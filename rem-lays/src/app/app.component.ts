@@ -14,12 +14,14 @@ import { FeedComponent } from './components/feed/feed.component';
 import { QuickActionBarComponent } from './components/quick-action-bar/quick-action-bar.component';
 import { ItemViewerComponent } from './components/item-viewer/item-viewer.component';
 import { DeviceNicknameModalComponent } from './components/device-nickname-modal/device-nickname-modal.component';
+import { ContextMenuComponent } from './components/context-menu/context-menu.component';
+import { WeeklyDigestComponent } from './components/weekly-digest/weekly-digest.component';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, FeedComponent, QuickActionBarComponent, ItemViewerComponent, DeviceNicknameModalComponent],
+  imports: [CommonModule, SidebarComponent, FeedComponent, QuickActionBarComponent, ItemViewerComponent, DeviceNicknameModalComponent, ContextMenuComponent, WeeklyDigestComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -90,6 +92,7 @@ export class AppComponent {
   sidebarOpen = signal(false);
   
   showShortcuts = signal(false);
+  showWeeklyDigest = signal(false);
 
   toggleSidebar() {
     this.sidebarOpen.update((v) => !v);
@@ -126,14 +129,14 @@ export class AppComponent {
     }
 
     // '?' -> Toggle shortcuts modal
-    if (event.key === '?') {
+    if (event.key === '?' && !event.ctrlKey && !event.metaKey) {
       event.preventDefault();
       this.showShortcuts.update(v => !v);
       return;
     }
 
     // Ctrl/Cmd + K or '/' -> Focus Search
-    if ((event.key === 'k' && (event.metaKey || event.ctrlKey)) || event.key === '/') {
+    if ((event.key === 'k' && (event.metaKey || event.ctrlKey)) || (event.key === '/' && !event.ctrlKey && !event.metaKey)) {
       event.preventDefault();
       const searchInput = document.querySelector('.search-input') as HTMLInputElement | null;
       searchInput?.focus();
@@ -141,11 +144,20 @@ export class AppComponent {
     }
 
     // Ctrl/Cmd + N or 'c' -> Focus New Note (Quick Action Bar)
-    if ((event.key === 'n' && (event.metaKey || event.ctrlKey)) || event.key === 'c') {
+    if ((event.key === 'n' && (event.metaKey || event.ctrlKey)) || (event.key === 'c' && !event.ctrlKey && !event.metaKey)) {
       event.preventDefault();
       const actionInput = document.querySelector('.action-input') as HTMLInputElement | null;
       actionInput?.focus();
       return;
+    }
+  }
+
+  @HostListener('document:contextmenu', ['$event'])
+  onDocumentContextMenu(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    // Allow default context menu only on text inputs for copy/paste
+    if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.isContentEditable) {
+      event.preventDefault();
     }
   }
 }

@@ -1,5 +1,5 @@
 <div class="backdrop" *ngIf="viewerSvc.currentItem() as item" (click)="close()" (window:keydown.escape)="close()">
-  <div class="modal" (click)="$event.stopPropagation()">
+  <div class="modal" (click)="$event.stopPropagation()" (contextmenu)="onContextMenu($event)">
     
     <div class="modal-actions">
       <ng-container *ngIf="item.type === 'text' || item.type === 'link'">
@@ -46,6 +46,16 @@
 
         <a [href]="linkUrl" target="_blank" rel="noopener" class="open-link-btn" (click)="close()">Open in Browser</a>
         <div class="link-url-display">{{ linkUrl }}</div>
+      </div>
+    </ng-container>
+
+    <!-- Reel -->
+    <ng-container *ngIf="item.type === 'reel'">
+      <div class="reel-content" style="display: flex; justify-content: center; width: 100%; overflow-y: auto;">
+        <div *ngIf="reelEmbedHtml(); else reelLoading" class="reel-embed" [innerHTML]="reelEmbedHtml()"></div>
+        <ng-template #reelLoading>
+          <div class="loading">Loading reel from {{ reelAuthorName }}…</div>
+        </ng-template>
       </div>
     </ng-container>
 

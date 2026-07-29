@@ -1,0 +1,19 @@
+<div 
+  #menu
+  class="context-menu" 
+  *ngIf="contextMenuSvc.isOpen()" 
+  [style.left.px]="x" 
+  [style.top.px]="y"
+  (click)="$event.stopPropagation()"
+  (contextmenu)="$event.stopPropagation(); $event.preventDefault()"
+>
+  <button 
+    *ngFor="let item of contextMenuSvc.items()" 
+    class="menu-item" 
+    [class.danger]="item.danger"
+    (click)="onItemClick($event, item)"
+  >
+    <span *ngIf="item.icon" class="menu-icon" [innerHTML]="getSafeIcon(item.icon)"></span>
+    <span class="menu-label">{{ item.label }}</span>
+  </button>
+</div>

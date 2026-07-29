@@ -13,7 +13,20 @@
   border-radius: 12px; padding: 8px 8px 8px 14px;
 }
 .action-inner:focus-within { border-color: var(--accent); }
-.action-input { flex: 1; background: none; border: none; outline: none; color: var(--text-primary); font-size: 13.5px; }
+.action-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  font-family: inherit;
+  resize: none;
+  line-height: 1.5;
+  padding: 2px 0;
+  max-height: 150px;
+  overflow-y: auto;
+}
 .action-input::placeholder { color: var(--text-tertiary); }
 .action-input:disabled { opacity: 0.5; }
 .tags-input-wrap {
