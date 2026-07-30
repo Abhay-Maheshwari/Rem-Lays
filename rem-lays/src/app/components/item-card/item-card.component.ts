@@ -355,6 +355,37 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
       });
     }
 
+    // ── Sharing ──
+    const shareIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>';
+    if (this.item.share_token) {
+      items.push({
+        label: 'Copy share link',
+        icon: shareIcon,
+        action: () => {
+          this.itemsSvc.copyShareLink(this.item.share_token!);
+          this.contextMenuSvc.close();
+        }
+      });
+      items.push({
+        label: 'Stop sharing',
+        icon: shareIcon,
+        danger: true,
+        action: () => {
+          this.itemsSvc.unshareItem(this.item.id);
+          this.contextMenuSvc.close();
+        }
+      });
+    } else {
+      items.push({
+        label: 'Share link',
+        icon: shareIcon,
+        action: () => {
+          this.itemsSvc.shareItem(this.item.id);
+          this.contextMenuSvc.close();
+        }
+      });
+    }
+
     items.push({
       label: 'Edit Expiration',
       icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',

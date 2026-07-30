@@ -2,7 +2,8 @@
   <div class="brand" data-tauri-drag-region>
     <img src="assets/logo_dark_mode.png" class="brand-logo" data-tauri-drag-region alt="RemLays" />
     <div class="brand-spacer" data-tauri-drag-region></div>
-    <button class="icon-btn" title="Settings">
+    <div class="brand-spacer" data-tauri-drag-region></div>
+    <button class="icon-btn settings-btn" title="Settings">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
   </div>
@@ -15,17 +16,26 @@
     </button>
   </div>
 
-  <div class="nav-section-label">Review</div>
-  <nav class="filters">
+  <div class="sidebar-scroll-area">
+    <div class="nav-section-header clickable" (click)="reviewCollapsed.set(!reviewCollapsed())">
+      <div class="nav-section-label">Review</div>
+      <svg class="chevron" [class.rotated]="reviewCollapsed()" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    </div>
+    <nav class="filters nav-section-content" *ngIf="!reviewCollapsed()">
     <button class="filter-item" (click)="openDigest.emit(); navigated.emit()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
       <span class="label">Weekly Digest</span>
     </button>
   </nav>
 
-  <div class="nav-section-label">Inbox</div>
-  <nav class="filters">
-    <button class="filter-item" [class.active]="itemsSvc.filter() === 'all'" (click)="setFilter('all')">
+    <div class="divider"></div>
+
+    <div class="nav-section-header clickable" (click)="inboxCollapsed.set(!inboxCollapsed())">
+      <div class="nav-section-label">Inbox</div>
+      <svg class="chevron" [class.rotated]="inboxCollapsed()" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    </div>
+    <nav class="filters nav-section-content" *ngIf="!inboxCollapsed()">
+    <button class="filter-item" [class.active]="itemsSvc.filter() === 'all' && !itemsSvc.activeBoardId()" (click)="setFilter('all')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
       <span class="label">All Items</span>
     </button>
@@ -50,11 +60,50 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
       <span class="label">Snoozed</span>
     </button>
+    <button class="filter-item" [class.active]="itemsSvc.filter() === 'shared'" (click)="setFilter('shared')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+      <span class="label">Shared Links</span>
+    </button>
   </nav>
 
+  <div class="divider"></div>
+
+  <div class="boards-section">
+    <div class="nav-section-header clickable" (click)="boardsCollapsed.set(!boardsCollapsed())">
+      <div class="nav-section-label">Boards</div>
+      <div class="header-actions">
+        <button class="icon-btn" *ngIf="!boardsCollapsed()" (click)="openCreateBoard(); $event.stopPropagation()" title="Create Board">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <svg class="chevron" [class.rotated]="boardsCollapsed()" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <nav class="filters boards-list nav-section-content" *ngIf="boardsSvc.boards().length > 0 && !boardsCollapsed()" cdkDropList (cdkDropListDropped)="dropBoard($event)">
+      <div class="board-item-wrap" *ngFor="let board of boardsSvc.boards()" cdkDrag>
+        <button class="filter-item" [class.active]="itemsSvc.activeBoardId() === board.id" (click)="setBoard(board.id)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+          <span class="label">{{ board.name }}</span>
+          <span class="badge" *ngIf="itemsSvc.getBoardUnseenCount(board.id) > 0">{{ itemsSvc.getBoardUnseenCount(board.id) }}</span>
+        </button>
+        <div class="board-actions">
+          <button class="icon-btn" title="Manage Members" (click)="openManageMembers(board.id); $event.stopPropagation()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </button>
+          <button class="icon-btn share-btn" title="Copy Invite Link" (click)="boardsSvc.copyInviteLink(board); $event.stopPropagation()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+  </div>
+
   <div class="tags-section" *ngIf="itemsSvc.allTags().length > 0">
-    <div class="nav-section-label">Tags</div>
-    <div class="tags-list">
+    <div class="divider"></div>
+    <div class="nav-section-header clickable" (click)="tagsCollapsed.set(!tagsCollapsed())">
+      <div class="nav-section-label">Tags</div>
+      <svg class="chevron" [class.rotated]="tagsCollapsed()" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    </div>
+    <div class="tags-list nav-section-content" *ngIf="!tagsCollapsed()">
       <button class="tag-pill" 
               *ngFor="let tag of itemsSvc.allTags()" 
               [class.active]="itemsSvc.selectedTag() === tag"
@@ -67,8 +116,12 @@
   <div class="divider"></div>
 
   <div class="devices-section">
-    <div class="nav-section-label">Your devices</div>
-    <div class="device-row" *ngFor="let d of devicesSvc.devices()" [class.is-offline]="!presenceSvc.onlineDeviceIds().has(d.id)">
+    <div class="nav-section-header clickable" (click)="devicesCollapsed.set(!devicesCollapsed())">
+      <div class="nav-section-label">Your devices</div>
+      <svg class="chevron" [class.rotated]="devicesCollapsed()" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    </div>
+    <div class="devices-list nav-section-content" *ngIf="!devicesCollapsed()">
+      <div class="device-row" *ngFor="let d of devicesSvc.devices()" [class.is-offline]="!presenceSvc.onlineDeviceIds().has(d.id)">
       <div class="device-dot" [class.online]="presenceSvc.onlineDeviceIds().has(d.id)" [class.pulse]="presenceSvc.onlineDeviceIds().has(d.id)" [class.offline]="!presenceSvc.onlineDeviceIds().has(d.id)"></div>
       <div class="device-info">
         <ng-container *ngIf="editingDeviceId !== d.id; else editMode">
@@ -91,6 +144,8 @@
         <div class="device-status">{{ presenceSvc.onlineDeviceIds().has(d.id) ? 'Online' : 'Offline' }}</div>
       </div>
     </div>
+    </div>
+  </div>
   </div>
 
   <div class="sidebar-footer">
@@ -106,3 +161,40 @@
     </div>
   </div>
 </aside>
+
+<!-- Create Board Modal -->
+<div class="modal-overlay" *ngIf="showCreateBoardModal" (click)="closeCreateBoard()">
+  <div class="modal-content custom-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Create New Board</h2>
+      <button class="close-btn" (click)="closeCreateBoard()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc">Create a collaborative board to share links and media.</p>
+      <input 
+        type="text" 
+        class="custom-input" 
+        placeholder="Board name" 
+        [value]="newBoardName"
+        (input)="newBoardName = $any($event).target.value"
+        (keyup.enter)="confirmCreateBoard()"
+        (keyup.escape)="closeCreateBoard()"
+        autofocus
+      />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeCreateBoard()">Cancel</button>
+      <button class="btn-primary" (click)="confirmCreateBoard()" [disabled]="!newBoardName.trim()">Create Board</button>
+    </div>
+  </div>
+</div>
+
+<app-manage-members-modal 
+  *ngIf="showManageMembersModal && activeManageBoardId" 
+  [boardId]="activeManageBoardId" 
+  (close)="closeManageMembers()">
+</app-manage-members-modal>

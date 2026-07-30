@@ -7,8 +7,9 @@ import { ToastService } from './toast.service';
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeTextFile } from '@tauri-apps/plugin-fs';
 import { NativeNotificationService } from './native-notification.service';
+import { environment } from '../../environments/environment';
 
-export type FeedFilter = 'all' | 'unseen' | 'link' | 'media' | 'archived' | 'snoozed';
+export type FeedFilter = 'all' | 'unseen' | 'link' | 'media' | 'archived' | 'snoozed' | 'shared';
 
 @Injectable({ providedIn: 'root' })
 export class ItemsService {
@@ -16,6 +17,7 @@ export class ItemsService {
   filter = signal<FeedFilter>('all');
   searchQuery = signal('');
   selectedTag = signal<string | null>(null);
+  activeBoardId = signal<string | null>(null);
 
   currentTime = signal<number>(Date.now());
   private snoozeCheckInterval: any;
@@ -70,14 +72,15 @@ export class ItemsService {
     
     // Filter out expired and archived items locally, unless viewing archive
     if (this.filter() === 'archived') {
-      all = all.filter(i => i.status === 'archived');
+      all = all.filter(i => i.status === 'archived' && (i.board_id || null) === this.activeBoardId());
     } else if (this.filter() === 'snoozed') {
-      all = all.filter(i => i.snooze_until && i.snooze_until > nowStr && i.status !== 'archived');
+      all = all.filter(i => i.snooze_until && i.snooze_until > nowStr && i.status !== 'archived' && (i.board_id || null) === this.activeBoardId());
     } else {
       all = all.filter(i => 
         (!i.expires_at || i.expires_at > nowStr) && 
         i.status !== 'archived' &&
-        (!i.snooze_until || i.snooze_until <= nowStr)
+        (!i.snooze_until || i.snooze_until <= nowStr) &&
+        (i.board_id || null) === this.activeBoardId()
       );
     }
     
@@ -108,6 +111,9 @@ export class ItemsService {
       case 'media':
         result = all.filter((i) => i.type === 'image' || i.type === 'video' || i.type === 'reel');
         break;
+      case 'shared':
+        result = all.filter((i) => i.share_token !== null);
+        break;
     }
 
     // Stable sort: Pinned first, then by date (newest first), then by ID
@@ -122,8 +128,13 @@ export class ItemsService {
 
   unseenCount = computed(() => {
     const now = new Date().toISOString();
-    return this.items().filter((i) => i.status === 'unseen' && (!i.expires_at || i.expires_at > now)).length;
+    return this.items().filter((i) => i.status === 'unseen' && (!i.expires_at || i.expires_at > now) && !i.board_id).length;
   });
+
+  getBoardUnseenCount(boardId: string) {
+    const now = new Date().toISOString();
+    return this.items().filter(i => i.status === 'unseen' && (!i.expires_at || i.expires_at > now) && i.board_id === boardId).length;
+  }
 
   async refresh() {
     const now = new Date().toISOString();
@@ -142,6 +153,7 @@ export class ItemsService {
 
     if (error) {
       console.error('items refresh failed', error);
+      this.toastSvc.show('Refresh Error: ' + error.message, 'error');
       return;
     }
     this.items.set((data ?? []) as Item[]);
@@ -205,15 +217,19 @@ export class ItemsService {
       return;
     }
 
-    const { error } = await supabase.from('items').insert({
+    const insertPayload: any = {
       user_id: userData.user.id,
       source_device_id: this.devicesService.currentDeviceId,
       type: 'text' as ItemType,
-      payload: { note: trimmed, tags }
-    });
+      payload: { note: trimmed, tags },
+    };
+    if (this.activeBoardId()) insertPayload.board_id = this.activeBoardId();
+
+    const { error } = await supabase.from('items').insert(insertPayload);
 
     if (error) {
       console.error('addText failed, queuing for retry', error);
+      this.toastSvc.show('Insert Error: ' + error.message, 'error');
       this.offlineQueue.enqueue({ kind: 'text', note: trimmed, tags, queuedAt: new Date().toISOString() });
       return;
     }
@@ -278,14 +294,17 @@ export class ItemsService {
       return;
     }
 
-    const { data: inserted, error } = await supabase
-      .from('items')
-      .insert({
+    const insertPayload: any = {
         user_id: userData.user.id,
         source_device_id: this.devicesService.currentDeviceId,
         type,
         payload: { url: rawUrl, domain, tags }
-      })
+    };
+    if (this.activeBoardId()) insertPayload.board_id = this.activeBoardId();
+
+    const { data: inserted, error } = await supabase
+      .from('items')
+      .insert(insertPayload)
       .select('id')
       .single();
 
@@ -425,13 +444,16 @@ export class ItemsService {
     // Only write the items row after a confirmed-successful upload, so a
     // failed upload never leaves a dangling item pointing at nothing.
     const type: ItemType = file.type.startsWith('video/') ? 'video' : 'image';
-    const { error: insertError } = await supabase.from('items').insert({
+    const insertPayload: any = {
       user_id: userData.user.id,
       source_device_id: this.devicesService.currentDeviceId,
       type,
       payload: { filename: file.name, tags },
       storage_key: storageKey
-    });
+    };
+    if (this.activeBoardId()) insertPayload.board_id = this.activeBoardId();
+
+    const { error: insertError } = await supabase.from('items').insert(insertPayload);
     if (insertError) console.error('addMedia insert failed', insertError);
 
     await this.refresh();
@@ -445,13 +467,16 @@ export class ItemsService {
     if (!userData.user) return;
 
     const type: ItemType = mimeType.startsWith('video/') ? 'video' : 'image';
-    const { error } = await supabase.from('items').insert({
+    const insertPayload: any = {
       user_id: userData.user.id,
       source_device_id: this.devicesService.currentDeviceId,
       type,
       payload: { filename, tags },
       storage_key: storageKey
-    });
+    };
+    if (this.activeBoardId()) insertPayload.board_id = this.activeBoardId();
+
+    const { error } = await supabase.from('items').insert(insertPayload);
     if (error) console.error('addMediaFromStorageKey insert failed', error);
     await this.refresh();
   }
@@ -638,5 +663,106 @@ export class ItemsService {
       URL.revokeObjectURL(url);
       this.toastSvc.show('Data download started');
     }
+  }
+
+  // ─── Sharing ─────────────────────────────────────────────────────
+  // Per-item public sharing via a UUID token.  The `anon` RLS policy
+  // on the items table lets anyone SELECT rows that have a non-null
+  // share_token, so no auth is needed to read a shared item.
+
+  /**
+   * Generate a share_token for an item so it becomes publicly readable.
+   * Returns the shareable URL and copies it to the clipboard.
+   */
+  async shareItem(id: string): Promise<string | null> {
+    const token = crypto.randomUUID();
+    const { error } = await supabase
+      .from('items')
+      .update({ share_token: token })
+      .eq('id', id);
+
+    if (error) {
+      console.error('shareItem failed', error);
+      this.toastSvc.show('Failed to share item', 'error');
+      return null;
+    }
+
+    const shareUrl = `${environment.publicWebAppUrl}/shared/${token}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      this.toastSvc.show('Share link copied to clipboard!');
+    } catch {
+      // Clipboard API can fail in non-secure contexts or headless
+      this.toastSvc.show('Share link created');
+    }
+
+    await this.refresh();
+    return shareUrl;
+  }
+
+  /**
+   * Revoke sharing — sets share_token back to null so the public URL
+   * stops working immediately.
+   */
+  async unshareItem(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('items')
+      .update({ share_token: null })
+      .eq('id', id);
+
+    if (error) {
+      console.error('unshareItem failed', error);
+      this.toastSvc.show('Failed to stop sharing', 'error');
+      return;
+    }
+
+    this.toastSvc.show('Sharing stopped');
+    await this.refresh();
+  }
+
+  /** Copy the existing share URL to the clipboard. */
+  copyShareLink(token: string) {
+    const url = `${environment.publicWebAppUrl}/shared/${token}`;
+    navigator.clipboard.writeText(url).then(
+      () => this.toastSvc.show('Share link copied!'),
+      () => this.toastSvc.show('Could not copy link', 'error')
+    );
+  }
+
+  /**
+   * Fetch a single item by its share_token — no auth required.
+   * Uses the same global supabase client, but the anon RLS policy
+   * allows this SELECT as long as share_token IS NOT NULL.
+   */
+  static async fetchSharedItem(token: string): Promise<Item | null> {
+    const { createClient } = await import('@supabase/supabase-js');
+    const { environment } = await import('../../environments/environment');
+    const anonClient = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
+
+    const { data, error } = await anonClient
+      .from('items')
+      .select('*')
+      .eq('share_token', token)
+      .single();
+
+    if (error || !data) return null;
+    return data as Item;
+  }
+
+  /**
+   * Fetch a signed media URL for a shared item (calls the shared-media
+   * Edge Function which uses the service-role key internally).
+   */
+  static async fetchSharedMediaUrl(shareToken: string): Promise<string | null> {
+    const { createClient } = await import('@supabase/supabase-js');
+    const { environment } = await import('../../environments/environment');
+    const anonClient = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
+
+    const { data, error } = await anonClient.functions.invoke('shared-media', {
+      body: { shareToken }
+    });
+
+    if (error || !data?.signedUrl) return null;
+    return data.signedUrl;
   }
 }

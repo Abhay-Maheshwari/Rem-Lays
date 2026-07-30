@@ -18,7 +18,7 @@
        [class.unseen]="item.status === 'unseen'" 
        [class.incoming]="isNew" 
        (click)="onOpen()" 
-       (contextmenu)="onContextMenu($event)" 
+       (contextmenu)="onContextMenu($event); false" 
        [style.z-index]="showExpireMenu ? 100 : 1"
        [style.transform]="swipeTransform"
        [style.transition]="swipeTransition">
@@ -89,11 +89,19 @@
 
   <div class="meta">
     <span class="time">{{ item.created_at | date:'MMM d, h:mm a' }}</span>
-    <div class="meta-row" *ngIf="item.status === 'unseen' || item.expires_at">
+    <div class="meta-row" *ngIf="item.status === 'unseen' || item.expires_at || item.share_token">
       <span class="new-badge" *ngIf="item.status === 'unseen'" (click)="markAsRead($event)" style="cursor: pointer;" title="Mark as read">NEW</span>
       <span class="expire-badge" *ngIf="item.expires_at" title="Expiring soon">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px; vertical-align:middle"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         {{ expireText }}
+      </span>
+      <span class="share-badge" *ngIf="item.share_token" title="Shared publicly">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px; vertical-align:middle">
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+          <polyline points="16 6 12 2 8 6"></polyline>
+          <line x1="12" y1="2" x2="12" y2="15"></line>
+        </svg>
+        Shared
       </span>
     </div>
   </div>

@@ -74,6 +74,31 @@
   padding-bottom: 20px;
 }
 
+.masonry-grid {
+  display: block;
+  column-count: 1;
+  column-gap: 12px;
+}
+
+@media (min-width: 600px) {
+  .masonry-grid { column-count: 2; }
+}
+
+@media (min-width: 900px) {
+  .masonry-grid { column-count: 3; }
+}
+
+@media (min-width: 1200px) {
+  .masonry-grid { column-count: 4; }
+}
+
+.masonry-grid > app-item-card {
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 12px;
+  break-inside: avoid;
+}
+
 .inbox-zero-state {
   display: flex;
   flex-direction: column;

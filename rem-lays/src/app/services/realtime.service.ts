@@ -31,7 +31,7 @@ export class RealtimeService {
       .channel(`items-changes-${userId}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'items', filter: `user_id=eq.${userId}` },
+        { event: '*', schema: 'public', table: 'items' },
         (payload: RealtimePostgresChangesPayload<Item>) => this.handleChange(payload)
       )
       .subscribe((status) => {

@@ -42,6 +42,11 @@ export class ContextMenuComponent {
   @HostListener('document:click', ['$event'])
   @HostListener('document:contextmenu', ['$event'])
   onDocumentClick(event: MouseEvent) {
+    // If default was prevented, it means an item card (or another component) 
+    // handled the right-click to OPEN the menu. Don't close it instantly.
+    if (event.defaultPrevented && event.type === 'contextmenu') {
+      return;
+    }
     if (this.contextMenuSvc.isOpen()) {
       this.contextMenuSvc.close();
     }

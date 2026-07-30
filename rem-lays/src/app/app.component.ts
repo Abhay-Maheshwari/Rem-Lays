@@ -9,6 +9,7 @@ import { ShareIntentService } from './services/share-intent.service';
 import { ItemsService } from './services/items.service';
 import { OfflineQueueService } from './services/offline-queue.service';
 import { ToastService } from './services/toast.service';
+import { BoardsService } from './services/boards.service';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { FeedComponent } from './components/feed/feed.component';
 import { QuickActionBarComponent } from './components/quick-action-bar/quick-action-bar.component';
@@ -16,17 +17,34 @@ import { ItemViewerComponent } from './components/item-viewer/item-viewer.compon
 import { DeviceNicknameModalComponent } from './components/device-nickname-modal/device-nickname-modal.component';
 import { ContextMenuComponent } from './components/context-menu/context-menu.component';
 import { WeeklyDigestComponent } from './components/weekly-digest/weekly-digest.component';
+import { SharedItemViewerComponent } from './components/shared-item-viewer/shared-item-viewer.component';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, FeedComponent, QuickActionBarComponent, ItemViewerComponent, DeviceNicknameModalComponent, ContextMenuComponent, WeeklyDigestComponent],
+  imports: [CommonModule, SidebarComponent, FeedComponent, QuickActionBarComponent, ItemViewerComponent, DeviceNicknameModalComponent, ContextMenuComponent, WeeklyDigestComponent, SharedItemViewerComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
   isDesktop = !!(window as any).__TAURI_INTERNALS__ && !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  // URL-based routing for shared item public pages
+  sharedToken = signal<string | null>(this.parseSharedToken());
+  inviteToken = signal<string | null>(this.parseInviteToken());
+
+  private parseSharedToken(): string | null {
+    const path = window.location.pathname;
+    const match = path.match(/^\/shared\/([0-9a-f-]{36})$/i);
+    return match ? match[1] : null;
+  }
+
+  private parseInviteToken(): string | null {
+    const path = window.location.pathname;
+    const match = path.match(/^\/invite\/([0-9a-f-]{36})$/i);
+    return match ? match[1] : null;
+  }
 
   minimize() {
     if (this.isDesktop) getCurrentWindow().minimize();
@@ -49,7 +67,8 @@ export class AppComponent {
     private shareIntentSvc: ShareIntentService,
     private itemsSvc: ItemsService,
     private offlineQueue: OfflineQueueService,
-    public toastSvc: ToastService
+    public toastSvc: ToastService,
+    private boardsSvc: BoardsService
   ) {
     // Flush whatever's queued the moment connectivity actually returns —
     // not gated on sign-in state below, since 'online' can fire at any
@@ -68,6 +87,7 @@ export class AppComponent {
       const session = this.auth.session();
       if (session?.user?.id) {
         this.realtimeSvc.connect(session.user.id);
+        this.boardsSvc.refresh();
         this.autostartSvc.ensureEnabled();
         this.notificationSvc.init();
         this.shareIntentSvc.startListening();
@@ -75,6 +95,18 @@ export class AppComponent {
         // where the app was fully closed while something sat queued and
         // connectivity already came back before this launch.
         this.itemsSvc.flushOfflineQueue();
+
+        // Handle invite tokens if present
+        const invite = this.inviteToken();
+        if (invite) {
+          this.inviteToken.set(null); // Clear to avoid looping
+          window.history.replaceState({}, document.title, '/');
+          this.boardsSvc.joinBoard(invite).then(boardId => {
+             if (boardId) {
+                this.itemsSvc.activeBoardId.set(boardId);
+             }
+          });
+        }
       } else {
         this.realtimeSvc.disconnect();
         this.presenceSvc.disconnect();

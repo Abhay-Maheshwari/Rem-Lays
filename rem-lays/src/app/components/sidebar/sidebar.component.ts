@@ -1,20 +1,26 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ItemsService, FeedFilter } from '../../services/items.service';
 import { DevicesService } from '../../services/devices.service';
 import { AuthService } from '../../services/auth.service';
 import { PresenceService } from '../../services/presence.service';
 import { FcmTokenService } from '../../services/fcm-token.service';
+import { BoardsService } from '../../services/boards.service';
 import { isAndroid } from '../../services/platform';
 
 import { FormsModule } from '@angular/forms';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { ManageMembersModalComponent } from '../manage-members-modal/manage-members-modal.component';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DragDropModule, ManageMembersModalComponent],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.scss'
+  styleUrl: './sidebar.component.scss',
+  host: {
+    '[class.collapsed]': 'isCollapsed()'
+  }
 })
 export class SidebarComponent implements OnInit {
   // Drives the mobile off-canvas drawer — irrelevant/inert on desktop
@@ -23,14 +29,29 @@ export class SidebarComponent implements OnInit {
   @Output() navigated = new EventEmitter<void>();
   @Output() openDigest = new EventEmitter<void>();
 
+  isCollapsed = signal(false);
+
+  reviewCollapsed = signal(true);
+  inboxCollapsed = signal(true);
+  boardsCollapsed = signal(true);
+  tagsCollapsed = signal(true);
+  devicesCollapsed = signal(true);
+
   editingDeviceId: string | null = null;
   editDeviceName: string = '';
+
+  showCreateBoardModal = false;
+  newBoardName = '';
+
+  showManageMembersModal = false;
+  activeManageBoardId: string | null = null;
 
   constructor(
     public itemsSvc: ItemsService,
     public devicesSvc: DevicesService,
     public auth: AuthService,
     public presenceSvc: PresenceService,
+    public boardsSvc: BoardsService,
     private fcmTokenSvc: FcmTokenService
   ) {}
 
@@ -53,12 +74,43 @@ export class SidebarComponent implements OnInit {
   }
 
   setFilter(f: FeedFilter) {
+    this.itemsSvc.activeBoardId.set(null);
     this.itemsSvc.filter.set(f);
-    // On mobile, picking a filter is also "I'm done with the drawer" —
-    // on desktop this just emits into nothing, AppComponent's own
-    // sidebarOpen state doesn't matter there since the CSS ignores it
-    // above the breakpoint.
     this.navigated.emit();
+  }
+
+  setBoard(boardId: string) {
+    this.itemsSvc.activeBoardId.set(boardId);
+    // Keep the current filter (e.g. 'all' or 'media') but scope it to the board
+    this.navigated.emit();
+  }
+
+  openCreateBoard() {
+    this.newBoardName = '';
+    this.showCreateBoardModal = true;
+  }
+
+  closeCreateBoard() {
+    this.showCreateBoardModal = false;
+  }
+
+  toggleCollapse() {
+    this.isCollapsed.update(v => !v);
+  }
+
+  dropBoard(event: CdkDragDrop<string[]>) {
+    const currentBoards = [...this.boardsSvc.boards()];
+    moveItemInArray(currentBoards, event.previousIndex, event.currentIndex);
+    const newOrder = currentBoards.map(b => b.id);
+    this.boardsSvc.reorderBoards(newOrder);
+  }
+
+  async confirmCreateBoard() {
+    const name = this.newBoardName.trim();
+    if (name) {
+      this.showCreateBoardModal = false;
+      await this.boardsSvc.createBoard(name);
+    }
   }
 
   startEditDevice(device: any) {
@@ -75,5 +127,15 @@ export class SidebarComponent implements OnInit {
       await this.devicesSvc.renameDevice(device.id, this.editDeviceName.trim());
     }
     this.editingDeviceId = null;
+  }
+
+  openManageMembers(boardId: string) {
+    this.activeManageBoardId = boardId;
+    this.showManageMembersModal = true;
+  }
+
+  closeManageMembers() {
+    this.showManageMembersModal = false;
+    this.activeManageBoardId = null;
   }
 }

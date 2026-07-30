@@ -1,0 +1,124 @@
+<div class="shared-page">
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading()">
+    <div class="spinner"></div>
+    <p>Loading shared item…</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error() && !loading()">
+    <div class="error-card">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="15" y1="9" x2="9" y2="15"></line>
+        <line x1="9" y1="9" x2="15" y2="15"></line>
+      </svg>
+      <h2>Item Not Found</h2>
+      <p>This item doesn't exist or is no longer shared.</p>
+    </div>
+  </div>
+
+  <!-- Shared Item Card -->
+  <div class="shared-card-wrapper" *ngIf="item() && !loading()">
+    <div class="shared-card">
+      <!-- Header -->
+      <div class="card-header">
+        <div class="type-badge" [attr.data-type]="item()!.type">
+          <!-- Text icon -->
+          <svg *ngIf="item()!.type === 'text'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <!-- Link icon -->
+          <svg *ngIf="item()!.type === 'link'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+          <!-- Image icon -->
+          <svg *ngIf="item()!.type === 'image'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <!-- Video icon -->
+          <svg *ngIf="item()!.type === 'video' || item()!.type === 'reel'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          </svg>
+          <span>{{ item()!.type | titlecase }}</span>
+        </div>
+        <span class="date">{{ formattedDate }}</span>
+      </div>
+
+      <!-- Text Item -->
+      <div class="card-body" *ngIf="item()!.type === 'text'">
+        <p class="note-text">{{ noteText }}</p>
+      </div>
+
+      <!-- Link Item -->
+      <div class="card-body link-body" *ngIf="item()!.type === 'link'">
+        <img class="link-preview" *ngIf="linkImage" [src]="linkImage" [alt]="linkTitle" loading="lazy" />
+        <h3 class="link-title">{{ linkTitle }}</h3>
+        <span class="link-domain">{{ linkDomain }}</span>
+        <a class="visit-btn" [href]="linkUrl" target="_blank" rel="noopener noreferrer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+          Visit Link
+        </a>
+      </div>
+
+      <!-- Image Item -->
+      <div class="card-body media-body" *ngIf="item()!.type === 'image'">
+        <img class="shared-media" *ngIf="mediaUrl()" [src]="mediaUrl()" [alt]="mediaFilename" loading="lazy" />
+        <div class="media-placeholder" *ngIf="!mediaUrl()">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <p>{{ mediaFilename }}</p>
+        </div>
+      </div>
+
+      <!-- Video Item -->
+      <div class="card-body media-body" *ngIf="item()!.type === 'video'">
+        <video class="shared-media" *ngIf="mediaUrl()" [src]="mediaUrl()" controls></video>
+        <div class="media-placeholder" *ngIf="!mediaUrl()">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          </svg>
+          <p>{{ mediaFilename }}</p>
+        </div>
+      </div>
+
+      <!-- Reel Item -->
+      <div class="card-body reel-body" *ngIf="item()!.type === 'reel'">
+        <div *ngIf="reelEmbedHtml" [innerHTML]="reelEmbedHtml"></div>
+        <div class="media-placeholder" *ngIf="!reelEmbedHtml">
+          <p>Reel by {{ reelAuthorName }}</p>
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div class="card-tags" *ngIf="itemTags.length > 0">
+        <span class="tag" *ngFor="let tag of itemTags">#{{ tag }}</span>
+      </div>
+    </div>
+
+    <!-- Footer branding -->
+    <div class="shared-footer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+        <polyline points="16 6 12 2 8 6"></polyline>
+        <line x1="12" y1="2" x2="12" y2="15"></line>
+      </svg>
+      <span>Shared via <strong>Rem-Lays</strong></span>
+    </div>
+  </div>
+</div>

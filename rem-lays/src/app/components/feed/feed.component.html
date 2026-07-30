@@ -1,12 +1,17 @@
 <div class="main-header" data-tauri-drag-region>
   <div data-tauri-drag-region>
     <div class="main-title" data-tauri-drag-region>
-      {{ itemsSvc.filter() === 'all' ? 'All Items'
+      {{ itemsSvc.filter() === 'all' && !itemsSvc.activeBoardId() ? 'All Items'
          : itemsSvc.filter() === 'unseen' ? 'Unseen'
          : itemsSvc.filter() === 'link' ? 'Links'
-         : 'Media' }}
+         : itemsSvc.filter() === 'media' ? 'Media'
+         : itemsSvc.filter() === 'shared' ? 'Shared Links'
+         : itemsSvc.activeBoardId() ? getBoardName() : 'Items' }}
     </div>
-    <div class="main-sub" data-tauri-drag-region>Everything shared to your inbox, across every device</div>
+    <div class="main-sub" data-tauri-drag-region>
+      <ng-container *ngIf="itemsSvc.activeBoardId()">Invite others to collaborate on this board</ng-container>
+      <ng-container *ngIf="!itemsSvc.activeBoardId()">Everything shared to your inbox, across every device</ng-container>
+    </div>
   </div>
   <div class="header-actions">
     <button class="demo-btn" *ngIf="itemsSvc.unseenCount() > 0" (click)="markAllAsRead()">

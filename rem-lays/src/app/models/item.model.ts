@@ -15,4 +15,6 @@ export interface Item {
   is_pinned: boolean;
   expires_at: string | null;
   snooze_until: string | null;
+  share_token: string | null;
+  board_id: string | null;
 }
