@@ -20,9 +20,33 @@ export class AuthService {
       '__TAURI_INVOKE__' in window ||
       '__TAURI__' in window
     );
-    
-    // Handle deep links from OAuth redirects in Tauri apps
+
+    // Mobile specific: Auto-refresh tokens when app comes to foreground.
+    // If the device sleeps, Supabase's setTimeout for auto-refresh won't fire.
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          console.log('[Auth] App became visible, refreshing session');
+          supabase.auth.refreshSession().catch(e => console.error(e));
+        }
+      });
+    }
+
     if (isTauri) {
+      import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+        getCurrentWindow().listen('tauri://focus', () => {
+          console.log('[Auth] Window focused, refreshing session');
+          supabase.auth.refreshSession().catch(e => console.error(e));
+        });
+      });
+      import('@tauri-apps/api/event').then(module => {
+        module.listen('tauri://resume', () => {
+          console.log('[Auth] App resumed, refreshing session');
+          supabase.auth.refreshSession().catch(e => console.error(e));
+        });
+      });
+      
+      // Handle deep links from OAuth redirects in Tauri apps
       console.log('[Auth] Registering onOpenUrl listener');
       onOpenUrl((urls) => {
         console.log('[Auth] onOpenUrl triggered with urls:', JSON.stringify(urls));
@@ -187,5 +211,9 @@ export class AuthService {
 
   async signOut() {
     await supabase.auth.signOut();
+  }
+
+  async updateUserMetadata(data: any) {
+    return await supabase.auth.updateUser({ data });
   }
 }

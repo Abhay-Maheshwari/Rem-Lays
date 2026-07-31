@@ -44,7 +44,7 @@
         <div class="link-title" *ngIf="!isEditing()">{{ linkTitle }}</div>
         <input class="edit-input" type="text" *ngIf="isEditing()" [ngModel]="editLinkTitle()" (ngModelChange)="editLinkTitle.set($event)" placeholder="Edit Title" />
 
-        <a [href]="linkUrl" target="_blank" rel="noopener" class="open-link-btn" (click)="close()">Open in Browser</a>
+        <a href="#" class="open-link-btn" (click)="openLink($event)">Open in Browser</a>
         <div class="link-url-display">{{ linkUrl }}</div>
       </div>
     </ng-container>
@@ -59,7 +59,7 @@
       </div>
     </ng-container>
 
-    <div class="modal-footer">
+    <div class="modal-footer" *ngIf="itemTags.length > 0 || item.status === 'unseen' || item.expires_at">
       <div class="tags-container" *ngIf="itemTags.length > 0">
         <span class="card-tag" *ngFor="let t of itemTags">#{{t}}</span>
       </div>

@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { PresenceService } from '../../services/presence.service';
 import { FcmTokenService } from '../../services/fcm-token.service';
 import { BoardsService } from '../../services/boards.service';
+import { ThemeService } from '../../services/theme.service';
 import { isAndroid } from '../../services/platform';
 
 import { FormsModule } from '@angular/forms';
@@ -52,6 +53,7 @@ export class SidebarComponent implements OnInit {
     public auth: AuthService,
     public presenceSvc: PresenceService,
     public boardsSvc: BoardsService,
+    public themeSvc: ThemeService,
     private fcmTokenSvc: FcmTokenService
   ) {}
 
@@ -137,5 +139,11 @@ export class SidebarComponent implements OnInit {
   closeManageMembers() {
     this.showManageMembersModal = false;
     this.activeManageBoardId = null;
+  }
+
+  @Output() openSettingsPage = new EventEmitter<void>();
+
+  openSettings() {
+    this.openSettingsPage.emit();
   }
 }

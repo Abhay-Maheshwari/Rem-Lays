@@ -18,12 +18,13 @@ import { DeviceNicknameModalComponent } from './components/device-nickname-modal
 import { ContextMenuComponent } from './components/context-menu/context-menu.component';
 import { WeeklyDigestComponent } from './components/weekly-digest/weekly-digest.component';
 import { SharedItemViewerComponent } from './components/shared-item-viewer/shared-item-viewer.component';
+import { SettingsPageComponent } from './components/settings-page/settings-page.component';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, FeedComponent, QuickActionBarComponent, ItemViewerComponent, DeviceNicknameModalComponent, ContextMenuComponent, WeeklyDigestComponent, SharedItemViewerComponent],
+  imports: [CommonModule, SidebarComponent, FeedComponent, QuickActionBarComponent, ItemViewerComponent, DeviceNicknameModalComponent, ContextMenuComponent, WeeklyDigestComponent, SharedItemViewerComponent, SettingsPageComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -33,6 +34,7 @@ export class AppComponent {
   // URL-based routing for shared item public pages
   sharedToken = signal<string | null>(this.parseSharedToken());
   inviteToken = signal<string | null>(this.parseInviteToken());
+  activeView = signal<'feed' | 'settings'>('feed');
 
   private parseSharedToken(): string | null {
     const path = window.location.pathname;

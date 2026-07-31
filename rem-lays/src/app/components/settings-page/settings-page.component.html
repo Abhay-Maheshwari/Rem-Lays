@@ -1,0 +1,142 @@
+<div class="settings-page">
+  <div class="settings-header">
+    <button class="back-btn" (click)="closeSettings.emit()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      <span>Back</span>
+    </button>
+    <h2>Settings</h2>
+  </div>
+
+  <div class="settings-layout">
+    <nav class="settings-nav">
+      <button [class.active]="activeTab === 'account'" (click)="activeTab = 'account'">Account</button>
+      <button [class.active]="activeTab === 'appearance'" (click)="activeTab = 'appearance'">Appearance</button>
+      <button [class.active]="activeTab === 'system'" (click)="activeTab = 'system'">System</button>
+      <button [class.active]="activeTab === 'data'" (click)="activeTab = 'data'">Data & Sync</button>
+    </nav>
+
+    <div class="settings-content">
+      
+      <!-- ACCOUNT TAB -->
+      <div *ngIf="activeTab === 'account'" class="settings-section">
+        <h3>Account & Profile</h3>
+        
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Email</span>
+            <span class="setting-desc">{{ auth.session()?.user?.email }}</span>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Display Name</span>
+            <span class="setting-desc">How you appear to others on shared boards.</span>
+          </div>
+          <div class="setting-action-group">
+            <ng-container *ngIf="!isEditingName">
+              <span class="value-text">{{ displayName || 'Not set' }}</span>
+              <button class="btn-secondary" (click)="isEditingName = true">Edit</button>
+            </ng-container>
+            <ng-container *ngIf="isEditingName">
+              <input type="text" class="custom-input" [(ngModel)]="displayName" placeholder="Enter display name" (keyup.enter)="saveDisplayName()" (keyup.escape)="isEditingName = false" autofocus />
+              <button class="btn-primary" (click)="saveDisplayName()">Save</button>
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="danger-zone">
+          <div class="setting-row action-row">
+            <div class="setting-info">
+              <span class="setting-label danger-text">Sign Out</span>
+              <span class="setting-desc">Sign out of your account on this device.</span>
+            </div>
+            <button class="btn-danger" (click)="auth.signOut()">Sign out</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPEARANCE TAB -->
+      <div *ngIf="activeTab === 'appearance'" class="settings-section">
+        <h3>Appearance</h3>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Theme</span>
+            <span class="setting-desc">Choose between light, dark, or system default.</span>
+          </div>
+          <div class="theme-toggles">
+            <button class="theme-btn" [class.active]="themeSvc.currentTheme() === 'light'" (click)="setTheme('light')">Light</button>
+            <button class="theme-btn" [class.active]="themeSvc.currentTheme() === 'dark'" (click)="setTheme('dark')">Dark</button>
+            <button class="theme-btn" [class.active]="themeSvc.currentTheme() === 'system'" (click)="setTheme('system')">System</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Compact Mode</span>
+            <span class="setting-desc">Reduce spacing to fit more items on the screen.</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" [checked]="isCompactMode" (change)="toggleCompactMode()" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- SYSTEM TAB -->
+      <div *ngIf="activeTab === 'system'" class="settings-section">
+        <h3>System & Behavior</h3>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Run on Startup</span>
+            <span class="setting-desc">Automatically launch RemLays when you log in.</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" [checked]="isAutostartEnabled" (change)="toggleAutostart()" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Minimize to Tray</span>
+            <span class="setting-desc">Closing the window hides it in the system tray instead of exiting.</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" [checked]="isMinimizeToTray" (change)="toggleMinimizeToTray()" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- DATA TAB -->
+      <div *ngIf="activeTab === 'data'" class="settings-section">
+        <h3>Data & Storage</h3>
+
+        <div class="setting-row action-row">
+          <div class="setting-info">
+            <span class="setting-label">Export Data</span>
+            <span class="setting-desc">Download a copy of your items as a JSON file.</span>
+          </div>
+          <button class="btn-secondary" (click)="itemsSvc.exportData()">Export JSON</button>
+        </div>
+
+        <div class="danger-zone">
+          <div class="setting-row action-row">
+            <div class="setting-info">
+              <span class="setting-label danger-text">Clear Local Cache</span>
+              <span class="setting-desc">Clears all local storage data. You will need to log in again.</span>
+            </div>
+            <button class="btn-danger" (click)="clearLocalCache()">Clear Cache</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

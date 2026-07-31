@@ -8,6 +8,7 @@ import { InstagramEmbedService } from '../../services/instagram-embed.service';
 import { ItemViewerService } from '../../services/item-viewer.service';
 import { ContextMenuService, MenuItem } from '../../services/context-menu.service';
 import { ToastService } from '../../services/toast.service';
+import { openUrl } from '@tauri-apps/plugin-opener';
 
 import { FormsModule } from '@angular/forms';
 
@@ -106,13 +107,15 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
     const hours = Math.floor(diffMins / 60);
     const mins = diffMins % 60;
     
+    const prefix = this.item.status === 'deleted' ? 'Deletes' : 'Expires';
+    
     if (hours >= 24) {
       const days = Math.floor(hours / 24);
-      this.expireText = `Expires in ${days}d`;
+      this.expireText = `${prefix} in ${days}d`;
     } else if (hours > 0) {
-      this.expireText = `Expires in ${hours}h ${mins}m`;
+      this.expireText = `${prefix} in ${hours}h ${mins}m`;
     } else {
-      this.expireText = `Expires in ${mins}m`;
+      this.expireText = `${prefix} in ${mins}m`;
     }
   }
 
@@ -158,7 +161,14 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
 
   get linkTitle(): string {
     const v = this.item.payload?.['title'];
-    return typeof v === 'string' && v ? v : this.linkDomain || this.linkUrl;
+    const title = typeof v === 'string' && v ? v : this.linkDomain || this.linkUrl;
+    return this.decodeHtmlEntities(title);
+  }
+
+  private decodeHtmlEntities(text: string): string {
+    if (!text) return text;
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    return doc.documentElement.textContent || text;
   }
 
   get linkImage(): string {
@@ -174,6 +184,19 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
   get reelAuthorName(): string {
     const v = this.item.payload?.['authorName'];
     return typeof v === 'string' && v ? v : 'Instagram';
+  }
+
+  async openLink(ev: Event) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (this.linkUrl) {
+      try {
+        await openUrl(this.linkUrl);
+      } catch (err) {
+        console.error('Failed to open link via Tauri:', err);
+        window.open(this.linkUrl, '_blank');
+      }
+    }
   }
 
   onOpen() {
@@ -228,6 +251,17 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
     
     // Fire and forget network call
     this.itemsSvc.togglePin(this.item.id, newPinState);
+  }
+
+  toggleSelection(ev: Event) {
+    ev.stopPropagation();
+    const current = new Set(this.itemsSvc.selectedItemIds());
+    if (current.has(this.item.id)) {
+      current.delete(this.item.id);
+    } else {
+      current.add(this.item.id);
+    }
+    this.itemsSvc.selectedItemIds.set(current);
   }
 
   toggleExpireMenu(ev: Event) {
@@ -319,6 +353,24 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
   onContextMenu(event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
+    
+    if (this.item.status === 'deleted') {
+      this.contextMenuSvc.open(event, [
+        {
+          label: 'Restore',
+          icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>',
+          action: () => this.itemsSvc.restore(this.item.id)
+        },
+        {
+          label: 'Permanently Delete',
+          icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+          action: () => this.itemsSvc.permanentlyDelete(this.item.id),
+          danger: true
+        }
+      ]);
+      return;
+    }
+
     const items: MenuItem[] = [
       {
         label: this.item.is_pinned ? 'Unpin' : 'Pin to top',
@@ -387,7 +439,7 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
     }
 
     items.push({
-      label: 'Edit Expiration',
+      label: this.item.expires_at ? 'Edit Expiration' : 'Set Expiration',
       icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
       keepOpen: true,
       action: (e) => {

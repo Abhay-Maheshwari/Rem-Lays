@@ -52,6 +52,13 @@ export class ContextMenuComponent {
     }
   }
 
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    if (this.contextMenuSvc.isOpen()) {
+      this.contextMenuSvc.close();
+    }
+  }
+
   getSafeIcon(iconSvg: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(iconSvg);
   }

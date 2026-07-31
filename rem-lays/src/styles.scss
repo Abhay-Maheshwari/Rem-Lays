@@ -16,11 +16,28 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+body.light-theme {
+  --bg-sidebar: #f7f7f8;
+  --bg-main: #ffffff;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.15);
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+}
+
+body.compact-mode {
+  --radius-lg: 8px;
+  --radius-md: 6px;
+  --radius-sm: 4px;
+}
+
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
 body {
   color: var(--text-primary);
   background: var(--bg-main);
   overflow: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 button { font-family: inherit; cursor: pointer; }

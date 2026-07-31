@@ -24,6 +24,8 @@
   transition: background .15s ease, color .15s ease;
 }
 .demo-btn:hover{ color:#fff; background:rgba(255,255,255,0.08); }
+.demo-btn.danger:hover:not([disabled]) { color: #ff4444; background: rgba(255, 68, 68, 0.1); }
+.demo-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
 
 .header-actions {
   display: flex;
@@ -209,12 +211,32 @@
     display: none; /* Hide subtitle on mobile for a cleaner, balanced header */
   }
   .btn-text {
-    display: inline;
+    display: none;
   }
   .demo-btn {
-    width: auto;
+    width: 36px;
     height: 36px;
-    padding: 0 12px;
+    padding: 0;
     justify-content: center;
+  }
+  .demo-btn.danger {
+    width: auto;
+    padding: 0 12px;
+  }
+  .demo-btn.danger .btn-text {
+    display: inline;
+  }
+}
+
+/* Compact Mode Overrides */
+:host-context(body.compact-mode) {
+  .masonry-grid {
+    column-gap: 8px;
+  }
+  .masonry-grid > app-item-card {
+    margin-bottom: 8px;
+  }
+  .feed-day-label {
+    margin: 4px 0 8px 2px;
   }
 }

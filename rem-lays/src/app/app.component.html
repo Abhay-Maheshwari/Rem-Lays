@@ -32,10 +32,15 @@
     </svg>
   </button>
   <div class="backdrop" [class.visible]="sidebarOpen()" (click)="closeSidebar()"></div>
-  <app-sidebar [open]="sidebarOpen()" (navigated)="closeSidebar()" (openDigest)="showWeeklyDigest.set(true); closeSidebar()"></app-sidebar>
+  <app-sidebar [open]="sidebarOpen()" (navigated)="closeSidebar()" (openDigest)="showWeeklyDigest.set(true); closeSidebar()" (openSettingsPage)="activeView.set('settings'); closeSidebar()"></app-sidebar>
   <main class="main-pane">
-    <app-feed></app-feed>
-    <app-quick-action-bar></app-quick-action-bar>
+    <ng-container *ngIf="activeView() === 'feed'">
+      <app-feed></app-feed>
+      <app-quick-action-bar></app-quick-action-bar>
+    </ng-container>
+    <ng-container *ngIf="activeView() === 'settings'">
+      <app-settings-page (closeSettings)="activeView.set('feed')"></app-settings-page>
+    </ng-container>
   </main>
 </div>
 

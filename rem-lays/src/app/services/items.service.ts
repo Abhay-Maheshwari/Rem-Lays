@@ -9,7 +9,7 @@ import { writeTextFile } from '@tauri-apps/plugin-fs';
 import { NativeNotificationService } from './native-notification.service';
 import { environment } from '../../environments/environment';
 
-export type FeedFilter = 'all' | 'unseen' | 'link' | 'media' | 'archived' | 'snoozed' | 'shared';
+export type FeedFilter = 'all' | 'unseen' | 'link' | 'media' | 'archived' | 'snoozed' | 'shared' | 'deleted';
 
 @Injectable({ providedIn: 'root' })
 export class ItemsService {
@@ -18,6 +18,9 @@ export class ItemsService {
   searchQuery = signal('');
   selectedTag = signal<string | null>(null);
   activeBoardId = signal<string | null>(null);
+
+  selectionMode = signal<boolean>(false);
+  selectedItemIds = signal<Set<string>>(new Set());
 
   currentTime = signal<number>(Date.now());
   private snoozeCheckInterval: any;
@@ -75,10 +78,13 @@ export class ItemsService {
       all = all.filter(i => i.status === 'archived' && (i.board_id || null) === this.activeBoardId());
     } else if (this.filter() === 'snoozed') {
       all = all.filter(i => i.snooze_until && i.snooze_until > nowStr && i.status !== 'archived' && (i.board_id || null) === this.activeBoardId());
+    } else if (this.filter() === 'deleted') {
+      all = all.filter(i => i.status === 'deleted' && (i.board_id || null) === this.activeBoardId());
     } else {
       all = all.filter(i => 
         (!i.expires_at || i.expires_at > nowStr) && 
         i.status !== 'archived' &&
+        i.status !== 'deleted' &&
         (!i.snooze_until || i.snooze_until <= nowStr) &&
         (i.board_id || null) === this.activeBoardId()
       );
@@ -139,14 +145,22 @@ export class ItemsService {
   async refresh() {
     const now = new Date().toISOString();
 
-    // Background cleanup of expired items (fire and forget)
-    supabase.from('items').delete().lt('expires_at', now).then();
+    // Background cleanup: Items that were normally expiring should go to Trash instead of being permanently deleted.
+    // However, if they are ALREADY in the Trash ('deleted' status) and their trash expiration (expires_at) passes, THEN delete them permanently.
+    
+    // 1. Permanently delete items that were already in the trash and have passed their 30-day trash expiration.
+    supabase.from('items').delete().lt('expires_at', now).eq('status', 'deleted').then();
+
+    // 2. Move newly expired normal items to the trash, giving them a 30-day trash lifespan.
+    const deleteDate = new Date();
+    deleteDate.setDate(deleteDate.getDate() + 30);
+    const trashExpiresAt = deleteDate.toISOString();
+    supabase.from('items').update({ status: 'deleted', expires_at: trashExpiresAt }).lt('expires_at', now).neq('status', 'deleted').then();
 
     const { data, error } = await supabase
       .from('items')
       .select('*')
-      .neq('status', 'deleted')
-      .or(`expires_at.is.null,expires_at.gt.${now}`)
+      .or(`expires_at.is.null,expires_at.gt.${now},status.eq.deleted`)
       .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(100);
@@ -546,8 +560,28 @@ export class ItemsService {
   }
 
   async remove(id: string) {
-    const { error } = await supabase.from('items').update({ status: 'deleted' }).eq('id', id);
-    if (error) console.error('remove failed', error);
+    if (this.filter() === 'deleted') {
+      const { error } = await supabase.from('items').delete().eq('id', id);
+      if (error) console.error('remove permanently failed', error);
+    } else {
+      const deleteDate = new Date();
+      deleteDate.setDate(deleteDate.getDate() + 30);
+      const expiresAt = deleteDate.toISOString();
+      const { error } = await supabase.from('items').update({ status: 'deleted', expires_at: expiresAt }).eq('id', id);
+      if (error) console.error('remove failed', error);
+    }
+    await this.refresh();
+  }
+
+  async restore(id: string) {
+    const { error } = await supabase.from('items').update({ status: 'seen', expires_at: null }).eq('id', id);
+    if (error) console.error('restore failed', error);
+    await this.refresh();
+  }
+
+  async permanentlyDelete(id: string) {
+    const { error } = await supabase.from('items').delete().eq('id', id);
+    if (error) console.error('permanentlyDelete failed', error);
     await this.refresh();
   }
 
@@ -593,6 +627,41 @@ export class ItemsService {
       return;
     }
     await this.refresh();
+  }
+
+  async deleteSelected() {
+    const ids = Array.from(this.selectedItemIds());
+    if (ids.length === 0) return;
+    
+    if (this.filter() === 'deleted') {
+      const { error } = await supabase.from('items').delete().in('id', ids);
+      if (error) console.error('deleteSelected permanently failed', error);
+    } else {
+      const deleteDate = new Date();
+      deleteDate.setDate(deleteDate.getDate() + 30);
+      const expiresAt = deleteDate.toISOString();
+      const { error } = await supabase.from('items').update({ status: 'deleted', expires_at: expiresAt }).in('id', ids);
+      if (error) console.error('deleteSelected failed', error);
+    }
+    
+    this.clearSelection();
+    await this.refresh();
+  }
+
+  async restoreSelected() {
+    const ids = Array.from(this.selectedItemIds());
+    if (ids.length === 0) return;
+    
+    const { error } = await supabase.from('items').update({ status: 'seen', expires_at: null }).in('id', ids);
+    if (error) console.error('restoreSelected failed', error);
+    
+    this.clearSelection();
+    await this.refresh();
+  }
+
+  clearSelection() {
+    this.selectedItemIds.set(new Set());
+    this.selectionMode.set(false);
   }
 
   async exportData() {

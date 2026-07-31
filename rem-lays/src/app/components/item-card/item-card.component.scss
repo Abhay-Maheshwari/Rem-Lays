@@ -44,6 +44,41 @@
   }
 }
 
+.card.selected {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.selection-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--border-strong);
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: white;
+}
+
+.checkbox.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.checkbox svg {
+  width: 14px;
+  height: 14px;
+}
+
 .card-actions {
   position: absolute;
   top: 8px;
@@ -64,13 +99,22 @@
   top: 12px;
   right: 12px;
   color: var(--accent);
-  transition: opacity .15s ease;
+  transition: all .15s ease;
   pointer-events: none;
   display: flex;
 }
 
 .card:hover .pin-indicator {
   opacity: 0;
+}
+
+.card.selection-active .pin-indicator {
+  right: 40px;
+  opacity: 1; /* Keep it visible even on hover during selection */
+}
+
+.card.selection-active .card-actions {
+  display: none !important;
 }
 
 .action-icon-btn {
@@ -199,21 +243,33 @@
 }
 
 .body.link .link-title {
-  color: var(--accent);
+  color: var(--text-primary);
   text-decoration: none;
   word-break: break-word;
   font-weight: 500;
+  font-size: 14px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 4px;
 }
 
 .body.link .link-title:hover {
   text-decoration: underline;
+  color: var(--text-primary);
 }
 
 .body.link .link-url-text {
   color: var(--text-secondary);
   font-size: 11px;
-  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
   opacity: 0.8;
+  margin-top: 2px;
 }
 
 .body.link .link-domain {
@@ -516,9 +572,37 @@
   border-radius: 12px;
   padding: 16px 16px 12px 16px;
   cursor: pointer;
-  transition: border-color .15s ease, box-shadow .15s ease; /* removed transform transition from here to handle it dynamically */
+  transition: border-color .15s ease, box-shadow .15s ease;
   display: flex;
   flex-direction: column;
   height: 100%;
   will-change: transform;
+}
+
+/* Compact Mode Overrides */
+:host-context(body.compact-mode) {
+  .card {
+    padding: 10px 12px 8px 12px;
+  }
+  .body {
+    font-size: 12.5px;
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  .body.text {
+    margin-top: 10px;
+    -webkit-line-clamp: 4;
+  }
+  .body.link .link-image {
+    height: 80px;
+  }
+  .body.media img,
+  .body.media video,
+  .reel-embed {
+    height: 100px;
+    margin-top: 10px;
+  }
+  .tags-container {
+    margin-bottom: 6px;
+  }
 }

@@ -7,6 +7,7 @@ import { DevicesService } from '../../services/devices.service';
 import { ContextMenuService, MenuItem } from '../../services/context-menu.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { InstagramEmbedService } from '../../services/instagram-embed.service';
+import { openUrl } from '@tauri-apps/plugin-opener';
 
 @Component({
   selector: 'app-item-viewer',
@@ -83,7 +84,14 @@ export class ItemViewerComponent {
   get linkTitle(): string {
     const item = this.viewerSvc.currentItem();
     const v = item?.payload?.['title'];
-    return typeof v === 'string' && v ? v : this.linkDomain || this.linkUrl;
+    const title = typeof v === 'string' && v ? v : this.linkDomain || this.linkUrl;
+    return this.decodeHtmlEntities(title);
+  }
+
+  private decodeHtmlEntities(text: string): string {
+    if (!text) return text;
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    return doc.documentElement.textContent || text;
   }
 
   get itemTags(): string[] {
@@ -139,6 +147,20 @@ export class ItemViewerComponent {
     
     await this.itemsSvc.updateItemPayload(item.id, newPayload);
     this.isEditing.set(false);
+  }
+
+  async openLink(ev: Event) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (this.linkUrl) {
+      try {
+        await openUrl(this.linkUrl);
+      } catch (err) {
+        console.error('Failed to open link via Tauri:', err);
+        window.open(this.linkUrl, '_blank');
+      }
+    }
+    this.close();
   }
 
   close() {

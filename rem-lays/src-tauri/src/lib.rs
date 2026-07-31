@@ -1,12 +1,29 @@
+use std::sync::Mutex;
+use tauri::Manager;
+
+struct AppState {
+    close_to_tray: Mutex<bool>,
+}
+
+#[tauri::command]
+fn set_close_to_tray(enabled: bool, state: tauri::State<'_, AppState>) {
+    let mut close_to_tray = state.close_to_tray.lock().unwrap();
+    *close_to_tray = enabled;
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut builder = tauri::Builder::default()
+        .manage(AppState {
+            close_to_tray: Mutex::new(true),
+        })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_notification::init());
+        .plugin(tauri_plugin_notification::init())
+        .invoke_handler(tauri::generate_handler![set_close_to_tray]);
 
     #[cfg(desktop)]
     {
@@ -69,8 +86,12 @@ pub fn run() {
         .on_window_event(|_window, _event| {
             #[cfg(desktop)]
             if let tauri::WindowEvent::CloseRequested { api, .. } = _event {
-                _window.hide().ok();
-                api.prevent_close();
+                let state = _window.state::<AppState>();
+                let close_to_tray = *state.close_to_tray.lock().unwrap();
+                if close_to_tray {
+                    _window.hide().ok();
+                    api.prevent_close();
+                }
             }
         })
         .run(tauri::generate_context!())

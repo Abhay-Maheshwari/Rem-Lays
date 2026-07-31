@@ -122,7 +122,8 @@
   font-size: 15px;
   font-weight: 500;
   color: var(--text-primary);
-  word-break: break-all;
+  word-break: break-word;
+  line-height: 1.5;
 }
 
 .open-link-btn {
@@ -266,6 +267,9 @@
 .link-url-display {
   font-size: 13px;
   color: var(--text-tertiary);
-  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
   margin-top: -10px;
 }

@@ -1,0 +1,60 @@
+<div class="overlay" (click)="close.emit()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Settings</h3>
+      <button class="close-btn" (click)="close.emit()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="modal-body settings-body">
+      <div class="settings-section">
+        <h4 class="section-title">Account</h4>
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Email</span>
+            <span class="setting-desc">{{ auth.session()?.user?.email }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4 class="section-title">App Preferences</h4>
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Run on Startup</span>
+            <span class="setting-desc">Automatically launch RemLays when you log in.</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" [checked]="isAutostartEnabled" (change)="toggleAutostart()" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4 class="section-title">Data</h4>
+        <div class="setting-row action-row">
+          <div class="setting-info">
+            <span class="setting-label">Export Data</span>
+            <span class="setting-desc">Download a copy of your items as a JSON file.</span>
+          </div>
+          <button class="btn-secondary" (click)="itemsSvc.exportData()">Export JSON</button>
+        </div>
+      </div>
+
+      <div class="settings-section danger-zone">
+        <h4 class="section-title">Danger Zone</h4>
+        <div class="setting-row action-row">
+          <div class="setting-info">
+            <span class="setting-label danger-text">Sign Out</span>
+            <span class="setting-desc">Sign out of your account on this device.</span>
+          </div>
+          <button class="btn-danger" (click)="auth.signOut()">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -6,6 +6,7 @@
          : itemsSvc.filter() === 'link' ? 'Links'
          : itemsSvc.filter() === 'media' ? 'Media'
          : itemsSvc.filter() === 'shared' ? 'Shared Links'
+         : itemsSvc.filter() === 'deleted' ? 'Recently Deleted'
          : itemsSvc.activeBoardId() ? getBoardName() : 'Items' }}
     </div>
     <div class="main-sub" data-tauri-drag-region>
@@ -14,14 +15,34 @@
     </div>
   </div>
   <div class="header-actions">
-    <button class="demo-btn" *ngIf="itemsSvc.unseenCount() > 0" (click)="markAllAsRead()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
-      <span class="btn-text">Mark All Read</span>
-    </button>
-    <button class="demo-btn" (click)="refresh()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-      <span class="btn-text">Refresh</span>
-    </button>
+    <ng-container *ngIf="itemsSvc.selectionMode()">
+      <button class="demo-btn" *ngIf="itemsSvc.filter() === 'deleted'" [disabled]="itemsSvc.selectedItemIds().size === 0" (click)="itemsSvc.restoreSelected()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+        <span class="btn-text">Restore ({{ itemsSvc.selectedItemIds().size }})</span>
+      </button>
+      <button class="demo-btn danger" [disabled]="itemsSvc.selectedItemIds().size === 0" (click)="itemsSvc.deleteSelected()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        <span class="btn-text">{{ itemsSvc.filter() === 'deleted' ? 'Permanently Delete' : 'Delete' }} ({{ itemsSvc.selectedItemIds().size }})</span>
+      </button>
+      <button class="demo-btn" (click)="itemsSvc.clearSelection()">
+        <span class="btn-text">Cancel</span>
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="!itemsSvc.selectionMode()">
+      <button class="demo-btn" (click)="itemsSvc.selectionMode.set(true)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span class="btn-text">Select</span>
+      </button>
+      <button class="demo-btn" *ngIf="itemsSvc.unseenCount() > 0" (click)="markAllAsRead()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+        <span class="btn-text">Mark All Read</span>
+      </button>
+      <button class="demo-btn" (click)="refresh()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        <span class="btn-text">Refresh</span>
+      </button>
+    </ng-container>
   </div>
 </div>
 

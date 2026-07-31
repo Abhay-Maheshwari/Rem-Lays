@@ -14,7 +14,10 @@
       <div *ngIf="!isLoading()" class="members-list">
         <div *ngFor="let member of members()" class="member-row">
           <div class="member-info">
-            <div class="member-email">{{ member.email }} <span *ngIf="member.user_id === currentUserId" class="you-badge">(You)</span></div>
+            <div class="member-email-container">
+              <span class="member-email">{{ member.email }}</span>
+              <span *ngIf="member.user_id === currentUserId" class="you-badge">(You)</span>
+            </div>
             <div class="member-role-label" *ngIf="!isOwner() || member.role === 'owner'">{{ member.role | titlecase }}</div>
           </div>
           

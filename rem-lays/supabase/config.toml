@@ -16,3 +16,6 @@ port = 54323
 
 [realtime]
 enabled = true
+
+[auth]
+jwt_expiry = 360000
