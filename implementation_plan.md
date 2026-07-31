@@ -17,15 +17,15 @@ Please review the prioritization below. Let me know which of the "Easy" tasks yo
 ### Phase 1: Easy (Quick Wins, Low Complexity)
 These features mostly involve straightforward frontend changes or simple database schema updates.
 
-- [ ] **Mark as unread / Pin to top**
+- [x] **Mark as unread / Pin to top**
   - **Implementation**: Add boolean flags (`is_unread`, `is_pinned`) to the database schema. Add toggle buttons in the UI and update sorting logic.
-- [ ] **Keyboard shortcuts**
+- [x] **Keyboard shortcuts**
   - **Implementation**: Add global event listeners to map key presses to existing actions (e.g., open search, add item).
-- [ ] **Full data export**
+- [x] **Full data export**
   - **Implementation**: Query all items from the DB, serialize to JSON/CSV, and use Tauri's FS API to trigger a save dialog.
-- [ ] **Duplicate detection**
+- [x] **Duplicate detection**
   - **Implementation**: Before saving a new link, check if the URL already exists. Offer to merge tags or update the timestamp.
-- [ ] **Auto-expiring items**
+- [x] **Auto-expiring items**
   - **Implementation**: Add an `expires_at` timestamp. Filter expired items from the main view and run a background cleanup task.
 
 ### Phase 2: Medium (Moderate Effort)
