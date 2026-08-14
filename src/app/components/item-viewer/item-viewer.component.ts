@@ -8,6 +8,7 @@ import { ContextMenuService, MenuItem } from '../../services/context-menu.servic
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { InstagramEmbedService } from '../../services/instagram-embed.service';
 import { openUrl } from '@tauri-apps/plugin-opener';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
   selector: 'app-item-viewer',
@@ -43,7 +44,8 @@ export class ItemViewerComponent {
     private devicesSvc: DevicesService,
     private contextMenuSvc: ContextMenuService,
     private sanitizer: DomSanitizer,
-    private igEmbedSvc: InstagramEmbedService
+    private igEmbedSvc: InstagramEmbedService,
+    private clipboard: Clipboard
   ) {
     effect(async () => {
       const item = this.viewerSvc.currentItem();
@@ -247,13 +249,13 @@ export class ItemViewerComponent {
       items.push({
         label: 'Copy link',
         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
-        action: () => { navigator.clipboard.writeText(this.linkUrl || this.linkTitle); }
+        action: () => { this.clipboard.copy(this.linkUrl || this.linkTitle); }
       });
     } else if (item.type === 'text') {
       items.push({
         label: 'Copy text',
         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
-        action: () => { navigator.clipboard.writeText(this.noteText); }
+        action: () => { this.clipboard.copy(this.noteText); }
       });
     }
 

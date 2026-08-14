@@ -5,12 +5,13 @@ import { AuthService } from './auth.service';
 import { ToastService } from './toast.service';
 import { LocalDbService } from './local-db.service';
 import { environment } from '../../environments/environment';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 @Injectable({ providedIn: 'root' })
 export class BoardsService {
   boards = signal<Board[]>([]);
 
-  constructor(private auth: AuthService, private toastSvc: ToastService, private localDb: LocalDbService) {
+  constructor(private auth: AuthService, private toastSvc: ToastService, private localDb: LocalDbService, private clipboard: Clipboard) {
     // Load cached boards instantly, then sync from network
     this.loadFromCache();
     this.auth.session() ? this.refresh() : this.boards.set([]);
@@ -147,10 +148,11 @@ export class BoardsService {
 
   copyInviteLink(board: Board, role: 'editor' | 'viewer' = 'editor') {
     const url = this.getInviteLink(board, role);
-    navigator.clipboard.writeText(url).then(
-      () => this.toastSvc.show(`${role === 'editor' ? 'Editor' : 'Viewer'} invite link copied!`),
-      () => this.toastSvc.show('Could not copy link', 'error')
-    );
+    if (this.clipboard.copy(url)) {
+      this.toastSvc.show(`${role === 'editor' ? 'Editor' : 'Viewer'} invite link copied!`);
+    } else {
+      this.toastSvc.show('Could not copy link', 'error');
+    }
   }
 
   async getMembers(boardId: string): Promise<BoardMemberDetails[]> {

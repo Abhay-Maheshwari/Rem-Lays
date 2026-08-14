@@ -115,7 +115,8 @@
         <polyline points="16 6 12 2 8 6"></polyline>
         <line x1="12" y1="2" x2="12" y2="15"></line>
       </svg>
-      <span>Shared via <strong>Rem-Lays</strong></span>
+      <span *ngIf="sharedBy">Shared by <strong>{{ sharedBy }}</strong> via Rem-Lays</span>
+      <span *ngIf="!sharedBy">Shared via <strong>Rem-Lays</strong></span>
     </div>
   </div>
 </div>

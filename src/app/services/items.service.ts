@@ -11,6 +11,7 @@ import { BoardsService } from './boards.service';
 import { CacheService } from './cache.service';
 import { LocalDbService } from './local-db.service';
 import { environment } from '../../environments/environment';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 export type FeedFilter = 'all' | 'unseen' | 'link' | 'media' | 'archived' | 'snoozed' | 'shared' | 'deleted' | 'untagged' | 'pending';
 
@@ -46,7 +47,8 @@ export class ItemsService {
     private notificationSvc: NativeNotificationService,
     private boardsSvc: BoardsService,
     private cache: CacheService,
-    private localDb: LocalDbService
+    private localDb: LocalDbService,
+    private clipboard: Clipboard
   ) {
     this.snoozeCheckInterval = setInterval(() => {
       this.checkSnoozes();
@@ -1097,10 +1099,9 @@ export class ItemsService {
     }
 
     const shareUrl = `${environment.publicWebAppUrl}/shared/${token}`;
-    try {
-      await navigator.clipboard.writeText(shareUrl);
+    if (this.clipboard.copy(shareUrl)) {
       this.toastSvc.show('Share link copied to clipboard!');
-    } catch {
+    } else {
       // Clipboard API can fail in non-secure contexts or headless
       this.toastSvc.show('Share link created');
     }
@@ -1131,10 +1132,11 @@ export class ItemsService {
   /** Copy the existing share URL to the clipboard. */
   copyShareLink(token: string) {
     const url = `${environment.publicWebAppUrl}/shared/${token}`;
-    navigator.clipboard.writeText(url).then(
-      () => this.toastSvc.show('Share link copied!'),
-      () => this.toastSvc.show('Could not copy link', 'error')
-    );
+    if (this.clipboard.copy(url)) {
+      this.toastSvc.show('Share link copied!');
+    } else {
+      this.toastSvc.show('Could not copy link', 'error');
+    }
   }
 
   /**

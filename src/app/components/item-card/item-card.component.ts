@@ -12,6 +12,7 @@ import { BoardsService } from '../../services/boards.service';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { TagInputComponent } from '../tag-input/tag-input.component';
 import { DatetimePickerComponent } from '../datetime-picker/datetime-picker.component';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 import { FormsModule } from '@angular/forms';
 
@@ -65,7 +66,8 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
     private viewerSvc: ItemViewerService,
     private contextMenuSvc: ContextMenuService,
     private toastSvc: ToastService,
-    private boardsSvc: BoardsService
+    private boardsSvc: BoardsService,
+    private clipboard: Clipboard
   ) {}
 
   async ngOnInit() {
@@ -360,11 +362,11 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
   copyContent(ev: Event) {
     ev.stopPropagation();
     if (this.item.type === 'link' || this.item.type === 'reel') {
-      navigator.clipboard.writeText(this.linkUrl || this.linkTitle);
-      this.toastSvc.show('Link copied to clipboard');
+      this.clipboard.copy(this.linkUrl || this.linkTitle);
+      this.toastSvc.show('Link copied!');
     } else if (this.item.type === 'text') {
-      navigator.clipboard.writeText(this.noteText);
-      this.toastSvc.show('Text copied to clipboard');
+      this.clipboard.copy(this.noteText);
+      this.toastSvc.show('Text copied!');
     }
   }
 
@@ -579,13 +581,13 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
       items.push({
         label: 'Copy link',
         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
-        action: () => { navigator.clipboard.writeText(this.linkUrl || this.linkTitle); }
+        action: () => { this.clipboard.copy(this.linkUrl || this.linkTitle); }
       });
     } else if (this.item.type === 'text') {
       items.push({
         label: 'Copy text',
         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
-        action: () => { navigator.clipboard.writeText(this.noteText); }
+        action: () => { this.clipboard.copy(this.noteText); }
       });
     }
 
