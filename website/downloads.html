@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Download rem-lays — Windows & Android</title>
+<title>Download rem-lays — Windows, Android & Web</title>
 <link rel="icon" type="image/png" href="assets/logo_square.png">
 <link rel="apple-touch-icon" href="assets/logo_square.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -248,7 +248,7 @@
     font-size:clamp(32px,5vw,56px); 
     line-height:1.05; 
     letter-spacing:-0.015em; 
-    max-width:680px; 
+    max-width:840px; 
     margin:0 auto;
     background: linear-gradient(180deg, #fff 0%, #a49a8c 100%);
     -webkit-background-clip: text;
@@ -266,8 +266,8 @@
 
   /* platform cards */
   .platforms{
-    max-width:760px; margin:0 auto; padding:0 24px;
-    display:grid; grid-template-columns:1fr 1fr; gap:16px;
+    max-width:1040px; margin:0 auto; padding:0 24px;
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;
   }
   .plat-card{
     background: linear-gradient(160deg, rgba(23, 20, 15, 0.6) 0%, rgba(14, 12, 11, 0.8) 100%);
@@ -327,6 +327,7 @@
   .plat-card .dl-btn svg{width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; transition: transform 0.3s ease;}
   .plat-card .dl-btn:hover svg{ transform: translateY(2px); }
 
+  @media (max-width:900px){ .platforms{grid-template-columns:repeat(2, 1fr);} }
   @media (max-width:600px){ .platforms{grid-template-columns:1fr;} }
 
   /* coming soon strip */
@@ -450,7 +451,7 @@
   </div>
 
 <section class="header">
-  <h1>get rem-lays on your <em>desktop</em> and <em>phone</em>.</h1>
+  <h1>get rem-lays on your <em>desktop</em>, <em>phone</em>, and the <em>web</em>.</h1>
   <p>same inbox, same tags, always in sync. pick your platform below.</p>
 </section>
 
@@ -468,6 +469,13 @@
     <p class="meta">Latest release · Play Store</p>
     <p class="req">Requires Android 8.0 and up</p>
     <a href="#" class="dl-btn"><svg viewBox="0 0 24 24"><path d="M12 4v12M6 12l6 6 6-6"/><path d="M5 20h14"/></svg>Get it on Android</a>
+  </div>
+  <div class="plat-card">
+    <div class="icon-badge"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+    <h3>Web App</h3>
+    <p class="meta">Access anywhere · Browser</p>
+    <p class="req">No installation required</p>
+    <a href="/login" class="dl-btn"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Open in Browser</a>
   </div>
 </section>
 
