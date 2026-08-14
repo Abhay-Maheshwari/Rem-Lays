@@ -13,6 +13,7 @@
     "windows": [
       {
         "title": "Rem-Lays",
+        "url": "app.html",
         "width": 1100,
         "height": 720,
         "minWidth": 720,
