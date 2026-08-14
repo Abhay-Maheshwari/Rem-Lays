@@ -63,15 +63,33 @@
       <div *ngIf="activeTab === 'appearance'" class="settings-section">
         <h3>Appearance</h3>
 
-        <div class="setting-row">
+        <div class="setting-row theme-setting-row">
           <div class="setting-info">
             <span class="setting-label">Theme</span>
             <span class="setting-desc">Choose between light, dark, or system default.</span>
           </div>
           <div class="theme-toggles">
-            <button class="theme-btn" [class.active]="themeSvc.currentTheme() === 'light'" (click)="setTheme('light')">Light</button>
-            <button class="theme-btn" [class.active]="themeSvc.currentTheme() === 'dark'" (click)="setTheme('dark')">Dark</button>
             <button class="theme-btn" [class.active]="themeSvc.currentTheme() === 'system'" (click)="setTheme('system')">System</button>
+            <button class="theme-btn" [class.active]="themeSvc.currentTheme() === 'light'" (click)="setTheme('light')">White</button>
+            <button class="theme-btn" [class.active]="themeSvc.currentTheme() === 'dark'" (click)="setTheme('dark')">Default</button>
+            <button class="theme-btn" [class.active]="themeSvc.currentTheme() === 'oled'" (click)="setTheme('oled')">Black (OLED)</button>
+            <button class="theme-btn" [class.active]="themeSvc.currentTheme() === 'vscode'" (click)="setTheme('vscode')">VS Code</button>
+            <button class="theme-btn" [class.active]="themeSvc.currentTheme() === 'dracula'" (click)="setTheme('dracula')">Dracula</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Dashboard Wallpaper</span>
+            <span class="setting-desc">Add a subtle tint to your dashboard background.</span>
+          </div>
+          <div class="inline-bg-picker">
+            <button class="bg-preset-btn" *ngFor="let bg of presets" 
+                    [class.active]="bg.id === currentBgId"
+                    [style.background]="bg.style"
+                    [title]="bg.name"
+                    (click)="setDashboardBg(bg.id)">
+            </button>
           </div>
         </div>
 
@@ -111,6 +129,37 @@
             <input type="checkbox" [checked]="isMinimizeToTray" (change)="toggleMinimizeToTray()" />
             <span class="slider"></span>
           </label>
+        </div>
+
+        <div class="divider"></div>
+        <h4 class="subsection-title">App Updates</h4>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Current Version</span>
+            <span class="setting-desc">v{{ currentVersion }}</span>
+          </div>
+          <button class="btn-secondary" (click)="updateSvc.checkForUpdates()" [disabled]="updateSvc.isChecking() || updateSvc.isDownloading()">
+            <ng-container *ngIf="!updateSvc.isChecking()">Check for Updates</ng-container>
+            <ng-container *ngIf="updateSvc.isChecking()">Checking...</ng-container>
+          </button>
+        </div>
+
+        <div class="update-available" *ngIf="updateSvc.updateAvailable()">
+          <div class="update-info">
+            <div class="update-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Update v{{ updateSvc.updateVersion() }} available
+            </div>
+            <p class="update-notes" *ngIf="updateSvc.updateBody()">{{ updateSvc.updateBody() }}</p>
+          </div>
+          <button class="btn-primary update-btn" (click)="updateSvc.downloadAndInstall()" [disabled]="updateSvc.isDownloading()">
+            <ng-container *ngIf="!updateSvc.isDownloading()">Download & Install</ng-container>
+            <ng-container *ngIf="updateSvc.isDownloading()">Downloading... {{ updateSvc.downloadProgress() }}%</ng-container>
+          </button>
+          <div class="progress-bar" *ngIf="updateSvc.isDownloading()">
+            <div class="progress-fill" [style.width.%]="updateSvc.downloadProgress()"></div>
+          </div>
         </div>
       </div>
 

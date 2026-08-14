@@ -1,84 +1,195 @@
 <div class="main-header" data-tauri-drag-region>
-  <div data-tauri-drag-region>
+  <div class="header-left" data-tauri-drag-region>
     <div class="main-title" data-tauri-drag-region>
-      {{ itemsSvc.filter() === 'all' && !itemsSvc.activeBoardId() ? 'All Items'
-         : itemsSvc.filter() === 'unseen' ? 'Unseen'
-         : itemsSvc.filter() === 'link' ? 'Links'
-         : itemsSvc.filter() === 'media' ? 'Media'
-         : itemsSvc.filter() === 'shared' ? 'Shared Links'
-         : itemsSvc.filter() === 'deleted' ? 'Recently Deleted'
-         : itemsSvc.activeBoardId() ? getBoardName() : 'Items' }}
-    </div>
-    <div class="main-sub" data-tauri-drag-region>
-      <ng-container *ngIf="itemsSvc.activeBoardId()">Invite others to collaborate on this board</ng-container>
-      <ng-container *ngIf="!itemsSvc.activeBoardId()">Everything shared to your inbox, across every device</ng-container>
+      {{ itemsSvc.filter() === 'all' && !itemsSvc.activeBoardId() ? 'Inbox'
+      : itemsSvc.filter() === 'unseen' ? 'Unread'
+      : itemsSvc.filter() === 'pending' ? 'Pending'
+      : itemsSvc.filter() === 'link' ? 'Links'
+      : itemsSvc.filter() === 'media' ? 'Media'
+      : itemsSvc.filter() === 'shared' ? 'Shared Links'
+      : itemsSvc.filter() === 'deleted' ? 'Recently Deleted'
+      : itemsSvc.filter() === 'untagged' ? 'Untagged'
+      : itemsSvc.activeBoardId() ? getBoardName() : 'Items' }}
     </div>
   </div>
+
+  <div class="unified-search-container" data-tauri-drag-region>
+    <div class="search-input-wrapper" [class.focused]="isSearchFocused">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2">
+        <circle cx="11" cy="11" r="7" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+
+      <div class="active-tags-inline" *ngIf="itemsSvc.selectedTags().size > 0">
+        <button class="match-mode-btn" (click)="toggleTagMatchMode($event)" title="Toggle AND/OR/NOT match">
+          {{ itemsSvc.tagMatchMode() }}
+        </button>
+        <span class="active-tag-chip" *ngFor="let t of itemsSvc.selectedTags()">
+          #{{ t }}
+          <button class="remove-tag-btn" (click)="removeTag(t, $event)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </span>
+      </div>
+
+      <input type="text" class="unified-search-input" placeholder="Search or type # for tags..."
+        [ngModel]="itemsSvc.searchQuery()" (ngModelChange)="itemsSvc.searchQuery.set($event)" (focus)="onSearchFocus()"
+        (blur)="onSearchBlur()" />
+
+      <button *ngIf="itemsSvc.searchQuery() || itemsSvc.selectedTags().size > 0" class="clear-search-btn"
+        (click)="itemsSvc.searchQuery.set(''); clearAllTags($event)" title="Clear search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Dropdown for Tag Suggestions -->
+    <div class="tag-suggestions-dropdown" *ngIf="isSearchFocused && tagSuggestions.length > 0">
+      <div class="suggestion-header">
+        <span class="header-text">Suggestions</span>
+      </div>
+      <div class="tag-suggestions-grid">
+        <button class="tag-suggestion-item" *ngFor="let tag of tagSuggestions" (mousedown)="selectTag(tag, $event)">
+          <div class="tag-icon-container">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="9" x2="20" y2="9"></line>
+              <line x1="4" y1="15" x2="20" y2="15"></line>
+              <line x1="10" y1="3" x2="8" y2="21"></line>
+              <line x1="16" y1="3" x2="14" y2="21"></line>
+            </svg>
+          </div>
+          <span class="tag-name">{{ tag }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="header-actions">
     <ng-container *ngIf="itemsSvc.selectionMode()">
-      <button class="demo-btn" *ngIf="itemsSvc.filter() === 'deleted'" [disabled]="itemsSvc.selectedItemIds().size === 0" (click)="itemsSvc.restoreSelected()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+      <button class="demo-btn" *ngIf="boardsSvc.boards().length > 0" [disabled]="itemsSvc.selectedItemIds().size === 0"
+        (click)="showBoardPicker = !showBoardPicker" style="position:relative">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="3" y1="9" x2="21" y2="9"></line>
+          <line x1="9" y1="21" x2="9" y2="9"></line>
+        </svg>
+        <span class="btn-text">Move</span>
+        <div class="board-picker-dropdown" *ngIf="showBoardPicker" (click)="$event.stopPropagation()">
+          <button *ngIf="itemsSvc.activeBoardId()" class="board-picker-item" (click)="selectBoard(null)">📥
+            Inbox</button>
+          <ng-container *ngFor="let board of boardsSvc.boards()">
+            <button *ngIf="board.id !== itemsSvc.activeBoardId()" class="board-picker-item"
+              (click)="selectBoard(board.id)">{{ board.name }}</button>
+          </ng-container>
+        </div>
+      </button>
+      <button class="demo-btn" *ngIf="itemsSvc.filter() === 'deleted'"
+        [disabled]="itemsSvc.selectedItemIds().size === 0" (click)="itemsSvc.restoreSelected()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+        </svg>
         <span class="btn-text">Restore ({{ itemsSvc.selectedItemIds().size }})</span>
       </button>
-      <button class="demo-btn danger" [disabled]="itemsSvc.selectedItemIds().size === 0" (click)="itemsSvc.deleteSelected()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-        <span class="btn-text">{{ itemsSvc.filter() === 'deleted' ? 'Permanently Delete' : 'Delete' }} ({{ itemsSvc.selectedItemIds().size }})</span>
+      <button class="demo-btn danger" [disabled]="itemsSvc.selectedItemIds().size === 0"
+        (click)="itemsSvc.deleteSelected()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          <line x1="10" y1="11" x2="10" y2="17"></line>
+          <line x1="14" y1="11" x2="14" y2="17"></line>
+        </svg>
+        <span class="btn-text">{{ itemsSvc.filter() === 'deleted' ? 'Permanently Delete' : 'Delete' }} ({{
+          itemsSvc.selectedItemIds().size }})</span>
       </button>
-      <button class="demo-btn" (click)="itemsSvc.clearSelection()">
+      <button class="demo-btn" (click)="cancelSelection()">
         <span class="btn-text">Cancel</span>
       </button>
     </ng-container>
 
     <ng-container *ngIf="!itemsSvc.selectionMode()">
-      <button class="demo-btn" (click)="itemsSvc.selectionMode.set(true)">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <button class="demo-btn" (click)="startSelection()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 11l3 3L22 4" />
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+        </svg>
         <span class="btn-text">Select</span>
       </button>
       <button class="demo-btn" *ngIf="itemsSvc.unseenCount() > 0" (click)="markAllAsRead()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 13l4 4L19 7" />
+        </svg>
         <span class="btn-text">Mark All Read</span>
       </button>
       <button class="demo-btn" (click)="refresh()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
         <span class="btn-text">Refresh</span>
       </button>
     </ng-container>
   </div>
 </div>
 
-<div class="mobile-search-bar">
-  <input type="search" class="search-input" placeholder="Search items" [ngModel]="itemsSvc.searchQuery()" (ngModelChange)="itemsSvc.searchQuery.set($event)" />
-  <svg *ngIf="!itemsSvc.searchQuery()" class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-  <button *ngIf="itemsSvc.searchQuery()" class="clear-search-btn" (click)="itemsSvc.searchQuery.set('')" title="Clear search">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-  </button>
-</div>
+
 
 <div class="feed-scroll">
-  <div class="away-banner" *ngIf="itemsSvc.unseenCount() > 0 && itemsSvc.filter() !== 'unseen'" (click)="itemsSvc.filter.set('unseen')">
-    <div class="away-icon">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    </div>
-    <div class="away-text">
-      <div class="away-title">While you were away</div>
-      <div class="away-sub">New items were sent from your other devices</div>
-    </div>
-    <div class="away-count">{{ itemsSvc.unseenCount() }} new</div>
-  </div>
-
-  <div class="feed-day-label" *ngIf="itemsSvc.filteredItems().length > 0">Today</div>
-  <div class="feed-grid" *ngIf="itemsSvc.filteredItems().length > 0; else empty">
-    <app-item-card *ngFor="let item of itemsSvc.filteredItems()" [item]="item"></app-item-card>
-  </div>
-
-  <ng-template #empty>
-    <div class="inbox-zero-state">
-      <div class="inbox-zero-icon">✨</div>
-      <div class="inbox-zero-title">You're all caught up!</div>
-      <div class="inbox-zero-sub">Inbox Zero Achieved</div>
-      <div class="inbox-zero-streak" *ngIf="streakCount > 0">
-        🔥 {{ streakCount }} Session Streak
+  <!-- Skeleton Loading State -->
+  <div class="skeleton-container" *ngIf="loading()">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
+      <div class="skeleton-body">
+        <div class="skeleton-line long"></div>
+        <div class="skeleton-line medium"></div>
+        <div class="skeleton-line short"></div>
+      </div>
+      <div class="skeleton-footer">
+        <div class="skeleton-tag"></div>
+        <div class="skeleton-tag small"></div>
+        <div class="skeleton-time"></div>
       </div>
     </div>
-  </ng-template>
+  </div>
+
+  <ng-container *ngIf="!loading()">
+    <div class="away-banner" *ngIf="itemsSvc.unseenCount() > 0 && itemsSvc.filter() !== 'unseen'"
+      (click)="itemsSvc.filter.set('unseen')">
+      <div class="away-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </div>
+      <div class="away-text">
+        <div class="away-title">While you were away</div>
+        <div class="away-sub">New items were sent from your other devices</div>
+      </div>
+      <div class="away-count">{{ itemsSvc.unseenCount() }} new</div>
+    </div>
+
+    <div class="feed-grid" *ngIf="itemsSvc.filteredItems().length > 0; else empty" cdkDropList id="feedDropList"
+      [cdkDropListConnectedTo]="connectedBoardDropLists">
+      <app-item-card *ngFor="let item of itemsSvc.filteredItems(); trackBy: trackById" [item]="item" cdkDrag [cdkDragStartDelay]="{mouse: 0, touch: 250}" [cdkDragData]="item">
+        <div *cdkDragPlaceholder style="display: none;"></div>
+      </app-item-card>
+    </div>
+
+    <ng-template #empty>
+      <div class="inbox-zero-state">
+        <div class="inbox-zero-icon">✨</div>
+        <div class="inbox-zero-title">You're all caught up!</div>
+        <div class="inbox-zero-sub">Inbox Zero Achieved</div>
+        <div class="inbox-zero-streak" *ngIf="streakCount > 0">
+          🔥 {{ streakCount }} Session Streak
+        </div>
+      </div>
+    </ng-template>
+  </ng-container>
 </div>

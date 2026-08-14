@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 
 type QueuedOp =
   | { kind: 'text'; note: string; tags?: string[]; queuedAt: string }
-  | { kind: 'link'; url: string; tags?: string[]; queuedAt: string };
+  | { kind: 'link'; url: string; tags?: string[]; note?: string; queuedAt: string };
 // Media isn't queued here — a File object can't survive JSON
 // serialization into localStorage, and Android's native media upload is
 // a separate Kotlin-side path that doesn't go through this queue at all

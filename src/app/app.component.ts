@@ -10,6 +10,9 @@ import { ItemsService } from './services/items.service';
 import { OfflineQueueService } from './services/offline-queue.service';
 import { ToastService } from './services/toast.service';
 import { BoardsService } from './services/boards.service';
+import { UpdateService } from './services/update.service';
+import { LocalDbService } from './services/local-db.service';
+import { CacheService } from './services/cache.service';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { FeedComponent } from './components/feed/feed.component';
 import { QuickActionBarComponent } from './components/quick-action-bar/quick-action-bar.component';
@@ -19,12 +22,15 @@ import { ContextMenuComponent } from './components/context-menu/context-menu.com
 import { WeeklyDigestComponent } from './components/weekly-digest/weekly-digest.component';
 import { SharedItemViewerComponent } from './components/shared-item-viewer/shared-item-viewer.component';
 import { SettingsPageComponent } from './components/settings-page/settings-page.component';
+import { TagInputComponent } from './components/tag-input/tag-input.component';
+import { HomeComponent } from './components/home/home.component';
+import { CalendarComponent } from './components/calendar/calendar.component';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, FeedComponent, QuickActionBarComponent, ItemViewerComponent, DeviceNicknameModalComponent, ContextMenuComponent, WeeklyDigestComponent, SharedItemViewerComponent, SettingsPageComponent],
+  imports: [CommonModule, SidebarComponent, FeedComponent, QuickActionBarComponent, ItemViewerComponent, DeviceNicknameModalComponent, ContextMenuComponent, WeeklyDigestComponent, SharedItemViewerComponent, SettingsPageComponent, TagInputComponent, HomeComponent, CalendarComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -34,7 +40,7 @@ export class AppComponent {
   // URL-based routing for shared item public pages
   sharedToken = signal<string | null>(this.parseSharedToken());
   inviteToken = signal<string | null>(this.parseInviteToken());
-  activeView = signal<'feed' | 'settings'>('feed');
+  activeView = signal<'home' | 'feed' | 'settings' | 'calendar'>((localStorage.getItem('activeView') as any) || 'home');
 
   private parseSharedToken(): string | null {
     const path = window.location.pathname;
@@ -66,11 +72,14 @@ export class AppComponent {
     private presenceSvc: PresenceService,
     private autostartSvc: AutostartService,
     private notificationSvc: NativeNotificationService,
-    private shareIntentSvc: ShareIntentService,
+    public shareIntentSvc: ShareIntentService,
     private itemsSvc: ItemsService,
     private offlineQueue: OfflineQueueService,
     public toastSvc: ToastService,
-    private boardsSvc: BoardsService
+    private boardsSvc: BoardsService,
+    private updateSvc: UpdateService,
+    private localDb: LocalDbService,
+    private cacheSvc: CacheService
   ) {
     // Flush whatever's queued the moment connectivity actually returns —
     // not gated on sign-in state below, since 'online' can fire at any
@@ -89,10 +98,12 @@ export class AppComponent {
       const session = this.auth.session();
       if (session?.user?.id) {
         this.realtimeSvc.connect(session.user.id);
+        this.itemsSvc.refresh();
         this.boardsSvc.refresh();
         this.autostartSvc.ensureEnabled();
         this.notificationSvc.init();
         this.shareIntentSvc.startListening();
+        this.updateSvc.checkOnStartup();
         // Also catch up here, not just on 'online' — covers the case
         // where the app was fully closed while something sat queued and
         // connectivity already came back before this launch.
@@ -112,8 +123,27 @@ export class AppComponent {
       } else {
         this.realtimeSvc.disconnect();
         this.presenceSvc.disconnect();
+        // Clear all caches on sign-out to prevent stale data
+        this.localDb.clearAll();
+        this.cacheSvc.clear();
       }
     }, { allowSignalWrites: true });
+
+    // Foreground reconciliation — full sync when app comes back
+    // to the front, catching any changes missed while backgrounded.
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && this.auth.session()?.user) {
+          this.itemsSvc.refresh();
+          this.boardsSvc.refresh();
+        }
+      });
+    }
+    
+    // Persist active view across reloads
+    effect(() => {
+      localStorage.setItem('activeView', this.activeView());
+    });
     // Needed because PresenceService.disconnect() writes a signal
     // (onlineDeviceIds) synchronously — Angular blocks that by default
     // to prevent effects from looping on their own writes. Safe here:
@@ -192,6 +222,39 @@ export class AppComponent {
     // Allow default context menu only on text inputs for copy/paste
     if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.isContentEditable) {
       event.preventDefault();
+    }
+  }
+
+  pendingShareNote = signal('');
+  pendingShareTags = signal<string[]>([]);
+
+  cancelPendingShare() {
+    this.shareIntentSvc.pendingShare.set(null);
+    this.pendingShareNote.set('');
+    this.pendingShareTags.set([]);
+  }
+
+  confirmPendingShare() {
+    const detail = this.shareIntentSvc.pendingShare();
+    if (!detail) return;
+    
+    this.shareIntentSvc.pendingShare.set(null);
+    const { mimeType, payload } = detail;
+    const trimmed = payload.trim();
+    
+    const noteTrimmed = this.pendingShareNote().trim();
+    const finalNote = noteTrimmed ? noteTrimmed : undefined;
+    const tags = this.pendingShareTags();
+    
+    // Clear inputs
+    this.pendingShareNote.set('');
+    this.pendingShareTags.set([]);
+    
+    if (/^https?:\/\//i.test(trimmed)) {
+      this.itemsSvc.addLink(trimmed, tags.length > 0 ? tags : undefined, finalNote);
+    } else {
+      const fullText = finalNote ? `${finalNote}\n\n${trimmed}` : trimmed;
+      this.itemsSvc.addText(fullText, tags.length > 0 ? tags : undefined);
     }
   }
 }

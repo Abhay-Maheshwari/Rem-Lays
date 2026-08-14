@@ -22,16 +22,14 @@
       [disabled]="uploading()"
       rows="1"
     ></textarea>
-    <button class="send-btn" [class.sent]="isSent()" (click)="submit()" [disabled]="uploading()">{{ isSent() ? 'Sent!' : 'Send' }}</button>
+    <button class="send-btn" [class.sent]="isSent()" [class.active]="value.trim().length > 0" (click)="submit()" [disabled]="uploading()">{{ isSent() ? 'Sent!' : 'Send' }}</button>
   </div>
   <div class="tags-input-wrap">
-    <input
-      class="action-input tags-input"
-      [(ngModel)]="tags"
-      (keydown.enter)="submit()"
-      placeholder="Add tags (comma separated, e.g. work, ideas)"
+    <app-tag-input
+      [(tags)]="tags"
+      placeholder="Add tags (Enter or comma to confirm)"
       [disabled]="uploading()"
-    />
+    ></app-tag-input>
   </div>
   <p class="hint" *ngIf="offlineQueue.pendingCount() === 0">
     Text, links, and images/video all save now.

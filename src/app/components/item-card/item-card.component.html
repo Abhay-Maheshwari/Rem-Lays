@@ -3,8 +3,11 @@
      (touchmove)="onTouchMove($event)"
      (touchend)="onTouchEnd($event)">
   <div class="swipe-actions left" *ngIf="swipeTranslation > 0" [class.active]="swipeTranslation > swipeThreshold" [style.opacity]="swipeTranslation / swipeThreshold">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg *ngIf="item.status !== 'archived'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line>
+    </svg>
+    <svg *ngIf="item.status === 'archived'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 8v11a2 2 0 0 0 2 2h2"></path><path d="M20 8v11a2 2 0 0 1-2 2h-2"></path><path d="m9 15 3-3 3 3"></path><path d="M12 12v9"></path><rect width="20" height="5" x="2" y="3" rx="1"></rect>
     </svg>
   </div>
   <div class="swipe-actions right" *ngIf="swipeTranslation < 0" [class.active]="swipeTranslation < -swipeThreshold" [style.opacity]="-swipeTranslation / swipeThreshold">
@@ -49,9 +52,11 @@
     <p *ngSwitchCase="'text'" class="body text">{{ noteText }}</p>
 
     <div *ngSwitchCase="'link'" class="body link">
-      <img *ngIf="linkImage" [src]="linkImage" class="link-image" alt="" />
+      <div class="link-image-container" *ngIf="linkImage">
+        <img [src]="linkImage" class="link-image" alt="" />
+      </div>
       <a href="#" class="link-title" (click)="openLink($event)">{{ linkTitle }}</a>
-      <span class="link-url-text" *ngIf="linkUrl && linkUrl !== linkTitle">{{ linkUrl }}</span>
+      <span class="link-url-text" *ngIf="linkUrl && linkUrl !== linkTitle">{{ displayUrl }}</span>
     </div>
 
     <div *ngSwitchCase="'image'" class="body media">
@@ -65,6 +70,8 @@
     </div>
 
     <div *ngSwitchCase="'reel'" class="body reel">
+      <div class="link-title" *ngIf="item.payload['title']" style="margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text-primary);">{{ item.payload['title'] }}</div>
+      <p *ngIf="noteText" class="body text" style="margin-top: 0; margin-bottom: 8px;">{{ noteText }}</p>
       <div *ngIf="reelEmbedHtml; else reelLoading" class="reel-embed" [innerHTML]="reelEmbedHtml"></div>
       <ng-template #reelLoading>
         <div class="media-loading">Loading reel from {{ reelAuthorName }}…</div>
@@ -78,7 +85,7 @@
   </ng-container>
 
   <div class="tags-container" *ngIf="itemTags.length > 0 && !editingTags" (click)="$event.stopPropagation()">
-    <span class="card-tag" *ngFor="let t of itemTags" (click)="itemsSvc.selectedTag() === t ? itemsSvc.selectedTag.set(null) : itemsSvc.selectedTag.set(t)">#{{t}}</span>
+    <span class="card-tag" *ngFor="let t of itemTags" (click)="toggleTag(t, $event)" [class.active]="itemsSvc.selectedTags().has(t)">#{{t}}</span>
     <button class="edit-tags-btn" (click)="startEditTags($event)" title="Edit tags">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
     </button>
@@ -87,18 +94,30 @@
     <button class="add-tags-btn" (click)="startEditTags($event)">+ Add tags</button>
   </div>
   <div class="tags-edit-container" *ngIf="editingTags" (click)="$event.stopPropagation()">
-    <input class="tags-edit-input" [(ngModel)]="editTagsValue" (keydown.enter)="saveTags($event)" (keydown.escape)="cancelEditTags($event)" placeholder="Tags (comma separated)" autoFocus />
-    <button class="tags-action-btn save" (click)="saveTags($event)">Save</button>
-    <button class="tags-action-btn" (click)="cancelEditTags($event)">Cancel</button>
+    <app-tag-input
+      [(tags)]="editTagsValue"
+      placeholder="Add tags..."
+      [autoFocus]="true"
+    ></app-tag-input>
+    <div class="tags-edit-actions">
+      <button class="tags-action-btn" (click)="cancelEditTags($event)">Cancel</button>
+      <button class="tags-action-btn save" (click)="saveTags($event)">Save</button>
+    </div>
   </div>
 
   <div class="meta">
     <span class="time">{{ item.created_at | date:'MMM d, h:mm a' }}</span>
-    <div class="meta-row" *ngIf="item.status === 'unseen' || item.expires_at || item.share_token">
+    <div class="meta-row" *ngIf="item.status === 'unseen' || deadlineType || item.share_token || activeReminder">
       <span class="new-badge" *ngIf="item.status === 'unseen'" (click)="markAsRead($event)" style="cursor: pointer;" title="Mark as read">NEW</span>
-      <span class="expire-badge" *ngIf="item.expires_at" title="Expiring soon">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px; vertical-align:middle"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      <span class="expire-badge" *ngIf="deadlineType" [ngClass]="deadlineUrgency" [title]="deadlineType === 'expire' ? 'Expiring' : deadlineType === 'deadline' ? 'Deadline' : 'Snoozed'">
+        <svg *ngIf="deadlineType === 'expire'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px; vertical-align:middle"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <svg *ngIf="deadlineType === 'snooze'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px; vertical-align:middle"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>
+        <svg *ngIf="deadlineType === 'deadline'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px; vertical-align:middle"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
         {{ expireText }}
+      </span>
+      <span class="reminder-badge" *ngIf="activeReminder" title="Reminder active">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px; vertical-align:middle"><path d="M10 21h4"></path><path d="M12 2v2"></path><path d="M12 22v-1"></path><path d="M22 12h-1"></path><path d="M3 12H2"></path><path d="M19.07 4.93l-.71.71"></path><path d="M5.64 18.36l-.71.71"></path><path d="M19.07 19.07l-.71-.71"></path><path d="M5.64 5.64l-.71-.71"></path><circle cx="12" cy="12" r="6"></circle></svg>
+        <span style="text-transform: capitalize;">{{ activeReminder.type }}</span>
       </span>
       <span class="share-badge" *ngIf="item.share_token" title="Shared publicly">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px; vertical-align:middle">
@@ -112,3 +131,33 @@
   </div>
 </div>
 </div>
+
+<app-datetime-picker
+  *ngIf="showCustomSnooze"
+  [initialDate]="customSnoozeInitialDate"
+  (confirm)="onCustomSnoozeConfirm($event)"
+  (cancel)="onCustomSnoozeCancel()">
+</app-datetime-picker>
+
+<app-datetime-picker
+  *ngIf="showCustomExpire"
+  [initialDate]="customExpireInitialDate"
+  (confirm)="onCustomExpireConfirm($event)"
+  (cancel)="onCustomExpireCancel()">
+</app-datetime-picker>
+
+<app-datetime-picker
+  *ngIf="showCustomDeadline"
+  [initialDate]="customDeadlineInitialDate"
+  (confirm)="onCustomDeadlineConfirm($event)"
+  (cancel)="onCustomDeadlineCancel()">
+</app-datetime-picker>
+
+<app-datetime-picker
+  *ngIf="showCustomReminder"
+  [initialDate]="customReminderInitialDate"
+  [showRecurrence]="true"
+  [initialRecurrence]="customReminderInitialRecurrence"
+  (confirmWithRecurrence)="onCustomReminderConfirm($event)"
+  (cancel)="onCustomReminderCancel()">
+</app-datetime-picker>

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ItemsService } from '../../services/items.service';
 import { OfflineQueueService } from '../../services/offline-queue.service';
+import { TagInputComponent } from '../tag-input/tag-input.component';
 
 @Component({
   selector: 'app-quick-action-bar',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TagInputComponent],
   templateUrl: './quick-action-bar.component.html',
   styleUrl: './quick-action-bar.component.scss'
 })
@@ -15,7 +16,7 @@ export class QuickActionBarComponent {
   @ViewChild('noteInput') noteInput!: ElementRef<HTMLTextAreaElement>;
 
   value = '';
-  tags = '';
+  tags: string[] = [];
   uploading = signal(false);
 
   isSent = signal(false);
@@ -30,12 +31,11 @@ export class QuickActionBarComponent {
     const val = this.value.trim();
     if (!val) return;
 
-    const parsedTags = this.tags.split(',').map(t => t.trim().replace(/^#/, '')).filter(t => t.length > 0);
-    const tagsArray = parsedTags.length > 0 ? parsedTags : undefined;
+    const tagsArray = this.tags.length > 0 ? this.tags : undefined;
 
     // Instant UI feedback
     this.value = '';
-    this.tags = '';
+    this.tags = [];
     this.isSent.set(true);
     setTimeout(() => this.isSent.set(false), 1500);
 
@@ -73,10 +73,9 @@ export class QuickActionBarComponent {
 
     this.uploading.set(true);
     try {
-      const parsedTags = this.tags.split(',').map(t => t.trim().replace(/^#/, '')).filter(t => t.length > 0);
-      const tagsArray = parsedTags.length > 0 ? parsedTags : undefined;
+      const tagsArray = this.tags.length > 0 ? this.tags : undefined;
       await this.itemsSvc.addMedia(file, tagsArray);
-      this.tags = '';
+      this.tags = [];
     } finally {
       this.uploading.set(false);
     }
@@ -93,13 +92,12 @@ export class QuickActionBarComponent {
           event.preventDefault(); // Stop text paste
           this.uploading.set(true);
           try {
-            const parsedTags = this.tags.split(',').map(t => t.trim().replace(/^#/, '')).filter(t => t.length > 0);
-            const tagsArray = parsedTags.length > 0 ? parsedTags : undefined;
+            const tagsArray = this.tags.length > 0 ? this.tags : undefined;
             const ext = file.type.split('/')[1] || 'png';
             const filename = `Pasted_Image_${new Date().toISOString().replace(/[:.]/g, '-')}.${ext}`;
             const namedFile = new File([file], filename, { type: file.type });
             await this.itemsSvc.addMedia(namedFile, tagsArray);
-            this.tags = '';
+            this.tags = [];
           } finally {
             this.uploading.set(false);
           }

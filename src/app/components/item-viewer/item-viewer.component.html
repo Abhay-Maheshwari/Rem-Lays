@@ -1,8 +1,8 @@
-<div class="backdrop" *ngIf="viewerSvc.currentItem() as item" (click)="close()" (window:keydown.escape)="close()">
+<div class="backdrop" *ngIf="viewerSvc.currentItem() as item" (click)="close()">
   <div class="modal" (click)="$event.stopPropagation()" (contextmenu)="onContextMenu($event)">
     
     <div class="modal-actions">
-      <ng-container *ngIf="item.type === 'text' || item.type === 'link'">
+      <ng-container *ngIf="item.type === 'text' || item.type === 'link' || item.type === 'reel'">
         <button class="action-btn" *ngIf="!isEditing()" (click)="startEdit()">Edit</button>
         <button class="action-btn primary" *ngIf="isEditing()" (click)="saveEdit()">Save</button>
         <button class="action-btn" *ngIf="isEditing()" (click)="cancelEdit()">Cancel</button>
@@ -42,7 +42,10 @@
         <div class="link-favicon">{{ (linkDomain || linkUrl).charAt(0).toUpperCase() }}</div>
         
         <div class="link-title" *ngIf="!isEditing()">{{ linkTitle }}</div>
-        <input class="edit-input" type="text" *ngIf="isEditing()" [ngModel]="editLinkTitle()" (ngModelChange)="editLinkTitle.set($event)" placeholder="Edit Title" />
+        <ng-container *ngIf="isEditing()">
+          <input class="edit-input" type="text" [ngModel]="editLinkTitle()" (ngModelChange)="editLinkTitle.set($event)" placeholder="Title" />
+          <input class="edit-input" type="text" [ngModel]="editLinkUrl()" (ngModelChange)="editLinkUrl.set($event)" placeholder="URL" style="margin-top: 8px;" />
+        </ng-container>
 
         <a href="#" class="open-link-btn" (click)="openLink($event)">Open in Browser</a>
         <div class="link-url-display">{{ linkUrl }}</div>
@@ -51,11 +54,20 @@
 
     <!-- Reel -->
     <ng-container *ngIf="item.type === 'reel'">
-      <div class="reel-content" style="display: flex; justify-content: center; width: 100%; overflow-y: auto;">
-        <div *ngIf="reelEmbedHtml(); else reelLoading" class="reel-embed" [innerHTML]="reelEmbedHtml()"></div>
-        <ng-template #reelLoading>
-          <div class="loading">Loading reel from {{ reelAuthorName }}…</div>
-        </ng-template>
+      <div style="padding-top: 60px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <div class="link-content" *ngIf="isEditing() || item.payload?.['title']" style="padding: 0 24px 20px 24px; width: 100%; max-width: 400px;">
+          <div class="link-title" *ngIf="!isEditing() && item.payload?.['title']">{{ linkTitle }}</div>
+          <ng-container *ngIf="isEditing()">
+            <input class="edit-input" type="text" [ngModel]="editLinkTitle()" (ngModelChange)="editLinkTitle.set($event)" placeholder="Title" />
+            <input class="edit-input" type="text" [ngModel]="editLinkUrl()" (ngModelChange)="editLinkUrl.set($event)" placeholder="URL" style="margin-top: 8px;" />
+          </ng-container>
+        </div>
+        <div class="reel-content" style="display: flex; justify-content: center; width: 100%; overflow-y: auto; padding-bottom: 20px;">
+          <div *ngIf="reelEmbedHtml(); else reelLoading" class="reel-embed" [innerHTML]="reelEmbedHtml()"></div>
+          <ng-template #reelLoading>
+            <div class="loading">Loading reel from {{ reelAuthorName }}…</div>
+          </ng-template>
+        </div>
       </div>
     </ng-container>
 

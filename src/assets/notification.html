@@ -1,304 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notification</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
     :root {
-      --bg-dark: #141414;
-      --bg-gradient: linear-gradient(145deg, #1c1c22 0%, #0f0f11 100%);
-      --border-light: rgba(255, 255, 255, 0.08);
-      --text-main: #ffffff;
-      --text-muted: #9ca3af;
-      --accent: #3b82f6;
-      --accent-glow: rgba(59, 130, 246, 0.5);
-      --surface: rgba(255, 255, 255, 0.03);
-      --surface-hover: rgba(255, 255, 255, 0.08);
-      --radius-lg: 16px;
-      --radius-md: 10px;
+      --bg-main: #141414;
+      --border-strong: rgba(255, 255, 255, 0.1);
+      --text-primary: #ffffff;
+      --text-secondary: #737373;
+      --accent: #10b981; /* Vibrant neon green for cyber-technical accent */
+      --radius-lg: 14px;
     }
 
     body {
       margin: 0;
       padding: 0;
-      background: var(--bg-dark);
+      background: var(--bg-main);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       overflow: hidden;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      flex-direction: column;
       height: 100vh;
+      color: var(--text-primary);
       user-select: none;
-      color: var(--text-main);
-      animation: fadeScale 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      box-sizing: border-box;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-strong);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 20px 60px rgba(0, 0, 0, 0.85);
+      animation: popupAnim 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    @keyframes fadeScale {
+    @keyframes popupAnim {
       0% {
         opacity: 0;
-        transform: scale(0.95) translateY(10px);
+        transform: scale(0.92) translateY(10px);
       }
-
       100% {
         opacity: 1;
         transform: scale(1) translateY(0);
       }
     }
 
-    .toast-container {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      box-sizing: border-box;
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      position: relative;
-    }
-
-    /* Subtle background glow effect */
-    .glow-bg {
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
+    /* Top Bar */
     .top-bar {
-      height: 50px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 12px 16px 0;
-      font-size: 50px;
-      color: var(--text-muted);
-      font-weight: 500;
-      z-index: 10;
+      align-items: flex-start;
+      padding: 6px 12px 0;
+      -webkit-app-region: drag;
     }
 
-    .top-bar-left {
+    .app-info {
       display: flex;
       align-items: center;
-      gap: 8px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      font-size: 11px;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.5);
     }
 
-    .top-bar-left svg {
-      width: 14px;
-      height: 14px;
-      fill: currentColor;
-    }
-
-    .top-bar-left img {
-      height: 100px;
+    .app-info img {
+      height: 48px;
       width: auto;
       object-fit: contain;
-      margin-top: -25px;
-      margin-bottom: -25px;
+      opacity: 1;
+      margin-left: -4px;
+      margin-top: -10px;
+      margin-bottom: -16px;
     }
 
-    .close-icon-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
+    .close-btn {
+      width: 24px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 6px;
       cursor: pointer;
-      color: var(--text-muted);
-      transition: all 0.2s;
-      z-index: 20;
+      color: #777;
+      transition: all 0.2s ease;
+      -webkit-app-region: no-drag;
+      margin-top: 2px;
     }
 
-    .close-icon-btn:hover {
+    .close-btn:hover {
       background: rgba(255, 255, 255, 0.1);
       color: #fff;
     }
 
-    .close-icon-btn svg {
-      width: 16px;
-      height: 16px;
+    .close-btn svg {
+      width: 14px;
+      height: 14px;
       stroke: currentColor;
-      stroke-width: 2;
+      stroke-width: 2.5;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
 
+    /* Content Area (Horizontal Flattened Layout) */
     .content {
       flex: 1;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
+      flex-direction: row;
       align-items: center;
-      padding: 0 24px 32px 24px;
-      text-align: center;
+      justify-content: flex-start;
+      padding: 0 16px 12px;
+      gap: 14px;
       cursor: pointer;
-      z-index: 10;
+      -webkit-app-region: no-drag;
     }
 
-    .icon-wrapper {
-      position: relative;
-      margin-bottom: 24px;
-      animation: float 4s ease-in-out infinite;
+    .content:hover .icon-box {
+      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
     }
 
-    @keyframes float {
-
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-6px);
-      }
-    }
-
-    .big-icon {
-      width: 72px;
-      height: 72px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
+    .icon-box {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       color: #fff;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
 
-    .big-icon svg {
-      width: 34px;
-      height: 34px;
+    .icon-box svg {
+      width: 22px;
+      height: 22px;
       fill: currentColor;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
     }
 
-    .badge {
-      position: absolute;
-      bottom: -6px;
-      right: -6px;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: var(--accent);
+    .icon-box svg[stroke] {
+      fill: none;
+    }
+
+    .text-content {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      border: 3px solid var(--bg-dark);
-      box-shadow: 0 0 12px var(--accent-glow);
-      animation: pulseGlow 2s infinite;
-    }
-
-    @keyframes pulseGlow {
-      0% {
-        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6);
-      }
-
-      70% {
-        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
-      }
-
-      100% {
-        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-      }
-    }
-
-    .badge svg {
-      width: 14px;
-      height: 14px;
-      fill: #fff;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-start;
+      flex: 1;
+      overflow: hidden;
     }
 
     .title {
-      color: var(--text-main);
+      font-size: 16px;
       font-weight: 700;
-      font-size: 20px;
-      margin-bottom: 8px;
-      word-break: break-all;
+      line-height: 1.2;
+      color: #ffffff;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 1;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      line-height: 1.3;
-      letter-spacing: -0.5px;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      word-break: break-all;
     }
 
-    .body {
-      color: var(--text-muted);
-      font-size: 14px;
-      font-weight: 500;
-      line-height: 1.5;
-      max-width: 90%;
+    .body-text {
+      font-size: 12px;
+      font-weight: 400;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      line-height: 1.3;
+      color: var(--text-secondary);
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-all;
     }
 
     .action-btn {
-      margin-top: 24px;
-      padding: 10px 24px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      color: #fff;
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 600;
-      pointer-events: none;
-      /* Let the content click handle it */
-      transition: all 0.2s;
+      color: var(--accent);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 6px 12px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+      transition: 0.2s ease;
     }
 
-    .content:hover .action-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
+    .action-btn:hover {
+      background: rgba(16, 185, 129, 0.2);
     }
+
+    /* Larger image mode (Vertical override) */
+    body.image-mode .content {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding-top: 10px;
+      gap: 16px;
+    }
+    body.image-mode .text-content {
+      align-items: center;
+    }
+    body.image-mode .action-btn {
+      display: none;
+    }
+    body.image-mode .title, body.image-mode .body-text {
+      -webkit-line-clamp: 2;
+      word-break: break-word;
+    }
+    body.image-mode .icon-box {
+      width: 220px;
+      height: 220px;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    }
+
   </style>
 </head>
-
 <body>
-  <div class="toast-container">
-    <div class="glow-bg"></div>
-    <div class="top-bar" data-tauri-drag-region>
-      <div class="top-bar-left" data-tauri-drag-region>
-        <img src="logo_dark_mode.png" alt="Logo">
-      </div>
-      <div class="close-icon-btn" id="close-btn" title="Close">
-        <svg viewBox="0 0 24 24">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </div>
+  <div class="top-bar">
+    <div class="app-info">
+      <img src="logo_dark_mode.png" alt="Logo">
     </div>
+    <div class="close-btn" id="close-btn" title="Close">
+      <svg viewBox="0 0 24 24">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </div>
+  </div>
 
-    <div class="content" id="content-area">
-      <div class="icon-wrapper">
-        <div class="big-icon" id="big-icon">
-          <!-- Icon injected here -->
-        </div>
-        <div class="badge">
-          <svg viewBox="0 0 24 24">
-            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-          </svg>
-        </div>
-      </div>
+  <div class="content" id="content-area">
+    <div class="icon-box" id="big-icon">
+      <!-- Icon injected here -->
+    </div>
+    <div class="text-content">
       <div class="title" id="toast-title">New Item</div>
-      <div class="body" id="toast-body">You have received a new item.</div>
-
-      <div class="action-btn">Click to open</div>
+      <div class="body-text" id="toast-body">You have received a new item.</div>
     </div>
+    <div class="action-btn">View</div>
   </div>
 
   <script>
@@ -306,21 +248,27 @@
     const title = params.get('title');
     const body = params.get('body');
     const type = params.get('type') || 'file';
+    const imageUrl = params.get('imageUrl');
 
     if (title) document.getElementById('toast-title').innerText = title;
     if (body) document.getElementById('toast-body').innerText = body;
 
     let iconSvg = '';
-    if (type === 'image') {
-      iconSvg = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="2" fill="currentColor"/><path d="m21 15-5-5L5 21" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+    if (type === 'image' && imageUrl) {
+      document.body.classList.add('image-mode');
+      iconSvg = `<img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+    } else if (type === 'image') {
+      iconSvg = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="8.5" r="2" fill="currentColor"/><path d="m21 15-5-5L5 21" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
     } else if (type === 'video' || type === 'reel') {
-      iconSvg = '<svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+      iconSvg = '<svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
     } else if (type === 'link') {
-      iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>';
+      iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>';
     } else if (type === 'text') {
-      iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>';
+      // Sleek message bubble for text
+      iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
     } else {
-      iconSvg = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
+      // Sleek smartphone icon
+      iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>';
     }
     document.getElementById('big-icon').innerHTML = iconSvg;
 
@@ -359,9 +307,7 @@
     });
 
     document.getElementById('content-area').addEventListener('click', focusAppAndClose);
-    document.querySelector('.top-bar-left').style.cursor = 'pointer';
-    document.querySelector('.top-bar-left').addEventListener('click', focusAppAndClose);
+    document.querySelector('.top-bar-left')?.addEventListener('click', focusAppAndClose);
   </script>
 </body>
-
 </html>

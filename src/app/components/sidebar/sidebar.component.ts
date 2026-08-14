@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, signal, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ItemsService, FeedFilter } from '../../services/items.service';
 import { DevicesService } from '../../services/devices.service';
@@ -27,13 +27,14 @@ export class SidebarComponent implements OnInit {
   // Drives the mobile off-canvas drawer — irrelevant/inert on desktop
   // widths, see the @media block in this component's own stylesheet.
   @Input() open = false;
+  @Input() activeView: string = 'feed';
   @Output() navigated = new EventEmitter<void>();
   @Output() openDigest = new EventEmitter<void>();
+  @Output() openHome = new EventEmitter<void>();
 
   isCollapsed = signal(false);
 
   reviewCollapsed = signal(true);
-  inboxCollapsed = signal(true);
   boardsCollapsed = signal(true);
   tagsCollapsed = signal(true);
   devicesCollapsed = signal(true);
@@ -41,11 +42,16 @@ export class SidebarComponent implements OnInit {
   editingDeviceId: string | null = null;
   editDeviceName: string = '';
 
+  // Tag logic moved to feed component for unified search
+
   showCreateBoardModal = false;
   newBoardName = '';
 
   showManageMembersModal = false;
   activeManageBoardId: string | null = null;
+  
+  openShareDropdownBoard = signal<any | null>(null);
+  shareDropdownPos = signal<{x: number, y: number} | null>(null);
 
   constructor(
     public itemsSvc: ItemsService,
@@ -81,9 +87,17 @@ export class SidebarComponent implements OnInit {
     this.navigated.emit();
   }
 
+  setAllItemsFilter() {
+    this.itemsSvc.activeBoardId.set('*');
+    this.itemsSvc.filter.set('all');
+    this.navigated.emit();
+  }
+
+  // Tag manipulation methods moved to feed component
+
   setBoard(boardId: string) {
     this.itemsSvc.activeBoardId.set(boardId);
-    // Keep the current filter (e.g. 'all' or 'media') but scope it to the board
+    this.itemsSvc.filter.set('all');
     this.navigated.emit();
   }
 
@@ -105,6 +119,15 @@ export class SidebarComponent implements OnInit {
     moveItemInArray(currentBoards, event.previousIndex, event.currentIndex);
     const newOrder = currentBoards.map(b => b.id);
     this.boardsSvc.reorderBoards(newOrder);
+  }
+
+  dropItemOnBoard(event: CdkDragDrop<any>, boardId: string) {
+    if (event.previousContainer.id === 'feedDropList') {
+      const item = event.item.data;
+      if (item && item.id) {
+        this.itemsSvc.moveToBoard(item.id, boardId);
+      }
+    }
   }
 
   async confirmCreateBoard() {
@@ -131,6 +154,12 @@ export class SidebarComponent implements OnInit {
     this.editingDeviceId = null;
   }
 
+  async deleteDevice(device: any) {
+    if (confirm(`Are you sure you want to delete "${device.device_name}"? It will be logged out immediately.`)) {
+      await this.devicesSvc.deleteDevice(device.id);
+    }
+  }
+
   openManageMembers(boardId: string) {
     this.activeManageBoardId = boardId;
     this.showManageMembersModal = true;
@@ -145,5 +174,30 @@ export class SidebarComponent implements OnInit {
 
   openSettings() {
     this.openSettingsPage.emit();
+  }
+
+  toggleShareDropdown(board: any, event: MouseEvent) {
+    event.stopPropagation();
+    if (this.openShareDropdownBoard()?.id === board.id) {
+      this.closeShareDropdown();
+      return;
+    }
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    this.openShareDropdownBoard.set(board);
+    
+    // Position slightly left of the right edge of the button, and just below it
+    this.shareDropdownPos.set({ x: rect.right, y: rect.bottom + 4 });
+  }
+
+  closeShareDropdown() {
+    this.openShareDropdownBoard.set(null);
+    this.shareDropdownPos.set(null);
+  }
+
+  @HostListener('document:click')
+  onDocumentClick() {
+    if (this.openShareDropdownBoard()) {
+      this.closeShareDropdown();
+    }
   }
 }

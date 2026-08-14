@@ -1,6 +1,6 @@
 {
   "name": "rem-lays",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "scripts": {
     "start": "ng serve --host 0.0.0.0",
@@ -31,6 +31,8 @@
     "@tauri-apps/plugin-fs": "^2.5.1",
     "@tauri-apps/plugin-notification": "^2.0.0",
     "@tauri-apps/plugin-opener": "^2.5.4",
+    "@tauri-apps/plugin-updater": "^2.0.0",
+    "@tauri-apps/plugin-process": "^2.0.0",
     "rxjs": "~7.8.0",
     "tauri-plugin-fcm": "^0.2.0",
     "tslib": "^2.6.0",

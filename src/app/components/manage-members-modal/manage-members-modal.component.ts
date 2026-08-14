@@ -1,14 +1,15 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, signal, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BoardsService } from '../../services/boards.service';
 import { AuthService } from '../../services/auth.service';
 import { BoardMemberDetails } from '../../models/board.model';
+import { TagInputComponent } from '../tag-input/tag-input.component';
 
 @Component({
   selector: 'app-manage-members-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TagInputComponent],
   templateUrl: './manage-members-modal.component.html',
   styleUrl: './manage-members-modal.component.scss'
 })
@@ -19,6 +20,10 @@ export class ManageMembersModalComponent implements OnInit {
   members = signal<BoardMemberDetails[]>([]);
   isLoading = signal<boolean>(true);
   currentUserId: string | undefined;
+  openDropdownId = signal<string | null>(null);
+  
+  board = computed(() => this.boardsSvc.boards().find(b => b.id === this.boardId));
+  autoAssignTags = signal<string[]>([]);
   
   constructor(
     private boardsSvc: BoardsService,
@@ -29,6 +34,10 @@ export class ManageMembersModalComponent implements OnInit {
 
   ngOnInit() {
     this.loadMembers();
+    const b = this.board();
+    if (b && b.auto_assign_hashtags) {
+      this.autoAssignTags.set([...b.auto_assign_hashtags]);
+    }
   }
 
   async loadMembers() {
@@ -36,6 +45,11 @@ export class ManageMembersModalComponent implements OnInit {
     const m = await this.boardsSvc.getMembers(this.boardId);
     this.members.set(m);
     this.isLoading.set(false);
+  }
+
+  async updateAutoAssignTags(tags: string[]) {
+    this.autoAssignTags.set(tags);
+    await this.boardsSvc.updateAutoAssignHashtags(this.boardId, tags);
   }
 
   isOwner() {
@@ -65,5 +79,28 @@ export class ManageMembersModalComponent implements OnInit {
         this.members.update(m => m.filter(x => x.user_id !== member.user_id));
       }
     }
+  }
+
+  async deleteBoard() {
+    if (!this.isOwner()) return;
+    
+    if (confirm('Are you sure you want to permanently delete this board? This action cannot be undone.')) {
+      await this.boardsSvc.deleteBoard(this.boardId);
+      this.close.emit();
+    }
+  }
+
+  async leaveBoard() {
+    if (this.isOwner()) return;
+    
+    if (confirm('Are you sure you want to leave this board?')) {
+      await this.boardsSvc.leaveBoard(this.boardId);
+      this.close.emit();
+    }
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onKeydownHandler(event: KeyboardEvent) {
+    this.close.emit();
   }
 }

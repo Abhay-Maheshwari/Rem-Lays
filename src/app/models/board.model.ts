@@ -3,7 +3,9 @@ export interface Board {
   owner_id: string;
   name: string;
   invite_token: string;
+  viewer_invite_token?: string;
   created_at: string;
+  auto_assign_hashtags?: string[];
 }
 
 export interface BoardMember {

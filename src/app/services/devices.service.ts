@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { supabase } from './supabase-client';
 import { Device } from '../models/device.model';
+import { LocalDbService } from './local-db.service';
 
 const DEVICE_ID_KEY = 'rem-lays:device-id';
 
@@ -11,6 +12,17 @@ export class DevicesService {
   private localDeviceId: string | null = localStorage.getItem(DEVICE_ID_KEY);
 
   private registrationPromise: Promise<string | null> | null = null;
+
+  constructor(private localDb: LocalDbService) {
+    this.loadFromCache();
+  }
+
+  private async loadFromCache() {
+    const cached = await this.localDb.getAll<Device>('devices');
+    if (cached.length > 0 && this.devices().length === 0) {
+      this.devices.set(cached);
+    }
+  }
 
   get currentDeviceId(): string | null {
     return this.localDeviceId;
@@ -106,6 +118,7 @@ export class DevicesService {
       return;
     }
     this.devices.set((data ?? []) as Device[]);
+    this.localDb.replaceAll('devices', (data ?? []) as Device[]);
   }
 
   async renameDevice(id: string, newName: string) {
@@ -119,6 +132,20 @@ export class DevicesService {
       return;
     }
     
+    await this.refresh();
+  }
+
+  async deleteDevice(id: string) {
+    const { error } = await supabase
+      .from('devices')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('deleteDevice failed', error);
+      return;
+    }
+
     await this.refresh();
   }
 }

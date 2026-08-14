@@ -82,13 +82,22 @@ Deno.serve(async (req) => {
         message: {
           token: device.fcm_token,
           notification: {
-            title: "New item in Rem-Lays",
-            body: item.type === "text" ? "A note was shared" : `A ${item.type} was shared`,
+            title: item.type === "text"
+              ? (item.payload?.note || "New note").substring(0, 100)
+              : item.type === "link"
+              ? (item.payload?.title || item.payload?.url || "New link").substring(0, 100)
+              : `New ${item.type} shared`,
+            body: item.type === "text"
+              ? "A note was sent to your inbox"
+              : item.type === "link"
+              ? (item.payload?.domain || "A link was shared")
+              : `A ${item.type} was sent to your inbox`,
           },
           android: {
+            priority: "HIGH",
             notification: {
-              channel_id: "rem_lays_fcm_channel",
-              sound: "mixkit_long_pop_2358",
+              channel_id: "rem-lays-high-priority",
+              sound: "default",
             }
           }
         },

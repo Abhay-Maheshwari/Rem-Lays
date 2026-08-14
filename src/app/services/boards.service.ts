@@ -3,15 +3,24 @@ import { supabase } from './supabase-client';
 import { Board, BoardMemberDetails } from '../models/board.model';
 import { AuthService } from './auth.service';
 import { ToastService } from './toast.service';
+import { LocalDbService } from './local-db.service';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class BoardsService {
   boards = signal<Board[]>([]);
 
-  constructor(private auth: AuthService, private toastSvc: ToastService) {
-    // When auth session changes, refresh boards
+  constructor(private auth: AuthService, private toastSvc: ToastService, private localDb: LocalDbService) {
+    // Load cached boards instantly, then sync from network
+    this.loadFromCache();
     this.auth.session() ? this.refresh() : this.boards.set([]);
+  }
+
+  private async loadFromCache() {
+    const cached = await this.localDb.getAll<Board>('boards');
+    if (cached.length > 0 && this.boards().length === 0) {
+      this.boards.set(cached);
+    }
   }
 
   async refresh() {
@@ -45,6 +54,7 @@ export class BoardsService {
     }).filter(b => b != null);
     
     this.boards.set(mapped as Board[]);
+    this.localDb.replaceAll('boards', mapped as Board[]);
   }
 
   async reorderBoards(boardIds: string[]) {
@@ -130,14 +140,15 @@ export class BoardsService {
     await this.refresh();
   }
 
-  getInviteLink(board: Board) {
-    return `${environment.publicWebAppUrl}/invite/${board.invite_token}`;
+  getInviteLink(board: Board, role: 'editor' | 'viewer' = 'editor') {
+    const token = role === 'viewer' && board.viewer_invite_token ? board.viewer_invite_token : board.invite_token;
+    return `${environment.publicWebAppUrl}/invite/${token}`;
   }
 
-  copyInviteLink(board: Board) {
-    const url = this.getInviteLink(board);
+  copyInviteLink(board: Board, role: 'editor' | 'viewer' = 'editor') {
+    const url = this.getInviteLink(board, role);
     navigator.clipboard.writeText(url).then(
-      () => this.toastSvc.show('Invite link copied!'),
+      () => this.toastSvc.show(`${role === 'editor' ? 'Editor' : 'Viewer'} invite link copied!`),
       () => this.toastSvc.show('Could not copy link', 'error')
     );
   }
@@ -182,6 +193,18 @@ export class BoardsService {
     }
     
     this.toastSvc.show('Member removed successfully');
+    return true;
+  }
+  async updateAutoAssignHashtags(boardId: string, tags: string[]) {
+    const { error } = await supabase.from('boards').update({ auto_assign_hashtags: tags }).eq('id', boardId);
+    if (error) {
+      console.error('Failed to update auto-assign hashtags', error);
+      this.toastSvc.show('Failed to update hashtags', 'error');
+      return false;
+    }
+    
+    this.toastSvc.show('Auto-assign hashtags updated');
+    await this.refresh();
     return true;
   }
 }

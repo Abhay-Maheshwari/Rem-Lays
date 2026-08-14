@@ -6,18 +6,24 @@
 <div data-tauri-drag-region class="titlebar" *ngIf="isDesktop">
   <div class="window-controls">
     <button class="win-btn" (click)="minimize()" title="Minimize">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="22" y2="12"/></svg>
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 5.5H0" stroke="currentColor" stroke-width="1"/></svg>
     </button>
     <button class="win-btn" (click)="maximize()" title="Maximize">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.5" y="0.5" width="10" height="10" stroke="currentColor" stroke-width="1"/></svg>
     </button>
     <button class="win-btn close" (click)="close()" title="Close">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L10 10M1 10L10 1" stroke="currentColor" stroke-width="1"/></svg>
     </button>
   </div>
 </div>
 
-<main class="shell" *ngIf="!auth.session()">
+<main class="shell" *ngIf="auth.isInitializing()">
+  <div class="card splash">
+    <img [src]="isDesktop ? 'assets/logo_dark_mode.png' : 'assets/logo_light_mode.png'" class="splash-logo" alt="RemLays" style="width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.8; animation: pulse 2s infinite;" />
+  </div>
+</main>
+
+<main class="shell" *ngIf="!auth.isInitializing() && !auth.session()">
   <div class="card">
     <h1>Rem-Lays</h1>
     <p class="muted">Sign in to see your inbox.</p>
@@ -32,14 +38,20 @@
     </svg>
   </button>
   <div class="backdrop" [class.visible]="sidebarOpen()" (click)="closeSidebar()"></div>
-  <app-sidebar [open]="sidebarOpen()" (navigated)="closeSidebar()" (openDigest)="showWeeklyDigest.set(true); closeSidebar()" (openSettingsPage)="activeView.set('settings'); closeSidebar()"></app-sidebar>
+  <app-sidebar [open]="sidebarOpen()" [activeView]="activeView()" (navigated)="activeView.set('feed'); closeSidebar()" (openHome)="activeView.set('home'); closeSidebar()" (openDigest)="showWeeklyDigest.set(true); closeSidebar()" (openSettingsPage)="activeView.set('settings'); closeSidebar()"></app-sidebar>
   <main class="main-pane">
+    <ng-container *ngIf="activeView() === 'home'">
+      <app-home (navigate)="$event === 'digest' ? showWeeklyDigest.set(true) : activeView.set($event)"></app-home>
+    </ng-container>
     <ng-container *ngIf="activeView() === 'feed'">
       <app-feed></app-feed>
       <app-quick-action-bar></app-quick-action-bar>
     </ng-container>
     <ng-container *ngIf="activeView() === 'settings'">
       <app-settings-page (closeSettings)="activeView.set('feed')"></app-settings-page>
+    </ng-container>
+    <ng-container *ngIf="activeView() === 'calendar'">
+      <app-calendar (navigate)="$event === 'digest' ? showWeeklyDigest.set(true) : activeView.set($event)"></app-calendar>
     </ng-container>
   </main>
 </div>
@@ -102,6 +114,32 @@
   {{ toastSvc.toast().message }}
 </div>
 
+<!-- Pending Share Modal -->
+<div class="modal-overlay" *ngIf="shareIntentSvc.pendingShare()" (click)="cancelPendingShare()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Incoming Share</h2>
+    </div>
+    <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+        <p style="color: var(--text-secondary); word-break: break-all; margin: 0; font-size: 13px; max-height: 100px; overflow-y: auto;">
+          {{ shareIntentSvc.pendingShare()?.payload }}
+        </p>
+      </div>
+      
+      <textarea #shareNote class="action-input" placeholder="Add a note (optional)..." style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-family: inherit; font-size: 14px; resize: none; min-height: 80px;" [value]="pendingShareNote()" (input)="pendingShareNote.set(shareNote.value)" (keydown.enter)="$event.preventDefault(); confirmPendingShare()"></textarea>
+      
+      <div class="tags-input-wrap">
+        <app-tag-input [tags]="pendingShareTags()" (tagsChange)="pendingShareTags.set($event)" placeholder="Add tags..."></app-tag-input>
+      </div>
+      
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px;">
+        <button class="demo-btn" (click)="cancelPendingShare()">Discard</button>
+        <button class="primary" (click)="confirmPendingShare()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <app-context-menu></app-context-menu>
 </ng-container>
-

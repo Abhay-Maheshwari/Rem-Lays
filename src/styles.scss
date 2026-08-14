@@ -1,11 +1,12 @@
 :root {
+  color-scheme: dark;
   --bg-sidebar: #1e1e1e;
   --bg-main: #141414;
   --border-subtle: rgba(255, 255, 255, 0.05);
   --border-strong: rgba(255, 255, 255, 0.12);
   --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --text-tertiary: #6c6c75;
+  --text-secondary: #b3b3b3;
+  --text-tertiary: #8a8a95;
   --accent: #3b82f6;
   --accent-soft: rgba(59, 130, 246, 0.15);
   --online: #34d399;
@@ -17,6 +18,7 @@
 }
 
 body.light-theme {
+  color-scheme: light;
   --bg-sidebar: #f7f7f8;
   --bg-main: #ffffff;
   --border-subtle: rgba(0, 0, 0, 0.08);
@@ -24,6 +26,42 @@ body.light-theme {
   --text-primary: #1a1a1a;
   --text-secondary: #666666;
   --text-tertiary: #999999;
+}
+
+body.theme-vscode {
+  --bg-sidebar: #252526;
+  --bg-main: #1e1e1e;
+  --border-subtle: #2b2b2b;
+  --border-strong: #3c3c3c;
+  --text-primary: #cccccc;
+  --text-secondary: #858585;
+  --text-tertiary: #6b6b6b;
+  --accent: #007acc;
+  --accent-soft: rgba(0, 122, 204, 0.15);
+}
+
+body.theme-dracula {
+  --bg-sidebar: #21222c;
+  --bg-main: #282a36;
+  --border-subtle: #44475a;
+  --border-strong: #6272a4;
+  --text-primary: #f8f8f2;
+  --text-secondary: #b9bacb;
+  --text-tertiary: #6272a4;
+  --accent: #bd93f9;
+  --accent-soft: rgba(189, 147, 249, 0.15);
+}
+
+body.theme-oled {
+  --bg-sidebar: #000000;
+  --bg-main: #000000;
+  --border-subtle: #1a1a1a;
+  --border-strong: #333333;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --text-tertiary: #666666;
+  --accent: #ffffff;
+  --accent-soft: rgba(255, 255, 255, 0.15);
 }
 
 body.compact-mode {

@@ -1,4 +1,4 @@
-import { Component, effect, signal } from '@angular/core';
+import { Component, effect, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ItemViewerService } from '../../services/item-viewer.service';
@@ -22,8 +22,20 @@ export class ItemViewerComponent {
   isEditing = signal<boolean>(false);
   editNoteText = signal<string>('');
   editLinkTitle = signal<string>('');
+  editLinkUrl = signal<string>('');
 
   reelEmbedHtml = signal<SafeHtml | null>(null);
+
+  @HostListener('document:keydown.escape', ['$event'])
+  handleEscape(event: KeyboardEvent) {
+    if (!this.viewerSvc.currentItem()) return;
+    
+    if (this.isEditing()) {
+      this.cancelEdit();
+    } else {
+      this.close();
+    }
+  }
 
   constructor(
     public viewerSvc: ItemViewerService,
@@ -123,7 +135,12 @@ export class ItemViewerComponent {
   startEdit() {
     this.isEditing.set(true);
     this.editNoteText.set(this.noteText);
-    this.editLinkTitle.set(this.linkTitle);
+    
+    const item = this.viewerSvc.currentItem();
+    // Use the actual stored title, not the fallback, so they don't accidentally save 'instagram.com' as a title
+    const actualTitle = item?.payload?.['title'] || '';
+    this.editLinkTitle.set(actualTitle as string);
+    this.editLinkUrl.set(this.linkUrl);
   }
 
   cancelEdit() {
@@ -135,11 +152,21 @@ export class ItemViewerComponent {
     if (!item) return;
 
     const newPayload = { ...item.payload };
+    let urlChanged = false;
+    let newUrl = '';
     
     if (item.type === 'text') {
       newPayload['note'] = this.editNoteText();
-    } else if (item.type === 'link') {
+    } else if (item.type === 'link' || item.type === 'reel') {
       newPayload['title'] = this.editLinkTitle();
+      if (this.editLinkUrl() && this.editLinkUrl() !== this.linkUrl) {
+        urlChanged = true;
+        newUrl = this.editLinkUrl();
+        newPayload['url'] = newUrl;
+        try {
+          newPayload['domain'] = new URL(newUrl).hostname.replace(/^www\./, '');
+        } catch {}
+      }
     }
 
     // Optimistically update the current item so UI updates immediately
@@ -147,6 +174,14 @@ export class ItemViewerComponent {
     
     await this.itemsSvc.updateItemPayload(item.id, newPayload);
     this.isEditing.set(false);
+
+    if (urlChanged) {
+      if (item.type === 'reel') {
+        this.itemsSvc.enrichReel(item.id, newUrl);
+      } else if (item.type === 'link') {
+        this.itemsSvc.enrichLink(item.id, newUrl, (newPayload['domain'] as string) || newUrl);
+      }
+    }
   }
 
   async openLink(ev: Event) {

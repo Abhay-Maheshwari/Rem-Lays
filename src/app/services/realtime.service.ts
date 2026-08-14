@@ -5,6 +5,10 @@ import { ItemsService } from './items.service';
 import { NativeNotificationService } from './native-notification.service';
 import { Item } from '../models/item.model';
 import { DevicesService } from './devices.service';
+import { AuthService } from './auth.service';
+import { LocalDbService } from './local-db.service';
+import { BoardsService } from './boards.service';
+import { Board } from '../models/board.model';
 
 @Injectable({ providedIn: 'root' })
 export class RealtimeService {
@@ -19,7 +23,10 @@ export class RealtimeService {
   constructor(
     private itemsSvc: ItemsService,
     private notificationSvc: NativeNotificationService,
-    private devicesSvc: DevicesService
+    private devicesSvc: DevicesService,
+    private authSvc: AuthService,
+    private localDb: LocalDbService,
+    private boardsSvc: BoardsService
   ) {}
 
   connect(userId: string) {
@@ -57,7 +64,7 @@ export class RealtimeService {
     this.currentUserId = null;
   }
 
-  private handleChange(payload: RealtimePostgresChangesPayload<Item>) {
+  private async handleChange(payload: RealtimePostgresChangesPayload<Item>) {
     const current = this.itemsSvc.items();
 
     if (payload.eventType === 'INSERT') {
@@ -68,6 +75,8 @@ export class RealtimeService {
       if (current.some((i) => i.id === newItem.id)) return;
 
       this.itemsSvc.items.set([newItem, ...current]);
+      // Write-through to IndexedDB
+      this.localDb.put('items', newItem);
 
       // Don't notify or play sound if this device sent the item
       if (newItem.source_device_id === this.devicesSvc.currentDeviceId) return;
@@ -89,10 +98,21 @@ export class RealtimeService {
       const device = this.devicesSvc.devices().find(d => d.id === newItem.source_device_id);
       const sourceDeviceName = device ? device.device_name : 'Unknown device';
 
+      let imageUrl: string | undefined;
+      if (newItem.type === 'image' && newItem.storage_key) {
+        try {
+          const url = await this.itemsSvc.getSignedDownloadUrl(newItem.storage_key);
+          if (url) imageUrl = url;
+        } catch (e) {
+          console.error('Failed to get signed url for notification', e);
+        }
+      }
+
       this.notificationSvc.notifyIfBackgrounded(
         displayTitle,
         `Sent from ${sourceDeviceName}`,
-        newItem.type
+        newItem.type,
+        imageUrl
       );
       return;
     }
@@ -101,8 +121,10 @@ export class RealtimeService {
       const updated = payload.new as Item;
       if (updated.status === 'deleted') {
         this.itemsSvc.items.set(current.filter((i) => i.id !== updated.id));
+        this.localDb.delete('items', updated.id);
       } else {
         this.itemsSvc.items.set(current.map((i) => (i.id === updated.id ? updated : i)));
+        this.localDb.put('items', updated);
       }
       return;
     }
@@ -111,6 +133,17 @@ export class RealtimeService {
       const oldId = (payload.old as Partial<Item>).id;
       if (oldId) {
         this.itemsSvc.items.set(current.filter((i) => i.id !== oldId));
+        this.localDb.delete('items', oldId);
+      }
+    }
+  }
+
+  private handleDeviceChange(payload: RealtimePostgresChangesPayload<any>) {
+    if (payload.eventType === 'DELETE') {
+      const deletedId = payload.old['id'];
+      if (deletedId === this.devicesSvc.currentDeviceId) {
+        // Our device has been revoked remotely
+        this.authSvc.signOut();
       }
     }
   }

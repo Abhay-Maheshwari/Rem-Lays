@@ -13,6 +13,8 @@ fn set_close_to_tray(enabled: bool, state: tauri::State<'_, AppState>) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let _ = rustls::crypto::ring::default_provider().install_default();
+
     let mut builder = tauri::Builder::default()
         .manage(AppState {
             close_to_tray: Mutex::new(true),
@@ -36,7 +38,9 @@ pub fn run() {
                 let _ = window.show();
                 let _ = window.set_focus();
             }
-        }));
+        }))
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init());
     }
 
     #[cfg(mobile)]

@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-export type Theme = 'light' | 'dark' | 'system';
+export type Theme = 'light' | 'dark' | 'system' | 'vscode' | 'dracula' | 'oled';
 
 @Injectable({
   providedIn: 'root'
@@ -43,15 +43,18 @@ export class ThemeService {
       effectiveTheme = isSystemDark ? 'dark' : 'light';
     }
 
-    const dark = effectiveTheme === 'dark';
+    const dark = effectiveTheme !== 'light';
     this.isDark.set(dark);
 
-    if (!dark) {
+    document.body.classList.remove('light-theme', 'dark-theme', 'theme-vscode', 'theme-dracula', 'theme-oled');
+    
+    if (effectiveTheme === 'light') {
       document.body.classList.add('light-theme');
-      document.body.classList.remove('dark-theme');
-    } else {
+    } else if (effectiveTheme === 'dark') {
+      // Default :root handles dark, but we can add a class just in case
       document.body.classList.add('dark-theme');
-      document.body.classList.remove('light-theme');
+    } else {
+      document.body.classList.add(`theme-${effectiveTheme}`);
     }
   }
 }

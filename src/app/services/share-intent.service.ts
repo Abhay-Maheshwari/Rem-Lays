@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { ItemsService } from './items.service';
 import { supabase } from './supabase-client';
 
@@ -29,6 +29,7 @@ declare global {
 @Injectable({ providedIn: 'root' })
 export class ShareIntentService {
   private listening = false;
+  pendingShare = signal<RemLaysShareEventDetail | null>(null);
 
   constructor(private itemsSvc: ItemsService) {}
 
@@ -70,12 +71,8 @@ export class ShareIntentService {
     const { mimeType, payload } = detail;
 
     if (mimeType === 'text/plain') {
-      const trimmed = payload.trim();
-      if (/^https?:\/\//i.test(trimmed)) {
-        await this.itemsSvc.addLink(trimmed);
-      } else {
-        await this.itemsSvc.addText(trimmed);
-      }
+      // Intercept and prompt the user instead of saving immediately
+      this.pendingShare.set(detail);
       return;
     }
 

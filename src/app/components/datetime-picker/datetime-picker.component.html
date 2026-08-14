@@ -1,0 +1,86 @@
+<div class="modal-overlay" (click)="onCancel()">
+  <div class="modal-content custom-modal datetime-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Custom Date & Time</h2>
+      <button class="close-btn" (click)="onCancel()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="calendar-header">
+        <button class="icon-btn" (click)="prevMonth()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="month-year">{{ currentMonthDate | date:'MMMM yyyy' }}</div>
+        <button class="icon-btn" (click)="nextMonth()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+
+      <div class="calendar-grid">
+        <div class="weekday" *ngFor="let wd of weekDays">{{ wd }}</div>
+        <div class="day" 
+           *ngFor="let day of daysInMonth" 
+           [class.other-month]="!day.isCurrentMonth"
+           [class.today]="isToday(day.fullDate)"
+           [class.selected]="isSelected(day.fullDate)"
+           [class.disabled]="isPast(day.fullDate)"
+           (click)="!isPast(day.fullDate) && selectDate(day.fullDate)">
+        {{ day.date }}
+      </div>
+      </div>
+
+      <div class="time-picker">
+        <label>Time</label>
+        
+        <div class="custom-time-selector" [class.active]="showTimeDropdown" (click)="toggleTimeDropdown($event)">
+          <span class="time-display">{{ timeStr }}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          
+          <div class="time-dropdown" *ngIf="showTimeDropdown" (click)="$event.stopPropagation()">
+            <div class="time-column hours-col">
+              <div class="time-option" *ngFor="let h of hoursList" [class.selected]="selectedHour === h" (click)="selectHour(h)">
+                {{ h }}
+              </div>
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-column mins-col">
+              <div class="time-option" *ngFor="let m of minutesList" [class.selected]="selectedMinute === m" (click)="selectMinute(m)">
+                {{ m }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="time-picker" *ngIf="showRecurrence" style="margin-top: 12px;">
+        <label>Repeat</label>
+        
+        <div class="custom-time-selector" [class.active]="showRecurrenceDropdown" (click)="toggleRecurrenceDropdown($event)">
+          <span class="time-display" style="text-transform: capitalize;">{{ selectedRecurrence }}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+          
+          <div class="time-dropdown recurrence-dropdown" *ngIf="showRecurrenceDropdown" (click)="$event.stopPropagation()">
+            <div class="time-column" style="height: auto; max-height: 180px;">
+              <div class="time-option" style="text-transform: capitalize;" *ngFor="let r of recurrenceOptions" [class.selected]="selectedRecurrence === r" (click)="selectRecurrence(r)">
+                {{ r }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="onCancel()">Cancel</button>
+      <button class="btn-primary" (click)="onConfirm()" [disabled]="isPastDate">Save</button>
+    </div>
+  </div>
+</div>

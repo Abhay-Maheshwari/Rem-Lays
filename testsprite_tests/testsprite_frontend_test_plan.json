@@ -1,0 +1,637 @@
+[
+  {
+    "id": "TC001",
+    "title": "Save a new link with tags and a reminder",
+    "description": "This verifies that a user can create a new link item, add tags and an optional deadline, save it, and see it appear in the vault.",
+    "category": "Link and Note Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Type a link URL into the quick action input"
+      },
+      {
+        "type": "action",
+        "description": "Add category tags"
+      },
+      {
+        "type": "action",
+        "description": "Set an optional reminder or deadline"
+      },
+      {
+        "type": "action",
+        "description": "Save the item to the personal vault"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new item appears in the feed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the item shows the saved tags or deadline"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Save a new note with tags",
+    "description": "This verifies that a user can create a free-form note, tag it, save it, and find it in the vault.",
+    "category": "Link and Note Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Type note content into the quick action input"
+      },
+      {
+        "type": "action",
+        "description": "Add category tags"
+      },
+      {
+        "type": "action",
+        "description": "Save the item to the personal vault"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new note appears in the feed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the saved tags are shown for the note"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Delete an item after confirming the prompt",
+    "description": "This verifies that a user can delete a saved item from the viewer and see it removed from the vault after confirmation.",
+    "category": "Item Viewer and Actions",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click an item card in the feed"
+      },
+      {
+        "type": "action",
+        "description": "Delete the item"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the item is removed from the vault"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the deleted item no longer appears in the feed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Open an item and edit its details",
+    "description": "This verifies that a user can open a saved item, update its content or tags, save the changes, and see the updated item in the vault.",
+    "category": "Item Viewer and Actions",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click an item card in the feed"
+      },
+      {
+        "type": "action",
+        "description": "Edit the item title, notes, or tags"
+      },
+      {
+        "type": "action",
+        "description": "Save the changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated item is shown in the viewer or feed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the edited content or tags are reflected"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Snooze or archive an item from the viewer",
+    "description": "This verifies that a user can change an item’s status from the detailed viewer and see the vault update accordingly.",
+    "category": "Item Viewer and Actions",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click an item card in the feed"
+      },
+      {
+        "type": "action",
+        "description": "Snooze the reminder or archive the item"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the item status is updated"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the item is reflected in the vault after the change"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Find a saved item by search",
+    "description": "This verifies that searching the vault narrows the feed to matching items and preserves access to the matching content.",
+    "category": "Feed and Search Filtering",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Enter a search query in the search bar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the feed is narrowed to matching items"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the matching item remains accessible in the feed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Open the calendar view from the main app",
+    "description": "This test verifies that a user can open the calendar view from the dashboard and see saved deadlines in a calendar layout.",
+    "category": "Calendar View",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the calendar view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the calendar view is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify saved deadlines are displayed on the calendar"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Filter the feed by tag",
+    "description": "This verifies that selecting a tag chip filters the feed to items in that category.",
+    "category": "Feed and Search Filtering",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click a tag chip in the feed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the feed is filtered to the selected tag"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify only matching items are shown"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "View items due on a selected calendar date",
+    "description": "This test verifies that selecting a date in the calendar shows the items due on that day.",
+    "category": "Calendar View",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the calendar view"
+      },
+      {
+        "type": "action",
+        "description": "Select a date in the calendar"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify items due on the selected date are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the selected date remains highlighted or active"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Switch between month and week calendar views",
+    "description": "This test verifies that a user can switch calendar layouts and see the calendar update accordingly.",
+    "category": "Calendar View",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the calendar view"
+      },
+      {
+        "type": "action",
+        "description": "Switch to week view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the week calendar layout is displayed"
+      },
+      {
+        "type": "action",
+        "description": "Switch back to month view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the month calendar layout is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "Move the calendar to a different month",
+    "description": "This test verifies that changing calendar months updates the visible calendar to the selected month.",
+    "category": "Calendar View",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the calendar view"
+      },
+      {
+        "type": "action",
+        "description": "Move to a different month"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the calendar updates to the selected month"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify calendar items for that month are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "Copy an item link from the viewer",
+    "description": "This verifies that a user can copy a saved item link from the item viewer and see a copy confirmation.",
+    "category": "Item Viewer and Actions",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click an item card in the feed"
+      },
+      {
+        "type": "action",
+        "description": "Copy the item link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a copy confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the item remains open in the viewer"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC013",
+    "title": "Open a shared item from a public link",
+    "description": "This test verifies that a public recipient can open a valid shared link and see the shared item details and link card.",
+    "category": "Public Shared Item Viewer",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /share/:token"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the shared item title is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the shared item description and link card are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC014",
+    "title": "Switch between feed layouts",
+    "description": "This verifies that a user can switch the vault between grid and list layouts and the feed updates accordingly.",
+    "category": "Feed and Search Filtering",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Switch the feed to a different layout"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the feed layout changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify saved items are still visible after the layout change"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC015",
+    "title": "Switch the app theme",
+    "description": "This verifies that a user can open settings and switch between dark and light themes, with the app appearance updating accordingly.",
+    "category": "Settings and Customization",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open Settings view"
+      },
+      {
+        "type": "action",
+        "description": "Toggle the app theme"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the app appearance updates to the selected theme"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC016",
+    "title": "Review weekly digest insights",
+    "description": "This test verifies that a user can open the weekly digest, review saved content statistics and breakdowns, and close it to return to the vault.",
+    "category": "Weekly Digest",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the Weekly Digest modal"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify weekly saved content statistics are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify top tags and domain breakdowns are displayed"
+      },
+      {
+        "type": "action",
+        "description": "Close the modal"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the main vault view is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC017",
+    "title": "Change the device nickname",
+    "description": "This verifies that a user can edit the device nickname in settings and save the updated name successfully.",
+    "category": "Settings and Customization",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open Settings view"
+      },
+      {
+        "type": "action",
+        "description": "Edit the device nickname"
+      },
+      {
+        "type": "action",
+        "description": "Save the device nickname change"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated device nickname is shown"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC018",
+    "title": "Open a shared item and copy its share link",
+    "description": "This verifies that a public recipient can copy the shared link from the shared viewer and receive confirmation.",
+    "category": "Item Viewer and Actions",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /share/:token"
+      },
+      {
+        "type": "action",
+        "description": "Copy the shared link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a copy confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the shared item remains visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC019",
+    "title": "Review weekly digest without losing vault context",
+    "description": "This test verifies that opening and closing the weekly digest preserves access to the vault so the user can continue organizing items afterward.",
+    "category": "Weekly Digest",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the Weekly Digest modal"
+      },
+      {
+        "type": "action",
+        "description": "Close the modal"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the main dashboard is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify saved items remain accessible in the vault"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC020",
+    "title": "Copy the shared link from the public viewer",
+    "description": "This test verifies that a public recipient can copy the shared item link successfully from the shared viewer.",
+    "category": "Public Shared Item Viewer",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /share/:token"
+      },
+      {
+        "type": "action",
+        "description": "Copy the shared link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a copy confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the shared link remains available in the viewer"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC021",
+    "title": "View sync status in settings",
+    "description": "This verifies that a user can open settings and view the current sync status without leaving the settings area.",
+    "category": "Settings and Customization",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open Settings view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the sync status is displayed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC022",
+    "title": "Handle a missing shared item link",
+    "description": "This test verifies that an invalid or missing shared share route shows a missing-item state instead of a shared viewer.",
+    "category": "Public Shared Item Viewer",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /share/:token"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a missing item state is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the shared item viewer is not displayed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC023",
+    "title": "View keyboard shortcuts in settings",
+    "description": "This verifies that a user can open settings and view the available keyboard shortcuts for the app.",
+    "category": "Settings and Customization",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open Settings view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the keyboard shortcuts are displayed"
+      }
+    ],
+    "priority": "Low"
+  }
+]

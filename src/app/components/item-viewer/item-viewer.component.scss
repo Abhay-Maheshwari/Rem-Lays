@@ -273,3 +273,16 @@
   max-width: 100%;
   margin-top: -10px;
 }
+
+::ng-deep .reel-embed {
+  overflow: hidden;
+  border-radius: 12px;
+  background: #000;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  
+  /* The instagram script replaces the blockquote with an iframe */
+  iframe {
+    margin-top: -65px !important; /* hide profile header */
+    margin-bottom: -135px !important; /* hide likes/comments footer */
+  }
+}

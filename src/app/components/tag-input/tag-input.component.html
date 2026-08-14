@@ -1,0 +1,33 @@
+<div class="tag-input-container" [class.disabled]="disabled">
+  <div class="tags-list">
+    <span class="tag-pill" *ngFor="let tag of tags; let i = index" [style.--tag-color]="itemsSvc.getTagColor(tag)">
+      <span class="tag-name">#{{ tag }}</span>
+      <button class="remove-btn" (click)="removeTag(i); $event.stopPropagation()" *ngIf="!disabled" title="Remove tag">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </span>
+    
+    <input
+      #inputEl
+      type="text"
+      class="tag-input"
+      [placeholder]="tags.length === 0 ? placeholder : ''"
+      [disabled]="disabled"
+      [value]="inputValue()"
+      (input)="onInput($event)"
+      (keydown)="onKeyDown($event)"
+      (focus)="showDropdown.set(suggestions().length > 0)"
+      [autofocus]="autoFocus"
+    />
+  </div>
+
+  <div class="autocomplete-dropdown" *ngIf="showDropdown() && suggestions().length > 0 && !disabled">
+    <div class="suggestion-item" 
+         *ngFor="let suggestion of suggestions(); let i = index"
+         [class.selected]="i === selectedIndex()"
+         (click)="addTag(suggestion)">
+      <span class="tag-dot" [style.background]="itemsSvc.getTagColor(suggestion)"></span>
+      <span class="suggestion-name">#{{ suggestion }}</span>
+    </div>
+  </div>
+</div>

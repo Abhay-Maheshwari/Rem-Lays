@@ -7,6 +7,7 @@ import { ItemsService } from '../../services/items.service';
 import { ThemeService, Theme } from '../../services/theme.service';
 import { invoke } from '@tauri-apps/api/core';
 import { isTauri } from '../../services/platform';
+import { UpdateService } from '../../services/update.service';
 
 @Component({
   selector: 'app-settings-page',
@@ -26,20 +27,37 @@ export class SettingsPageComponent implements OnInit {
   isMinimizeToTray = true;
   displayName = '';
   isEditingName = false;
+  currentVersion = '';
+  
+  presets = [
+    { id: 'default', name: 'Default', style: 'var(--bg-main)' },
+    { id: 'blue', name: 'Blue', style: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, var(--bg-main) 100%)' },
+    { id: 'purple', name: 'Purple', style: 'linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, var(--bg-main) 100%)' },
+    { id: 'emerald', name: 'Emerald', style: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, var(--bg-main) 100%)' },
+    { id: 'rose', name: 'Rose', style: 'linear-gradient(135deg, rgba(244, 63, 94, 0.08) 0%, var(--bg-main) 100%)' }
+  ];
+  currentBgId = 'default';
 
   constructor(
     private autostartSvc: AutostartService,
     public auth: AuthService,
     public itemsSvc: ItemsService,
-    public themeSvc: ThemeService
+    public themeSvc: ThemeService,
+    public updateSvc: UpdateService
   ) {}
 
   async ngOnInit() {
     this.isAutostartEnabled = await this.autostartSvc.isEnabled();
     this.displayName = this.auth.session()?.user?.user_metadata?.['display_name'] || '';
+    this.currentVersion = await this.updateSvc.getCurrentVersion();
     
     const savedCompact = localStorage.getItem('remlays_compact_mode');
     this.isCompactMode = savedCompact === 'true';
+
+    const savedBg = localStorage.getItem('dashboard_bg');
+    if (savedBg) {
+      this.currentBgId = savedBg;
+    }
 
     if (isTauri()) {
         const savedTray = localStorage.getItem('remlays_minimize_to_tray');
@@ -64,6 +82,11 @@ export class SettingsPageComponent implements OnInit {
 
   setTheme(theme: Theme) {
     this.themeSvc.setTheme(theme);
+  }
+
+  setDashboardBg(bgId: string) {
+    this.currentBgId = bgId;
+    localStorage.setItem('dashboard_bg', bgId);
   }
 
   toggleCompactMode() {

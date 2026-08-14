@@ -9,9 +9,13 @@ export class AuthService {
   // Signal instead of an Observable-only approach — simplest thing that
   // works for a small app; swap for a proper store if this grows.
   session = signal<Session | null>(null);
+  isInitializing = signal(true);
 
   constructor() {
-    supabase.auth.getSession().then(({ data }) => this.session.set(data.session));
+    supabase.auth.getSession().then(({ data }) => {
+      this.session.set(data.session);
+      this.isInitializing.set(false);
+    });
     supabase.auth.onAuthStateChange((_event, session) => this.session.set(session));
 
     const isTauri = typeof window !== 'undefined' && (

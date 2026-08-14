@@ -7,16 +7,21 @@ import { ToastService } from './toast.service';
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeTextFile } from '@tauri-apps/plugin-fs';
 import { NativeNotificationService } from './native-notification.service';
+import { BoardsService } from './boards.service';
+import { CacheService } from './cache.service';
+import { LocalDbService } from './local-db.service';
 import { environment } from '../../environments/environment';
 
-export type FeedFilter = 'all' | 'unseen' | 'link' | 'media' | 'archived' | 'snoozed' | 'shared' | 'deleted';
+export type FeedFilter = 'all' | 'unseen' | 'link' | 'media' | 'archived' | 'snoozed' | 'shared' | 'deleted' | 'untagged' | 'pending';
 
 @Injectable({ providedIn: 'root' })
 export class ItemsService {
   items = signal<Item[]>([]);
   filter = signal<FeedFilter>('all');
   searchQuery = signal('');
-  selectedTag = signal<string | null>(null);
+  selectedTags = signal<Set<string>>(new Set());
+  tagMatchMode = signal<'AND' | 'OR' | 'NOT'>('OR');
+  tagSortMode = signal<'count' | 'alpha'>('count');
   activeBoardId = signal<string | null>(null);
 
   selectionMode = signal<boolean>(false);
@@ -25,16 +30,87 @@ export class ItemsService {
   currentTime = signal<number>(Date.now());
   private snoozeCheckInterval: any;
   private lastSnoozeCheck = Date.now();
+  private lastReminderCheck = Date.now();
+
+  /** In-memory fingerprint sets for fast duplicate detection. */
+  private textFingerprints = new Map<string, string>();  // note text -> item id
+  private linkFingerprints = new Map<string, string>();  // url -> item id
+
+  /** Signed URL TTL: 50 minutes (URLs expire in 60min, 10min safety margin). */
+  private readonly SIGNED_URL_TTL = 50 * 60 * 1000;
 
   constructor(
     private offlineQueue: OfflineQueueService, 
     private devicesService: DevicesService,
     private toastSvc: ToastService,
-    private notificationSvc: NativeNotificationService
+    private notificationSvc: NativeNotificationService,
+    private boardsSvc: BoardsService,
+    private cache: CacheService,
+    private localDb: LocalDbService
   ) {
     this.snoozeCheckInterval = setInterval(() => {
       this.checkSnoozes();
+      this.checkReminders();
     }, 60000);
+
+    // Load cached items from IndexedDB on service init (instant display)
+    this.loadFromCache();
+  }
+
+  // ─── Cache helpers ──────────────────────────────────────────────────
+
+  /** Load items from IndexedDB for instant display on app launch. */
+  private async loadFromCache() {
+    const cached = await this.localDb.getAll<Item>('items');
+    if (cached.length > 0 && this.items().length === 0) {
+      this.items.set(cached);
+      this.rebuildFingerprints(cached);
+    }
+  }
+
+  /** Rebuild the in-memory fingerprint sets from an items array. */
+  private rebuildFingerprints(items: Item[]) {
+    this.textFingerprints.clear();
+    this.linkFingerprints.clear();
+    for (const item of items) {
+      if (item.status === 'deleted') continue;
+      if (item.type === 'text' && item.payload?.['note']) {
+        this.textFingerprints.set(item.payload['note'] as string, item.id);
+      }
+      if ((item.type === 'link' || item.type === 'reel') && item.payload?.['url']) {
+        this.linkFingerprints.set(item.payload['url'] as string, item.id);
+      }
+    }
+  }
+
+  /**
+   * Optimistic local update — patches an item in the signal without
+   * a network round-trip. The actual DB write happens separately;
+   * Realtime handles cross-device sync.
+   */
+  private optimisticUpdate(id: string, patch: Partial<Item>) {
+    this.items.update(items =>
+      items.map(i => i.id === id ? { ...i, ...patch } : i)
+    );
+    // Write-through to IndexedDB (fire-and-forget)
+    const updated = this.items().find(i => i.id === id);
+    if (updated) this.localDb.put('items', updated);
+  }
+
+  /** Optimistic remove — takes an item out of the signal immediately. */
+  private optimisticRemove(id: string) {
+    this.items.update(items => items.filter(i => i.id !== id));
+    this.localDb.delete('items', id);
+  }
+
+  getBoardIdFromTags(tags: string[] | undefined): string | null {
+    if (!tags || tags.length === 0) return null;
+    const boards = this.boardsSvc.boards();
+    for (const tag of tags) {
+      const match = boards.find(b => b.auto_assign_hashtags && b.auto_assign_hashtags.some(t => t.toLowerCase() === tag.toLowerCase()));
+      if (match) return match.id;
+    }
+    return null;
   }
 
   checkSnoozes() {
@@ -55,46 +131,165 @@ export class ItemsService {
     this.lastSnoozeCheck = now;
   }
 
-  allTags = computed(() => {
-    const tags = new Set<string>();
+  checkReminders() {
+    const now = Date.now();
     for (const item of this.items()) {
-      if (item.payload['tags'] && Array.isArray(item.payload['tags'])) {
-        for (const tag of item.payload['tags']) {
-          tags.add(tag);
+      if (item.status === 'archived' || item.status === 'deleted') continue;
+      const reminder = item.payload?.['reminder'] as { type: string, next_at: string } | undefined;
+      if (reminder && reminder.next_at) {
+        const reminderTime = new Date(reminder.next_at).getTime();
+        if (reminderTime <= now && reminderTime > this.lastReminderCheck) {
+          this.notificationSvc.notifyIfBackgrounded(
+            'Reminder',
+            item.type === 'text' ? (item.payload as any)['note'] || (item.payload as any)['text'] : 'Check your reminder.'
+          );
+          
+          // Mark as unseen so it pops back into Inbox
+          this.optimisticUpdate(item.id, { status: 'unseen', seen_at: null } as Partial<Item>);
+          
+          // Schedule next occurrence or clear
+          let nextPayload = { ...item.payload };
+          if (reminder.type === 'once') {
+            delete nextPayload['reminder'];
+          } else {
+            const nextDate = new Date(reminder.next_at);
+            if (reminder.type === 'daily') nextDate.setDate(nextDate.getDate() + 1);
+            else if (reminder.type === 'weekly') nextDate.setDate(nextDate.getDate() + 7);
+            else if (reminder.type === 'monthly') nextDate.setMonth(nextDate.getMonth() + 1);
+            else if (reminder.type === 'yearly') nextDate.setFullYear(nextDate.getFullYear() + 1);
+            
+            // Catch up if missed multiple periods
+            while (nextDate.getTime() <= now) {
+               if (reminder.type === 'daily') nextDate.setDate(nextDate.getDate() + 1);
+               else if (reminder.type === 'weekly') nextDate.setDate(nextDate.getDate() + 7);
+               else if (reminder.type === 'monthly') nextDate.setMonth(nextDate.getMonth() + 1);
+               else if (reminder.type === 'yearly') nextDate.setFullYear(nextDate.getFullYear() + 1);
+            }
+            
+            nextPayload['reminder'] = { ...reminder, next_at: nextDate.toISOString() };
+          }
+          
+          supabase.from('items').update({ status: 'unseen', seen_at: null, payload: nextPayload }).eq('id', item.id).then();
+          this.optimisticUpdate(item.id, { payload: nextPayload });
         }
       }
     }
-    return Array.from(tags).sort();
-  });
+    this.lastReminderCheck = now;
+  }
 
-  // Derived views — same pattern as DevicesService's plain signal, just
-  // with a computed() layered on top since the feed needs filtering.
-  filteredItems = computed(() => {
+  baseViewItems = computed(() => {
     let all = this.items();
     const nowStr = new Date(this.currentTime()).toISOString();
+    const activeBoard = this.activeBoardId();
+    const boardMatch = (i: Item) => {
+      if (activeBoard === '*') return true;
+      if (this.filter() !== 'all') return true;
+      return (i.board_id || null) === activeBoard;
+    };
     
     // Filter out expired and archived items locally, unless viewing archive
     if (this.filter() === 'archived') {
-      all = all.filter(i => i.status === 'archived' && (i.board_id || null) === this.activeBoardId());
+      all = all.filter(i => i.status === 'archived' && boardMatch(i));
     } else if (this.filter() === 'snoozed') {
-      all = all.filter(i => i.snooze_until && i.snooze_until > nowStr && i.status !== 'archived' && (i.board_id || null) === this.activeBoardId());
+      all = all.filter(i => i.snooze_until && i.snooze_until > nowStr && i.status !== 'archived' && boardMatch(i));
     } else if (this.filter() === 'deleted') {
-      all = all.filter(i => i.status === 'deleted' && (i.board_id || null) === this.activeBoardId());
+      all = all.filter(i => i.status === 'deleted' && boardMatch(i));
     } else {
       all = all.filter(i => 
         (!i.expires_at || i.expires_at > nowStr) && 
         i.status !== 'archived' &&
         i.status !== 'deleted' &&
         (!i.snooze_until || i.snooze_until <= nowStr) &&
-        (i.board_id || null) === this.activeBoardId()
+        boardMatch(i)
       );
     }
+
+    let result = all;
+    switch (this.filter()) {
+      case 'unseen':
+        result = all.filter((i) => i.status === 'unseen');
+        break;
+      case 'pending':
+        result = all.filter((i) => i.payload && i.payload['deadline']);
+        break;
+      case 'link':
+        result = all.filter((i) => i.type === 'link' || i.type === 'reel');
+        break;
+      case 'media':
+        result = all.filter((i) => i.type === 'image' || i.type === 'video');
+        break;
+      case 'shared':
+        result = all.filter((i) => i.share_token !== null);
+        break;
+      case 'untagged':
+        result = all.filter((i) => !i.payload['tags'] || (Array.isArray(i.payload['tags']) && i.payload['tags'].length === 0));
+        break;
+    }
+    return result;
+  });
+
+  allTags = computed(() => {
+    const tags = new Set<string>();
+    for (const item of this.baseViewItems()) {
+      if (item.payload['tags'] && Array.isArray(item.payload['tags'])) {
+        for (const tag of item.payload['tags']) {
+          tags.add(tag);
+        }
+      }
+    }
+    const tagArray = Array.from(tags);
+    if (this.tagSortMode() === 'alpha') {
+      return tagArray.sort();
+    } else {
+      const counts = this.tagCounts();
+      return tagArray.sort((a, b) => {
+        const countDiff = (counts.get(b) || 0) - (counts.get(a) || 0);
+        return countDiff !== 0 ? countDiff : a.localeCompare(b);
+      });
+    }
+  });
+
+  tagCounts = computed(() => {
+    const counts = new Map<string, number>();
+    for (const item of this.baseViewItems()) {
+      if (item.payload['tags'] && Array.isArray(item.payload['tags'])) {
+        for (const tag of item.payload['tags']) {
+          counts.set(tag, (counts.get(tag) || 0) + 1);
+        }
+      }
+    }
+    return counts;
+  });
+
+  /** Deterministic HSL color from tag name hash — same tag always gets same color. */
+  getTagColor(tag: string): string {
+    let hash = 0;
+    for (let i = 0; i < tag.length; i++) {
+      hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 65%, 60%)`;
+  }
+
+  // Derived views — same pattern as DevicesService's plain signal, just
+  // with a computed() layered on top since the feed needs filtering.
+  filteredItems = computed(() => {
+    let all = this.baseViewItems();
     
-    const tag = this.selectedTag();
-    if (tag) {
+    const tags = this.selectedTags();
+    if (tags.size > 0) {
+      const mode = this.tagMatchMode();
       all = all.filter(i => {
         const itemTags = i.payload['tags'];
-        return Array.isArray(itemTags) && itemTags.includes(tag);
+        if (!Array.isArray(itemTags)) return mode === 'NOT';
+        if (mode === 'AND') {
+          return Array.from(tags).every(t => itemTags.includes(t));
+        } else if (mode === 'OR') {
+          return Array.from(tags).some(t => itemTags.includes(t));
+        } else if (mode === 'NOT') {
+          return !Array.from(tags).some(t => itemTags.includes(t));
+        }
+        return false;
       });
     }
 
@@ -106,24 +301,8 @@ export class ItemsService {
       });
     }
 
-    let result = all;
-    switch (this.filter()) {
-      case 'unseen':
-        result = all.filter((i) => i.status === 'unseen');
-        break;
-      case 'link':
-        result = all.filter((i) => i.type === 'link');
-        break;
-      case 'media':
-        result = all.filter((i) => i.type === 'image' || i.type === 'video' || i.type === 'reel');
-        break;
-      case 'shared':
-        result = all.filter((i) => i.share_token !== null);
-        break;
-    }
-
     // Stable sort: Pinned first, then by date (newest first), then by ID
-    return result.sort((a, b) => {
+    return all.sort((a, b) => {
       if (a.is_pinned && !b.is_pinned) return -1;
       if (!a.is_pinned && b.is_pinned) return 1;
 
@@ -134,7 +313,12 @@ export class ItemsService {
 
   unseenCount = computed(() => {
     const now = new Date().toISOString();
-    return this.items().filter((i) => i.status === 'unseen' && (!i.expires_at || i.expires_at > now) && !i.board_id).length;
+    return this.items().filter((i) => i.status === 'unseen' && (!i.snooze_until || i.snooze_until <= now) && (!i.expires_at || i.expires_at > now)).length;
+  });
+
+  pendingCount = computed(() => {
+    const now = new Date().toISOString();
+    return this.items().filter((i) => i.payload && i.payload['deadline'] && i.status !== 'archived' && i.status !== 'deleted' && (!i.snooze_until || i.snooze_until <= now) && (!i.expires_at || i.expires_at > now)).length;
   });
 
   getBoardUnseenCount(boardId: string) {
@@ -163,14 +347,20 @@ export class ItemsService {
       .or(`expires_at.is.null,expires_at.gt.${now},status.eq.deleted`)
       .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false })
-      .limit(100);
+      .limit(500);
 
     if (error) {
       console.error('items refresh failed', error);
       this.toastSvc.show('Refresh Error: ' + error.message, 'error');
       return;
     }
-    this.items.set((data ?? []) as Item[]);
+    const items = (data ?? []) as Item[];
+    this.items.set(items);
+
+    // Persist to IndexedDB + rebuild fingerprints (fire-and-forget)
+    this.localDb.replaceAll('items', items);
+    this.localDb.setMeta('items_last_sync', Date.now());
+    this.rebuildFingerprints(items);
   }
 
   /**
@@ -237,7 +427,12 @@ export class ItemsService {
       type: 'text' as ItemType,
       payload: { note: trimmed, tags },
     };
-    if (this.activeBoardId()) insertPayload.board_id = this.activeBoardId();
+    const mappedBoardId = this.getBoardIdFromTags(tags);
+    if (mappedBoardId) {
+      insertPayload.board_id = mappedBoardId;
+    } else if (this.activeBoardId() && this.activeBoardId() !== '*') {
+      insertPayload.board_id = this.activeBoardId();
+    }
 
     const { error } = await supabase.from('items').insert(insertPayload);
 
@@ -250,9 +445,9 @@ export class ItemsService {
     await this.refresh();
   }
 
-  async addLink(rawUrl: string, tags?: string[]) {
+  async addLink(rawUrl: string, tags?: string[], note?: string) {
     if (!navigator.onLine) {
-      this.offlineQueue.enqueue({ kind: 'link', url: rawUrl, tags, queuedAt: new Date().toISOString() });
+      this.offlineQueue.enqueue({ kind: 'link', url: rawUrl, tags, note, queuedAt: new Date().toISOString() });
       return;
     }
 
@@ -287,6 +482,9 @@ export class ItemsService {
       const existingTags = Array.isArray((duplicate.payload as any)?.tags) ? (duplicate.payload as any).tags : [];
       const newTags = tags || [];
       const mergedTags = Array.from(new Set([...existingTags, ...newTags]));
+      
+      const payloadUpdate: any = { ...(duplicate.payload as any), tags: mergedTags.length > 0 ? mergedTags : undefined };
+      if (note) payloadUpdate.note = note;
 
       const { error: updateError } = await supabase
         .from('items')
@@ -294,13 +492,13 @@ export class ItemsService {
           created_at: new Date().toISOString(),
           status: 'unseen', // Bring it back to attention
           seen_at: null,
-          payload: { ...(duplicate.payload as any), tags: mergedTags.length > 0 ? mergedTags : undefined }
+          payload: payloadUpdate
         })
         .eq('id', duplicate.id);
 
       if (updateError) {
         console.error('duplicate update failed, queuing for retry', updateError);
-        this.offlineQueue.enqueue({ kind: 'link', url: rawUrl, tags, queuedAt: new Date().toISOString() });
+        this.offlineQueue.enqueue({ kind: 'link', url: rawUrl, tags, note, queuedAt: new Date().toISOString() });
       } else {
         await this.refresh();
         this.toastSvc.show('Link already exists! Timestamp updated.');
@@ -312,9 +510,14 @@ export class ItemsService {
         user_id: userData.user.id,
         source_device_id: this.devicesService.currentDeviceId,
         type,
-        payload: { url: rawUrl, domain, tags }
+        payload: { url: rawUrl, domain, tags, note }
     };
-    if (this.activeBoardId()) insertPayload.board_id = this.activeBoardId();
+    const mappedBoardId = this.getBoardIdFromTags(tags);
+    if (mappedBoardId) {
+      insertPayload.board_id = mappedBoardId;
+    } else if (this.activeBoardId() && this.activeBoardId() !== '*') {
+      insertPayload.board_id = this.activeBoardId();
+    }
 
     const { data: inserted, error } = await supabase
       .from('items')
@@ -339,7 +542,7 @@ export class ItemsService {
     }
   }
 
-  private async enrichLink(itemId: string, url: string, fallbackDomain: string) {
+  async enrichLink(itemId: string, url: string, fallbackDomain: string) {
     try {
       const { data, error } = await supabase.functions.invoke('unfurl-link', { body: { url } });
       if (error || !data) return;
@@ -365,7 +568,7 @@ export class ItemsService {
     }
   }
 
-  private async enrichReel(itemId: string, url: string) {
+  async enrichReel(itemId: string, url: string) {
     try {
       const { data, error } = await supabase.functions.invoke('unfurl-reel', { body: { url } });
       
@@ -421,7 +624,7 @@ export class ItemsService {
       if (op.kind === 'text') {
         await this.addText(op.note, op.tags);
       } else {
-        await this.addLink(op.url, op.tags);
+        await this.addLink(op.url, op.tags, op.note);
       }
     }
   }
@@ -465,7 +668,12 @@ export class ItemsService {
       payload: { filename: file.name, tags },
       storage_key: storageKey
     };
-    if (this.activeBoardId()) insertPayload.board_id = this.activeBoardId();
+    const mappedBoardId = this.getBoardIdFromTags(tags);
+    if (mappedBoardId) {
+      insertPayload.board_id = mappedBoardId;
+    } else if (this.activeBoardId() && this.activeBoardId() !== '*') {
+      insertPayload.board_id = this.activeBoardId();
+    }
 
     const { error: insertError } = await supabase.from('items').insert(insertPayload);
     if (insertError) console.error('addMedia insert failed', insertError);
@@ -488,7 +696,12 @@ export class ItemsService {
       payload: { filename, tags },
       storage_key: storageKey
     };
-    if (this.activeBoardId()) insertPayload.board_id = this.activeBoardId();
+    const mappedBoardId = this.getBoardIdFromTags(tags);
+    if (mappedBoardId) {
+      insertPayload.board_id = mappedBoardId;
+    } else if (this.activeBoardId() && this.activeBoardId() !== '*') {
+      insertPayload.board_id = this.activeBoardId();
+    }
 
     const { error } = await supabase.from('items').insert(insertPayload);
     if (error) console.error('addMediaFromStorageKey insert failed', error);
@@ -497,13 +710,34 @@ export class ItemsService {
 
   /** Signed, time-limited download URL — the bucket is private, so this
    * is how ItemCardComponent actually renders an image/video, not a
-   * public URL. */
+   * public URL.
+   *
+   * Caching: checks in-memory cache first, then IndexedDB, then
+   * fetches from Supabase Storage. Cached for 50min (URLs expire in 60min). */
   async getSignedDownloadUrl(storageKey: string): Promise<string | null> {
+    // 1. In-memory cache hit?
+    const memCached = this.cache.get<string>(`signed:${storageKey}`);
+    if (memCached) return memCached;
+
+    // 2. IndexedDB cache hit?
+    const dbCached = await this.localDb.getSignedUrl(storageKey);
+    if (dbCached) {
+      // Promote to in-memory for faster repeated access this session
+      this.cache.set(`signed:${storageKey}`, dbCached, this.SIGNED_URL_TTL);
+      return dbCached;
+    }
+
+    // 3. Fetch from Supabase
     const { data, error } = await supabase.storage.from('media').createSignedUrl(storageKey, 3600);
     if (error || !data) {
       console.error('getSignedDownloadUrl failed', error);
       return null;
     }
+
+    // Cache in both layers
+    this.cache.set(`signed:${storageKey}`, data.signedUrl, this.SIGNED_URL_TTL);
+    this.localDb.putSignedUrl(storageKey, data.signedUrl, this.SIGNED_URL_TTL);
+
     return data.signedUrl;
   }
 
@@ -515,89 +749,137 @@ export class ItemsService {
    * on a manual refresh, which matches this phase's scope.
    */
   async markSeen(id: string) {
+    this.optimisticUpdate(id, { status: 'seen', seen_at: new Date().toISOString() } as Partial<Item>);
     const { error } = await supabase
       .from('items')
       .update({ status: 'seen', seen_at: new Date().toISOString() })
       .eq('id', id);
     if (error) console.error('markSeen failed', error);
-    await this.refresh();
   }
 
   async markUnread(id: string) {
+    this.optimisticUpdate(id, { status: 'unseen', seen_at: null } as Partial<Item>);
     const { error } = await supabase
       .from('items')
       .update({ status: 'unseen', seen_at: null })
       .eq('id', id);
     if (error) console.error('markUnread failed', error);
-    await this.refresh();
   }
 
   async togglePin(id: string, newPinState: boolean) {
+    this.optimisticUpdate(id, { is_pinned: newPinState });
     const { error } = await supabase
       .from('items')
       .update({ is_pinned: newPinState })
       .eq('id', id);
     if (error) console.error('togglePin failed', error);
-    await this.refresh();
   }
 
   async updateExpire(id: string, expiresAt: string | null) {
+    this.optimisticUpdate(id, { expires_at: expiresAt });
     const { error } = await supabase
       .from('items')
       .update({ expires_at: expiresAt })
       .eq('id', id);
     if (error) console.error('updateExpire failed', error);
-    await this.refresh();
   }
 
   async setSnooze(id: string, snoozeUntil: string | null) {
+    this.optimisticUpdate(id, { snooze_until: snoozeUntil });
     const { error } = await supabase
       .from('items')
       .update({ snooze_until: snoozeUntil })
       .eq('id', id);
     if (error) console.error('snooze failed', error);
-    await this.refresh();
   }
 
   async remove(id: string) {
     if (this.filter() === 'deleted') {
+      this.optimisticRemove(id);
       const { error } = await supabase.from('items').delete().eq('id', id);
       if (error) console.error('remove permanently failed', error);
     } else {
       const deleteDate = new Date();
       deleteDate.setDate(deleteDate.getDate() + 30);
       const expiresAt = deleteDate.toISOString();
+      this.optimisticUpdate(id, { status: 'deleted', expires_at: expiresAt } as Partial<Item>);
       const { error } = await supabase.from('items').update({ status: 'deleted', expires_at: expiresAt }).eq('id', id);
       if (error) console.error('remove failed', error);
     }
-    await this.refresh();
   }
 
   async restore(id: string) {
+    this.optimisticUpdate(id, { status: 'seen', expires_at: null } as Partial<Item>);
     const { error } = await supabase.from('items').update({ status: 'seen', expires_at: null }).eq('id', id);
     if (error) console.error('restore failed', error);
-    await this.refresh();
   }
 
   async permanentlyDelete(id: string) {
+    this.optimisticRemove(id);
     const { error } = await supabase.from('items').delete().eq('id', id);
     if (error) console.error('permanentlyDelete failed', error);
-    await this.refresh();
   }
 
   async archive(id: string) {
+    this.optimisticUpdate(id, { status: 'archived' } as Partial<Item>);
     const { error } = await supabase.from('items').update({ status: 'archived' }).eq('id', id);
     if (error) console.error('archive failed', error);
-    await this.refresh();
+  }
+
+  async unarchive(id: string) {
+    this.optimisticUpdate(id, { status: 'seen' } as Partial<Item>);
+    const { error } = await supabase.from('items').update({ status: 'seen' }).eq('id', id);
+    if (error) console.error('unarchive failed', error);
   }
 
   async updateItemPayload(id: string, newPayload: any) {
+    this.optimisticUpdate(id, { payload: newPayload });
     const { error } = await supabase
       .from('items')
       .update({ payload: newPayload })
       .eq('id', id);
     if (error) console.error('updateItemPayload failed', error);
-    await this.refresh();
+  }
+
+  async setDeadline(id: string, deadline: string | null) {
+    const item = this.items().find(i => i.id === id);
+    if (!item) return;
+    
+    const newPayload = { ...item.payload };
+    if (deadline) {
+      newPayload.deadline = deadline;
+    } else {
+      delete newPayload.deadline;
+    }
+    
+    await this.updateItemPayload(id, newPayload);
+  }
+
+  async setReminder(id: string, type: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'once' | 'clear', customDate?: string) {
+    const item = this.items().find(i => i.id === id);
+    if (!item) return;
+
+    const newPayload = { ...item.payload };
+
+    if (type === 'clear') {
+      delete newPayload['reminder'];
+    } else {
+      let nextDate = new Date();
+      if (type === 'once' && customDate) {
+        nextDate = new Date(customDate);
+      } else {
+        if (type === 'daily') nextDate.setDate(nextDate.getDate() + 1);
+        else if (type === 'weekly') nextDate.setDate(nextDate.getDate() + 7);
+        else if (type === 'monthly') nextDate.setMonth(nextDate.getMonth() + 1);
+        else if (type === 'yearly') nextDate.setFullYear(nextDate.getFullYear() + 1);
+      }
+      newPayload['reminder'] = {
+        type,
+        next_at: nextDate.toISOString()
+      };
+    }
+
+    await this.updateItemPayload(id, newPayload);
   }
 
   async updateTags(id: string, tags: string[]) {
@@ -605,7 +887,55 @@ export class ItemsService {
     if (!item) return;
     
     const newPayload = { ...item.payload, tags };
-    await this.updateItemPayload(id, newPayload);
+    let updateData: any = { payload: newPayload };
+    
+    const mappedBoardId = this.getBoardIdFromTags(tags);
+    if (mappedBoardId && mappedBoardId !== item.board_id) {
+      updateData.board_id = mappedBoardId;
+    }
+
+    this.optimisticUpdate(id, updateData);
+    const { error } = await supabase
+      .from('items')
+      .update(updateData)
+      .eq('id', id);
+    if (error) console.error('updateTags failed', error);
+  }
+
+  async moveToBoard(id: string, boardId: string | null) {
+    this.optimisticUpdate(id, { board_id: boardId });
+    const { error } = await supabase
+      .from('items')
+      .update({ board_id: boardId })
+      .eq('id', id);
+    if (error) {
+      console.error('moveToBoard failed', error);
+      this.toastSvc.show('Failed to move item', 'error');
+      return;
+    }
+    this.toastSvc.show(boardId ? 'Item moved to board' : 'Item moved to inbox');
+  }
+
+  async moveSelectedToBoard(boardId: string | null) {
+    const ids = Array.from(this.selectedItemIds());
+    if (ids.length === 0) return;
+
+    // Optimistic: update all selected items locally
+    for (const id of ids) {
+      this.optimisticUpdate(id, { board_id: boardId });
+    }
+
+    const { error } = await supabase
+      .from('items')
+      .update({ board_id: boardId })
+      .in('id', ids);
+    if (error) {
+      console.error('moveSelectedToBoard failed', error);
+      this.toastSvc.show('Failed to move items', 'error');
+      return;
+    }
+    this.toastSvc.show(boardId ? `${ids.length} items moved to board` : `${ids.length} items moved to inbox`);
+    this.clearSelection();
   }
 
   async markAllAsRead() {
@@ -616,17 +946,21 @@ export class ItemsService {
 
     if (unseenIds.length === 0) return;
 
+    // Optimistic: mark all unseen items as seen locally
+    const seenAt = new Date().toISOString();
+    for (const id of unseenIds) {
+      this.optimisticUpdate(id, { status: 'seen', seen_at: seenAt } as Partial<Item>);
+    }
+
     // Supabase update for multiple items
     const { error } = await supabase
       .from('items')
-      .update({ status: 'seen', seen_at: new Date().toISOString() })
+      .update({ status: 'seen', seen_at: seenAt })
       .in('id', unseenIds);
 
     if (error) {
       console.error('markAllAsRead failed', error);
-      return;
     }
-    await this.refresh();
   }
 
   async deleteSelected() {
@@ -634,29 +968,34 @@ export class ItemsService {
     if (ids.length === 0) return;
     
     if (this.filter() === 'deleted') {
+      // Optimistic: remove permanently
+      for (const id of ids) this.optimisticRemove(id);
       const { error } = await supabase.from('items').delete().in('id', ids);
       if (error) console.error('deleteSelected permanently failed', error);
     } else {
       const deleteDate = new Date();
       deleteDate.setDate(deleteDate.getDate() + 30);
       const expiresAt = deleteDate.toISOString();
+      // Optimistic: mark as deleted
+      for (const id of ids) this.optimisticUpdate(id, { status: 'deleted', expires_at: expiresAt } as Partial<Item>);
       const { error } = await supabase.from('items').update({ status: 'deleted', expires_at: expiresAt }).in('id', ids);
       if (error) console.error('deleteSelected failed', error);
     }
     
     this.clearSelection();
-    await this.refresh();
   }
 
   async restoreSelected() {
     const ids = Array.from(this.selectedItemIds());
     if (ids.length === 0) return;
     
+    // Optimistic: restore all
+    for (const id of ids) this.optimisticUpdate(id, { status: 'seen', expires_at: null } as Partial<Item>);
+    
     const { error } = await supabase.from('items').update({ status: 'seen', expires_at: null }).in('id', ids);
     if (error) console.error('restoreSelected failed', error);
     
     this.clearSelection();
-    await this.refresh();
   }
 
   clearSelection() {
@@ -745,6 +1084,7 @@ export class ItemsService {
    */
   async shareItem(id: string): Promise<string | null> {
     const token = crypto.randomUUID();
+    this.optimisticUpdate(id, { share_token: token });
     const { error } = await supabase
       .from('items')
       .update({ share_token: token })
@@ -765,7 +1105,6 @@ export class ItemsService {
       this.toastSvc.show('Share link created');
     }
 
-    await this.refresh();
     return shareUrl;
   }
 
@@ -774,6 +1113,7 @@ export class ItemsService {
    * stops working immediately.
    */
   async unshareItem(id: string): Promise<void> {
+    this.optimisticUpdate(id, { share_token: null });
     const { error } = await supabase
       .from('items')
       .update({ share_token: null })
@@ -786,7 +1126,6 @@ export class ItemsService {
     }
 
     this.toastSvc.show('Sharing stopped');
-    await this.refresh();
   }
 
   /** Copy the existing share URL to the clipboard. */

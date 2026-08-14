@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — rem-lays</title>
+  <link rel="icon" type="image/png" href="assets/logo_square.png">
+  <link rel="apple-touch-icon" href="assets/logo_square.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0b0a;
+      --surface: #17140f;
+      --surface-2: #1f1b16;
+      --border: rgba(244, 240, 233, 0.08);
+      --border-strong: rgba(244, 240, 233, 0.15);
+      --text: #f2efe9;
+      --text-dim: #a49a8c;
+      --text-mute: #6b6255;
+      --accent: #e8622f;
+      --accent-strong: #ff7a45;
+      --on-accent: #fff6f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent-strong);
+      outline-offset: 3px;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      display: block;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .brand-word {
+      font-size: 15px;
+    }
+
+    .brand-word b {
+      font-weight: 600;
+    }
+
+    .brand-word span {
+      color: var(--text-dim);
+      font-weight: 400;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      font-size: 13px;
+      letter-spacing: 0.01em;
+      color: var(--text-dim);
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-links a.active {
+      color: var(--accent-strong);
+    }
+
+    
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-login {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-login:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+.nav-cta {
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      color: var(--text);
+    }
+
+    .nav-cta:hover {
+      border-color: var(--accent);
+      color: var(--accent-strong);
+    }
+
+    @media (max-width:720px) {
+      .nav-links {
+        display: none;
+      }
+    }
+
+    .header {
+      text-align: center;
+      padding: 180px 24px 32px;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(232, 98, 47, 0.09), transparent 60%);
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--accent-strong);
+      margin-bottom: 18px;
+    }
+
+    .header h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    /* story */
+    .story {
+      max-width: 620px;
+      margin: 56px auto 0;
+      padding: 0 28px;
+    }
+
+    .story p {
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--text-dim);
+      margin-bottom: 22px;
+    }
+
+    .story p:first-of-type::first-letter {
+      font-family: 'Fraunces', serif;
+      font-size: 52px;
+      float: left;
+      line-height: 0.85;
+      margin: 6px 8px 0 0;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .pull-quote {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent-strong);
+      font-size: clamp(20px, 2.6vw, 26px);
+      line-height: 1.4;
+      text-align: center;
+      max-width: 520px;
+      margin: 52px auto;
+      padding: 0 12px;
+    }
+
+    /* founder card */
+    .founder-card {
+      max-width: fit-content;
+      margin: 56px auto 0;
+      padding: 10px 24px 10px 10px;
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 100px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .founder-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .founder-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .founder-card:hover::before {
+      opacity: 1;
+    }
+
+    .founder-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 22px;
+      color: white;
+      box-shadow: 0 4px 12px rgba(232, 98, 47, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+
+    .founder-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      padding-right: 8px;
+    }
+
+    .founder-info p.name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .founder-info p.role {
+      font-size: 13.5px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* mission grid */
+    .mission {
+      max-width: 900px;
+      margin: 112px auto 0;
+      padding: 0 28px;
+    }
+
+    .mission h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: clamp(22px, 3.2vw, 30px);
+      text-align: center;
+      margin-bottom: 44px;
+    }
+
+    .mission-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .mission-card {
+      background: linear-gradient(160deg, var(--surface) 0%, rgba(23, 20, 15, 0.2) 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .mission-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .mission-card.reveal.visible:hover {
+      transform: translateY(-6px);
+      border-color: rgba(232, 98, 47, 0.25);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(232, 98, 47, 0.06);
+    }
+
+    .mission-card.reveal.visible:hover::before {
+      opacity: 1;
+    }
+
+    .mission-card .m-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--surface-2), rgba(232, 98, 47, 0.08));
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .mission-card .m-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--accent-strong);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .mission-card h4 {
+      font-size: 15.5px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .mission-card p {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    @media (max-width:680px) {
+      .mission-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* timeline */
+    .timeline {
+      max-width: 620px;
+      margin: 112px auto 0;
+      padding: 0 28px 20px;
+    }
+
+    .timeline h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: clamp(22px, 3.2vw, 30px);
+      text-align: center;
+      margin-bottom: 52px;
+    }
+
+    .t-item {
+      position: relative;
+      padding-left: 28px;
+      padding-bottom: 40px;
+      border-left: 1px solid var(--border-strong);
+    }
+
+    .t-item:last-child {
+      border-color: transparent;
+      padding-bottom: 0;
+    }
+
+    .t-item::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: 2px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--accent-strong);
+    }
+
+    .t-item .t-tag {
+      font-size: 11px;
+      color: var(--accent-strong);
+      margin-bottom: 6px;
+    }
+
+    .t-item h4 {
+      font-size: 15.5px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .t-item p {
+      font-size: 13.5px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .cta-section {
+      text-align: center;
+      padding: 120px 24px 100px;
+    }
+
+    .cta-section h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: clamp(26px, 4vw, 38px);
+      max-width: 480px;
+      margin: 0 auto 26px;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: var(--on-accent);
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px 28px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 14px rgba(255, 255, 255, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+
+    .cta-btn:hover::before {
+      transform: translateX(100%);
+    }
+
+    footer {
+      padding: 40px 24px 28px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .footer-logo {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+
+    .footer-brand-name {
+      font-size: 14px;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+
+    .footer-brand-name span {
+      color: var(--text-dim);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 22px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-strong);
+    }
+
+    .footer-tag {
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--text-mute);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+      .nav-login {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-login:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+    }
+</style>
+  <link rel="stylesheet" href="themes.css">
+  <script src="theme-switcher.js"></script>
+</head>
+
+<body>
+
+  <nav class="nav">
+    <a href="rem-lays-hero.html" class="brand">
+      <img src="assets/logo_square.png" alt="RemLays" class="brand-mark">
+      <div class="brand-word"><b>Rem</b><span>Lays</span></div>
+    </a>
+    <div class="nav-links">
+      <a href="rem-lays-hero.html">Product</a>
+      <a href="rem-lays-features.html">Features</a>
+      <a href="rem-lays-about.html">About</a>
+      <a href="rem-lays-faq.html">FAQ</a>
+    </div>
+    <div class="nav-actions">
+      <a href="https://rem-lays.vercel.app" class="nav-login">Log in</a>
+      <a href="rem-lays-download.html" class="nav-cta">Get started</a>
+    </div>
+  </nav>
+
+  <section class="header">
+    <h1>built by someone who kept losing things too.</h1>
+  </section>
+
+  <section class="story reveal">
+    <p>rem-lays didn't start as a product. It started as a folder of screenshots, a hundred open browser tabs, and a
+      note titled "watch later" that never got watched.</p>
+    <p>Every app had its own inbox — chat had its own saved messages, the browser had its own bookmarks, the camera roll
+      had its own mess. Nothing talked to anything else, and the good ideas kept getting buried under the ones that
+      didn't matter.</p>
+    <p>So the first version of rem-lays wasn't for anyone but its maker — one inbox, on every device, to capture what
+      mattered.</p>
+
+    <p>That personal tool is what you're looking at now. Same idea, just ready for more than one person's mess.</p>
+  </section>
+
+  <div class="founder-card reveal">
+    <div class="founder-avatar">A</div>
+    <div class="founder-info">
+      <p class="name">Abhay Maheshwari</p>
+      <p class="role">Rem-Lays</p>
+    </div>
+  </div>
+
+  <section class="mission">
+    <h2>what we believe</h2>
+    <div class="mission-grid">
+      <div class="mission-card reveal">
+        <div class="m-icon"><svg viewBox="0 0 24 24">
+            <path d="M4 6h16M4 12h10M4 18h6" />
+          </svg></div>
+        <h4>One inbox, not ten apps</h4>
+        <p>Everything you save deserves one home, not a different app for every type of thing.</p>
+      </div>
+      <div class="mission-card reveal">
+        <div class="m-icon"><svg viewBox="0 0 24 24">
+            <path d="M12 4v12M6 12l6 6 6-6" />
+            <path d="M5 20h14" />
+          </svg></div>
+        <h4>Yours to export, always</h4>
+        <p>Nothing you save is locked in. Pull it all out whenever you want, no questions asked.</p>
+      </div>
+      <div class="mission-card reveal">
+        <div class="m-icon"><svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" />
+            <path d="M12 8v4l3 2" />
+          </svg></div>
+        <h4>Built to be used daily</h4>
+        <p>Not a tool you set up once and forget — one you actually open every day.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="timeline">
+    <h2>how it got here</h2>
+    <div class="t-item reveal">
+      <p class="t-tag">the mess</p>
+      <h4>Scattered everywhere</h4>
+      <p>Links in one app, screenshots in another, ideas in sticky notes that never got read again.</p>
+    </div>
+    <div class="t-item reveal">
+      <p class="t-tag">the first version</p>
+      <h4>A personal inbox</h4>
+      <p>Built just to keep track of things across devices — no plan to ship it yet.</p>
+    </div>
+    <div class="t-item reveal">
+      <p class="t-tag">public beta</p>
+      <h4>rem-lays goes live</h4>
+      <p>Available now on Windows and Android, syncing the same inbox everywhere.</p>
+    </div>
+    <div class="t-item reveal">
+      <p class="t-tag">what's next</p>
+      <h4>Mac, iOS, and more</h4>
+      <p>More platforms and more ways to make sense of what you save, on the way.</p>
+    </div>
+  </section>
+
+  <section class="cta-section reveal">
+    <h2>come save your mess with us.</h2>
+    <a href="rem-lays-download.html" class="cta-btn">Download rem-lays </a>
+  </section>
+
+  <footer>
+    <div class="footer-brand">
+      <img src="assets/logo_square.png" alt="RemLays" class="footer-logo">
+      <span class="footer-brand-name"><b>Rem</b><span>Lays</span></span>
+    </div>
+    <div class="footer-links">
+      <a href="rem-lays-hero.html">Product</a>
+      <a href="rem-lays-features.html">Features</a>
+      <a href="rem-lays-about.html">About</a>
+      <a href="rem-lays-faq.html">FAQ</a>
+      <a href="rem-lays-changelog.html">Changelog</a>
+    </div>
+    <p class="footer-tag">rem-lays &middot; your digital vault</p>
+  </footer>
+
+  <script>
+    (function () {
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var targets = document.querySelectorAll('.reveal');
+      if (reduced || !('IntersectionObserver' in window)) {
+        targets.forEach(function (el) { el.classList.add('visible'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      targets.forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+
+</body>
+
+</html>

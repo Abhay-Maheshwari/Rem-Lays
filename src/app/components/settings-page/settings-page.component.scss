@@ -162,33 +162,41 @@
 }
 
 /* Theme Toggles */
+.theme-setting-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
 .theme-toggles {
-  display: flex;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
-  padding: 4px;
-  gap: 4px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
 }
 
 .theme-btn {
-  background: none;
-  border: none;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
-  padding: 6px 16px;
-  border-radius: 6px;
+  padding: 10px;
+  border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+  text-align: center;
   transition: all 0.2s ease;
+  
+  &:hover {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+  }
   
   &.active {
     background: var(--accent, #3b82f6);
+    border-color: var(--accent, #3b82f6);
     color: #fff;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-  }
-  
-  &:hover:not(.active) {
-    color: var(--text-primary);
+    font-weight: 600;
   }
 }
 
@@ -200,10 +208,39 @@
   height: 24px;
   flex-shrink: 0;
   
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
   input {
     opacity: 0;
     width: 0;
     height: 0;
+  }
+}
+
+.inline-bg-picker {
+  display: flex;
+  gap: 8px;
+}
+
+.bg-preset-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border-subtle);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  padding: 0;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &.active {
+    border-color: var(--text-primary);
+    transform: scale(1.1);
   }
 }
 
@@ -300,10 +337,72 @@ input:checked + .slider:before {
   margin-top: 24px;
 }
 
+/* App Updates */
+.subsection-title {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  margin: 24px 0 12px 4px;
+}
+
+.update-available {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 12px;
+  animation: fadeIn 0.3s ease;
+}
+
+.update-info {
+  margin-bottom: 12px;
+}
+
+.update-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--accent, #3b82f6);
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.update-notes {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.update-btn {
+  width: 100%;
+}
+
+.progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent, #3b82f6);
+  transition: width 0.2s ease;
+}
+
 @media (max-width: 760px) {
   .settings-page {
     padding: 16px;
-    padding-top: 48px; /* Room for mobile header */
+    padding-top: 64px; /* Room for mobile header */
   }
 
   .settings-layout {

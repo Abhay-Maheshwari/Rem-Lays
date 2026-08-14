@@ -6,7 +6,7 @@ export interface Item {
   user_id: string;
   source_device_id: string | null;
   type: ItemType;
-  payload: { tags?: string[]; [key: string]: unknown };
+  payload: { tags?: string[]; deadline?: string; [key: string]: unknown };
   storage_key: string | null;
   thumbnail_key: string | null;
   status: ItemStatus;

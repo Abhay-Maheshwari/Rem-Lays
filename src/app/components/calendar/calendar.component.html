@@ -1,0 +1,87 @@
+<div class="calendar-layout" data-tauri-drag-region>
+  <div class="calendar-header" data-tauri-drag-region>
+    <div class="header-left">
+      <h1 class="page-title">Calendar</h1>
+    </div>
+    <div class="header-right">
+      <div class="custom-dropdown">
+        <button class="custom-select-btn" (click)="toggleDateTypeDropdown($event)">
+          {{ dateTypeFilter() === 'deadline' ? 'Deadlines' : dateTypeFilter() === 'snoozed' ? 'Snoozed' : 'Created' }}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="custom-dropdown-menu" *ngIf="isDateTypeDropdownOpen">
+          <div class="dropdown-item" (click)="dateTypeFilter.set('deadline'); isDateTypeDropdownOpen = false">Deadlines</div>
+          <div class="dropdown-item" (click)="dateTypeFilter.set('snoozed'); isDateTypeDropdownOpen = false">Snoozed</div>
+          <div class="dropdown-item" (click)="dateTypeFilter.set('created'); isDateTypeDropdownOpen = false">Created</div>
+        </div>
+      </div>
+
+      <div class="custom-dropdown">
+        <button class="custom-select-btn" (click)="toggleBoardDropdown($event)">
+          <ng-container *ngIf="boardFilter() === 'all'">All Boards</ng-container>
+          <ng-container *ngIf="boardFilter() !== 'all'">
+            {{ getBoardName(boardFilter()) }}
+          </ng-container>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="custom-dropdown-menu" *ngIf="isBoardDropdownOpen">
+          <div class="dropdown-item" (click)="boardFilter.set('all'); isBoardDropdownOpen = false">All Boards</div>
+          <div class="dropdown-item" (click)="boardFilter.set('personal'); isBoardDropdownOpen = false">Personal</div>
+          <div class="dropdown-item" *ngFor="let board of boardsSvc.boards()" (click)="boardFilter.set(board.id); isBoardDropdownOpen = false">
+            {{ board.name }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="calendar-content">
+    <div class="calendar-pane" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
+      <div class="month-nav">
+        <button class="icon-btn" (click)="prevMonth()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="current-month">{{ getMonthName() }} {{ currentYear() }}</div>
+        <button class="icon-btn" (click)="nextMonth()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      <div class="calendar-grid">
+        <div class="weekday-header">Sun</div>
+        <div class="weekday-header">Mon</div>
+        <div class="weekday-header">Tue</div>
+        <div class="weekday-header">Wed</div>
+        <div class="weekday-header">Thu</div>
+        <div class="weekday-header">Fri</div>
+        <div class="weekday-header">Sat</div>
+
+        <div *ngFor="let day of daysInMonth()" 
+             class="calendar-day" 
+             [class.out-of-month]="!day.currentMonth"
+             [class.today]="isToday(day.date)"
+             [class.selected]="isSelected(day.date)"
+             [class.has-items]="hasItemsOnDate(day.date)"
+             (click)="selectDate(day.date)">
+          <span class="day-number">{{ day.date.getDate() }}</span>
+          <span class="item-count-badge" *ngIf="hasItemsOnDate(day.date)">{{ getItemsCountOnDate(day.date) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="agenda-pane" [style.width.px]="agendaWidth()" [class.is-resizing]="isResizing">
+      <div class="resize-handle" (mousedown)="startResize($event)"></div>
+      <div class="agenda-header">
+        <h2 class="agenda-title">{{ selectedDate() | date:'EEEE, MMM d' }}</h2>
+        <span class="agenda-subtitle">{{ selectedDayItems().length }} items</span>
+      </div>
+      
+      <div class="agenda-list">
+        <div class="empty-agenda" *ngIf="selectedDayItems().length === 0">
+          No items for this date.
+        </div>
+        <app-item-card *ngFor="let item of selectedDayItems()" [item]="item"></app-item-card>
+      </div>
+    </div>
+  </div>
+</div>

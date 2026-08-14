@@ -23,18 +23,26 @@ export class FcmTokenService {
         await import('tauri-plugin-fcm');
 
       let permission = await checkPermissions();
+      console.log('[FCM] Permission status:', permission);
       if (permission === 'prompt' || permission === 'prompt-with-rationale') {
         permission = await requestPermissions();
+        console.log('[FCM] Permission after request:', permission);
       }
-      if (permission !== 'granted') return;
+      if (permission !== 'granted') {
+        console.warn('[FCM] Permission not granted, skipping token registration');
+        return;
+      }
 
       await register();
       const { token } = await getToken();
+      console.log('[FCM] Token obtained:', token.substring(0, 20) + '...');
       await this.saveToken(deviceId, token);
+      console.log('[FCM] Token saved for device:', deviceId);
 
       // Tokens rotate periodically — keep the stored one current so
       // push-fcm never sends to a stale token.
       await onTokenRefresh(async (event: { token: string }) => {
+        console.log('[FCM] Token refreshed, saving new token');
         await this.saveToken(deviceId, event.token);
       });
     } catch (err) {

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Changelog — rem-lays</title>
+<link rel="icon" type="image/png" href="assets/logo_square.png">
+<link rel="apple-touch-icon" href="assets/logo_square.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0b0a; --surface:#17140f; --surface-2:#1f1b16;
+    --border:rgba(244,240,233,0.08); --border-strong:rgba(244,240,233,0.15);
+    --text:#f2efe9; --text-dim:#a49a8c; --text-mute:#6b6255;
+    --accent:#e8622f; --accent-strong:#ff7a45; --on-accent:#fff6f0;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  a{color:inherit; text-decoration:none;}
+  :focus-visible{ outline:2px solid var(--accent-strong); outline-offset:3px; }
+
+  .nav{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between; padding:18px 32px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;}
+  .brand-mark{ width:28px; height:28px; border-radius:7px; display:block; object-fit:contain; flex-shrink:0;}
+  .brand-word{font-size:15px;} .brand-word b{font-weight:600;} .brand-word span{color:var(--text-dim); font-weight:400;}
+  .nav-links{display:flex; gap:28px; font-size:13px; letter-spacing:0.01em; color:var(--text-dim);}
+  .nav-links a:hover{color:var(--text);}
+  .nav-links a.active{color:var(--accent-strong);}
+    .nav-login {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-login:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+  .nav-cta{font-size:13px; padding:8px 16px; border-radius:8px; border:1px solid var(--border-strong); color:var(--text);}
+  .nav-cta:hover{border-color:var(--accent); color:var(--accent-strong);}
+  @media (max-width:720px){ .nav-links{display:none;} }
+
+  .header{ text-align:center; padding:180px 24px 40px; background:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(232,98,47,0.09), transparent 60%);}
+  .eyebrow{ font-size:12px; letter-spacing:0.08em; color:var(--accent-strong); margin-bottom:18px;}
+  .header h1{ font-family:'Fraunces',serif; font-weight:400; font-size:clamp(30px,5vw,48px); line-height:1.08; letter-spacing:-0.015em; max-width:600px; margin:0 auto;}
+  .header p{ margin-top:16px; font-size:15px; color:var(--text-dim);}
+
+  /* subscribe strip */
+  .subscribe{ max-width:600px; margin:0 auto 88px; padding:0 28px;}
+  .subscribe-inner{
+    background:var(--surface); border:1px dashed var(--border-strong); border-radius:16px;
+    padding:18px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  }
+  .subscribe-text{ flex:1; min-width:180px;}
+  .subscribe-text p.title{ font-size:13.5px; font-weight:500;}
+  .subscribe-text p.sub{ font-size:12px; color:var(--text-mute); margin-top:2px;}
+  .subscribe-form{ display:flex; gap:8px; flex-shrink:0;}
+  .subscribe-form input{
+    background:var(--bg); border:1px solid var(--border-strong); border-radius:8px;
+    padding:9px 12px; font-size:13px; color:var(--text); font-family:'Inter',sans-serif; width:170px;
+  }
+  .subscribe-form input::placeholder{ color:var(--text-mute);}
+  .subscribe-form button{
+    background:var(--surface-2); border:1px solid var(--border-strong); color:var(--text);
+    font-size:13px; padding:9px 14px; border-radius:8px; white-space:nowrap;
+  }
+  .subscribe-form button:hover{ border-color:var(--accent-strong); color:var(--accent-strong);}
+  @media (max-width:520px){ .subscribe-form{width:100%;} .subscribe-form input{flex:1; width:auto;} }
+
+  /* version timeline */
+  .log{ max-width:640px; margin:0 auto; padding:0 28px 110px;}
+  .v-item{ position:relative; padding-left:30px; padding-bottom:48px; border-left:1px solid var(--border-strong);}
+  .v-item:last-child{ border-color:transparent; padding-bottom:0;}
+  .v-item::before{
+    content:''; position:absolute; left:-5px; top:3px; width:9px; height:9px; border-radius:50%;
+    background:var(--bg); border:2px solid var(--accent-strong);
+  }
+  .v-head{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:4px;}
+  .v-tag{
+    font-size:11.5px; color:var(--accent-strong);
+    background:rgba(232,98,47,0.1); border:1px solid rgba(232,98,47,0.28); padding:2px 8px; border-radius:999px;
+  }
+  .v-date{ font-size:11.5px; color:var(--text-mute);}
+  .v-item h4{ font-family:'Fraunces',serif; font-weight:500; font-size:19px; margin:6px 0 12px;}
+  .v-item ul{ list-style:none;}
+  .v-item li{ font-size:13.5px; color:var(--text-dim); line-height:1.7; padding-left:20px; position:relative;}
+  .v-item li::before{ content:'+'; position:absolute; left:0; color:var(--accent-strong);}
+  .v-item li.improved::before{ content:'~'; color:var(--text-mute);}
+  .v-item li.fixed::before{ content:'\\00d7'; color:var(--text-mute);}
+
+  footer{ padding:40px 24px 28px; border-top:1px solid var(--border);}
+  .footer-brand{ display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:18px;}
+  .footer-logo{ width:22px; height:22px; border-radius:6px; object-fit:contain;}
+  .footer-brand-name{ font-size:14px; letter-spacing:0.01em; color:var(--text);}
+  .footer-brand-name span{ color:var(--text-dim);}
+  .footer-links{ display:flex; justify-content:center; flex-wrap:wrap; gap:22px; margin-bottom:16px; font-size:13px; color:var(--text-dim);}
+  .footer-links a:hover{ color:var(--accent-strong);}
+  .footer-tag{ text-align:center; font-size:11.5px; color:var(--text-mute);}
+    .nav-login {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-login:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+    }
+</style>
+<link rel="stylesheet" href="themes.css">
+<script src="theme-switcher.js"></script>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="rem-lays-hero.html" class="brand">
+    <img src="assets/logo_square.png" alt="RemLays" class="brand-mark">
+    <div class="brand-word"><b>Rem</b><span>Lays</span></div>
+  </a>
+  <div class="nav-links">
+    <a href="rem-lays-hero.html">Product</a>
+    <a href="rem-lays-features.html">Features</a>
+    <a href="rem-lays-about.html">About</a>
+    <a href="rem-lays-faq.html">FAQ</a>
+  </div>
+  <div class="nav-actions">
+      <a href="https://rem-lays.vercel.app" class="nav-login">Log in</a>
+      <a href="rem-lays-download.html" class="nav-cta">Get started</a>
+    </div>
+</nav>
+
+<section class="header">
+  <h1>what's new</h1>
+  <p>every update, in order — smallest fixes included.</p>
+</section>
+
+<section class="subscribe">
+  <div class="subscribe-inner">
+    <div class="subscribe-text">
+      <p class="title">get notified when we ship</p>
+      <p class="sub">one email, only when something new is out.</p>
+    </div>
+    <form class="subscribe-form" onsubmit="return false;">
+      <input type="email" placeholder="you@email.com" aria-label="Email for changelog updates">
+      <button type="submit">Subscribe</button>
+    </form>
+  </div>
+</section>
+
+<section class="log">
+  <div class="v-item">
+    <div class="v-head"><span class="v-tag">v1.0</span><span class="v-date">Aug 13, 2026</span></div>
+    <h4>rem-lays is live</h4>
+    <ul>
+      <li>Public launch on Windows and Android</li>
+      <li>Boards for organizing by project</li>
+      <li>Calendar view for anything with a due date</li>
+    </ul>
+  </div>
+  <div class="v-item">
+    <div class="v-head"><span class="v-tag">v0.9</span><span class="v-date">Jul 2026</span></div>
+    <h4>Boards & reminders</h4>
+    <ul>
+      <li>Introduced boards</li>
+      <li class="improved">Improved calendar and snooze behavior</li>
+      <li class="improved">Faster search across tags</li>
+    </ul>
+  </div>
+  <div class="v-item">
+    <div class="v-head"><span class="v-tag">v0.8</span><span class="v-date">Jun 2026</span></div>
+    <h4>Smarter tags</h4>
+    <ul>
+      <li class="improved">Redesigned quick-capture bar</li>
+      <li class="fixed">Fixed sync delay on slow connections</li>
+    </ul>
+  </div>
+  <div class="v-item">
+    <div class="v-head"><span class="v-tag">v0.7</span><span class="v-date">May 2026</span></div>
+    <h4>Early access</h4>
+    <ul>
+      <li>First cross-device sync (desktop + mobile)</li>
+      <li>Initial inbox and status filters</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">
+    <img src="assets/logo_square.png" alt="RemLays" class="footer-logo">
+    <span class="footer-brand-name"><b>Rem</b><span>Lays</span></span>
+  </div>
+  <div class="footer-links">
+    <a href="rem-lays-hero.html">Product</a>
+    <a href="rem-lays-features.html">Features</a>
+    <a href="rem-lays-about.html">About</a>
+    <a href="rem-lays-faq.html">FAQ</a>
+    <a href="rem-lays-changelog.html">Changelog</a>
+  </div>
+  <p class="footer-tag">rem-lays &middot; your digital vault</p>
+</footer>
+
+</body>
+</html>
