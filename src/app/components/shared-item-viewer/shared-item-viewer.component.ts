@@ -24,18 +24,24 @@ export class SharedItemViewerComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      // Mock data for previewing
-      this.item.set({
-        id: 'test',
-        type: 'text',
-        created_at: new Date('2026-08-13T20:59:00').toISOString(),
-        payload: {
-          note: 'Sar phate',
-          tags: ['Bheje ke kue'],
-          sharedBy: 'Abhay Maheshwari'
+      const fetchedItem = await ItemsService.fetchSharedItem(this.token);
+      if (!fetchedItem) {
+        this.error.set(true);
+        return;
+      }
+      this.item.set(fetchedItem);
+
+      if (fetchedItem.type === 'image' || fetchedItem.type === 'video') {
+        const url = await ItemsService.fetchSharedMediaUrl(this.token);
+        if (url) {
+          this.mediaUrl.set(url);
         }
-      } as any);
-      this.loading.set(false);
+      } else if (fetchedItem.type === 'reel') {
+        const embedHtml = fetchedItem.payload?.['embedHtml'];
+        if (embedHtml && typeof embedHtml === 'string') {
+          this.reelEmbedHtml = this.sanitizer.bypassSecurityTrustHtml(embedHtml);
+        }
+      }
     } catch (err) {
       console.error('Failed to load shared item', err);
       this.error.set(true);

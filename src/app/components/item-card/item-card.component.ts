@@ -367,6 +367,24 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
     } else if (this.item.type === 'text') {
       this.clipboard.copy(this.noteText);
       this.toastSvc.show('Text copied!');
+    } else if (this.item.type === 'image' && this.mediaUrl) {
+      this.copyImageToClipboard(this.mediaUrl);
+    }
+  }
+
+  async copyImageToClipboard(url: string) {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      await navigator.clipboard.write([
+        new (window as any).ClipboardItem({
+          [blob.type]: blob
+        })
+      ]);
+      this.toastSvc.show('Image copied!');
+    } catch (err) {
+      console.error('Failed to copy image', err);
+      this.toastSvc.show('Failed to copy image', 'error');
     }
   }
 
@@ -581,13 +599,25 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
       items.push({
         label: 'Copy link',
         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
-        action: () => { this.clipboard.copy(this.linkUrl || this.linkTitle); }
+        action: () => { 
+          this.clipboard.copy(this.linkUrl || this.linkTitle);
+          this.toastSvc.show('Link copied!');
+        }
       });
     } else if (this.item.type === 'text') {
       items.push({
         label: 'Copy text',
         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
-        action: () => { this.clipboard.copy(this.noteText); }
+        action: () => { 
+          this.clipboard.copy(this.noteText);
+          this.toastSvc.show('Text copied!');
+        }
+      });
+    } else if (this.item.type === 'image' && this.mediaUrl) {
+      items.push({
+        label: 'Copy image',
+        icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
+        action: () => { this.copyImageToClipboard(this.mediaUrl!); }
       });
     }
 

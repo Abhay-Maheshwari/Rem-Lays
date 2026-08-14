@@ -86,6 +86,20 @@ export class AppComponent {
     // time relative to that.
     this.offlineQueue.onReconnect(() => this.itemsSvc.flushOfflineQueue());
 
+    // Listen for quick replies from notifications
+    this.notificationSvc.quickReply$.subscribe((replyText) => {
+       if (replyText && replyText.trim()) {
+          this.itemsSvc.addText(replyText.trim());
+          this.toastSvc.show('Reply sent', 'success');
+          
+          // Android dismisses the ongoing notification when a RemoteInput action is triggered.
+          // We must re-issue the notification to keep it pinned.
+          if (localStorage.getItem('remlays_pinned_quick_note') === 'true') {
+             this.notificationSvc.showPinnedQuickNote();
+          }
+       }
+    });
+
     // Items realtime only needs the user id, so it can connect the moment
     // a session exists. Presence needs this device's own row id too — that
     // depends on registration finishing first, so SidebarComponent (which

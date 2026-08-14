@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
+import { listen } from '@tauri-apps/api/event';
 
 function isTauri(): boolean {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in (window as unknown as Record<string, unknown>);
@@ -13,14 +15,17 @@ function isMobile(): boolean {
 export class NativeNotificationService {
   private windowFocused = true;
   private initialized = false;
+  
+  public quickReply$ = new Subject<string>();
 
   async init() {
     if (!isTauri() || this.initialized) return;
     this.initialized = true;
 
+
     try {
       if (isMobile()) {
-        const { isPermissionGranted, requestPermission, createChannel } = await import('@tauri-apps/plugin-notification');
+        const { isPermissionGranted, requestPermission, createChannel, registerActionTypes, onAction } = await import('@tauri-apps/plugin-notification');
         let granted = await isPermissionGranted();
         if (!granted) {
           const result = await requestPermission();
@@ -47,8 +52,41 @@ export class NativeNotificationService {
             // Channel already exists — that's fine
             console.log('[Notification] Channel already exists or creation skipped');
           }
+
+          try {
+            await registerActionTypes([{
+              id: '0',
+              actions: [{
+                id: 'reply_action',
+                title: 'Add Note',
+                input: true,
+                inputButtonTitle: 'Save',
+                inputPlaceholder: 'Type a quick note...'
+              }]
+            }]);
+            await onAction((notification: any) => {
+              if (notification.inputValue) {
+                this.quickReply$.next(notification.inputValue);
+              }
+            });
+          } catch(e) {
+            console.error('[Notification] Failed to register quick reply action', e);
+          }
+
+          if (localStorage.getItem('remlays_pinned_quick_note') === 'true') {
+            setTimeout(() => {
+              this.showPinnedQuickNote();
+            }, 500);
+          }
         }
       }
+
+      // Listen for quick reply from desktop notification webview
+      listen<string>('quick-reply', (event) => {
+        if (event.payload) {
+          this.quickReply$.next(event.payload);
+        }
+      });
 
       const { getCurrentWindow } = await import('@tauri-apps/api/window');
       const win = getCurrentWindow();
@@ -118,6 +156,37 @@ export class NativeNotificationService {
       }
     } catch (err) {
       console.error('notifyIfBackgrounded failed', err);
+    }
+  }
+
+  async showPinnedQuickNote() {
+    if (!isMobile()) return;
+    try {
+      const { sendNotification } = await import('@tauri-apps/plugin-notification');
+      sendNotification({
+        id: 9999,
+        title: 'Rem-Lays Quick Note',
+        body: 'Tap to add a quick note directly to your inbox',
+        largeBody: 'Tap to add a quick note directly to your inbox',
+        summary: 'Add Note',
+        channelId: 'rem-lays-high-priority',
+        sound: 'default',
+        iconColor: '#10b981',
+        ongoing: true,
+        actionTypeId: '0'
+      });
+    } catch (err) {
+      console.error('Failed to show pinned quick note', err);
+    }
+  }
+
+  async hidePinnedQuickNote() {
+    if (!isMobile()) return;
+    try {
+      const { cancel } = await import('@tauri-apps/plugin-notification');
+      await cancel([9999]);
+    } catch (err) {
+      console.error('Failed to hide pinned quick note', err);
     }
   }
 }

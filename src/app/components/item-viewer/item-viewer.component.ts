@@ -9,6 +9,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { InstagramEmbedService } from '../../services/instagram-embed.service';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { Clipboard } from '@angular/cdk/clipboard';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-item-viewer',
@@ -45,7 +46,8 @@ export class ItemViewerComponent {
     private contextMenuSvc: ContextMenuService,
     private sanitizer: DomSanitizer,
     private igEmbedSvc: InstagramEmbedService,
-    private clipboard: Clipboard
+    private clipboard: Clipboard,
+    private toastSvc: ToastService
   ) {
     effect(async () => {
       const item = this.viewerSvc.currentItem();
@@ -249,13 +251,25 @@ export class ItemViewerComponent {
       items.push({
         label: 'Copy link',
         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
-        action: () => { this.clipboard.copy(this.linkUrl || this.linkTitle); }
+        action: () => { 
+          this.clipboard.copy(this.linkUrl || this.linkTitle); 
+          this.toastSvc.show('Link copied!');
+        }
       });
     } else if (item.type === 'text') {
       items.push({
         label: 'Copy text',
         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
-        action: () => { this.clipboard.copy(this.noteText); }
+        action: () => { 
+          this.clipboard.copy(this.noteText); 
+          this.toastSvc.show('Text copied!');
+        }
+      });
+    } else if (item.type === 'image' && this.mediaUrl()) {
+      items.push({
+        label: 'Copy image',
+        icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
+        action: () => { this.copyImageToClipboard(this.mediaUrl()!); }
       });
     }
 
@@ -290,6 +304,22 @@ export class ItemViewerComponent {
     });
 
     this.contextMenuSvc.open(event, items);
+  }
+
+  async copyImageToClipboard(url: string) {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      await navigator.clipboard.write([
+        new (window as any).ClipboardItem({
+          [blob.type]: blob
+        })
+      ]);
+      this.toastSvc.show('Image copied!');
+    } catch (err) {
+      console.error('Failed to copy image', err);
+      this.toastSvc.show('Failed to copy image', 'error');
+    }
   }
 
   setExpireFromMenu(ev: Event, item: any, hours: number) {

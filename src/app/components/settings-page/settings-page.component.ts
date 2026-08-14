@@ -8,6 +8,7 @@ import { ThemeService, Theme } from '../../services/theme.service';
 import { invoke } from '@tauri-apps/api/core';
 import { isTauri } from '../../services/platform';
 import { UpdateService } from '../../services/update.service';
+import { NativeNotificationService } from '../../services/native-notification.service';
 
 @Component({
   selector: 'app-settings-page',
@@ -25,6 +26,7 @@ export class SettingsPageComponent implements OnInit {
   isAutostartEnabled = false;
   isCompactMode = false;
   isMinimizeToTray = true;
+  enablePinnedQuickNote = false;
   displayName = '';
   isEditingName = false;
   currentVersion = '';
@@ -43,7 +45,8 @@ export class SettingsPageComponent implements OnInit {
     public auth: AuthService,
     public itemsSvc: ItemsService,
     public themeSvc: ThemeService,
-    public updateSvc: UpdateService
+    public updateSvc: UpdateService,
+    private notificationSvc: NativeNotificationService
   ) {}
 
   async ngOnInit() {
@@ -53,6 +56,9 @@ export class SettingsPageComponent implements OnInit {
     
     const savedCompact = localStorage.getItem('remlays_compact_mode');
     this.isCompactMode = savedCompact === 'true';
+
+    const savedPinnedQuickNote = localStorage.getItem('remlays_pinned_quick_note');
+    this.enablePinnedQuickNote = savedPinnedQuickNote === 'true';
 
     const savedBg = localStorage.getItem('dashboard_bg');
     if (savedBg) {
@@ -107,6 +113,16 @@ export class SettingsPageComponent implements OnInit {
         await invoke('set_close_to_tray', { enabled: this.isMinimizeToTray });
     } catch(e) {
         console.error('Failed to toggle tray', e);
+    }
+  }
+
+  togglePinnedQuickNote() {
+    this.enablePinnedQuickNote = !this.enablePinnedQuickNote;
+    localStorage.setItem('remlays_pinned_quick_note', String(this.enablePinnedQuickNote));
+    if (this.enablePinnedQuickNote) {
+      this.notificationSvc.showPinnedQuickNote();
+    } else {
+      this.notificationSvc.hidePinnedQuickNote();
     }
   }
   

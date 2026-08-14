@@ -320,6 +320,9 @@
     flex-wrap: wrap;
     gap: 8px;
     padding: 0 24px 24px;
+    width: fit-content;
+    margin: 0 auto;
+    justify-content: flex-start;
   }
 
   .tag {

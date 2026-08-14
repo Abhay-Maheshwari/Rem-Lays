@@ -131,6 +131,17 @@
           </label>
         </div>
 
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Pinned Quick Note (Android Only)</span>
+            <span class="setting-desc">Keeps an ongoing notification to let you add notes instantly at any time.</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" [checked]="enablePinnedQuickNote" (change)="togglePinnedQuickNote()" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
         <div class="divider"></div>
         <h4 class="subsection-title">App Updates</h4>
 
