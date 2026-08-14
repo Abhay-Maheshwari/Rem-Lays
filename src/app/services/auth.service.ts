@@ -203,12 +203,16 @@ export class AuthService {
         await openUrl(data.url);
       }
     } else {
+      const options: any = {
+        queryParams: { prompt: 'select_account' }
+      };
+      if (!isTauri && typeof window !== 'undefined') {
+        options.redirectTo = `${window.location.origin}/login`;
+      }
       // Desktop (or pure Web): Use standard embedded WebView / Browser redirect
       await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          queryParams: { prompt: 'select_account' }
-        }
+        options
       });
     }
   }

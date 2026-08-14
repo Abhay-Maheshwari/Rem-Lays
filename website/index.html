@@ -12,6 +12,11 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
     rel="stylesheet">
+  <script>
+    if (window.location.hash && (window.location.hash.includes("access_token=") || window.location.hash.includes("error="))) {
+      window.location.replace("/login" + window.location.search + window.location.hash);
+    }
+  </script>
   <style>
     :root {
       --bg: #0b0b0a;
@@ -624,6 +629,8 @@
       }
     }
   </style>
+<link rel="stylesheet" href="themes.css">
+<script src="theme-switcher.js"></script>
 </head>
 
 <body>
