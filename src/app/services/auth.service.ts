@@ -215,6 +215,15 @@ export class AuthService {
 
   async signOut() {
     await supabase.auth.signOut();
+    const isTauri = typeof window !== 'undefined' && (
+      '__TAURI_INTERNALS__' in window || 
+      '__TAURI_IPC__' in window ||
+      '__TAURI_INVOKE__' in window ||
+      '__TAURI__' in window
+    );
+    if (!isTauri && typeof window !== 'undefined') {
+      window.location.href = '/';
+    }
   }
 
   async updateUserMetadata(data: any) {
