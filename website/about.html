@@ -50,102 +50,202 @@
       outline-offset: 3px;
     }
 
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
+    /* --- nav --- */
+    .glass-pill-nav {
+      position: fixed;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 18px 32px;
+      gap: 20px;
+      padding: 8px 12px;
+      border-radius: 99px;
+      background: rgba(14, 12, 11, 0.6);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 
+        0 4px 24px rgba(0, 0, 0, 0.4),
+        0 1px 2px rgba(255, 255, 255, 0.05) inset;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .brand {
+    .glass-pill-nav .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
       text-decoration: none;
-      color: inherit;
     }
 
-    .brand-mark {
-      width: 28px;
-      height: 28px;
-      border-radius: 7px;
-      display: block;
-      object-fit: contain;
-      flex-shrink: 0;
+    .glass-pill-nav .brand-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
     }
 
-    .brand-word {
-      font-size: 15px;
-    }
-
-    .brand-word b {
-      font-weight: 600;
-    }
-
-    .brand-word span {
-      color: var(--text-dim);
-      font-weight: 400;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 28px;
-      font-size: 13px;
-      letter-spacing: 0.01em;
-      color: var(--text-dim);
-    }
-
-    .nav-links a:hover {
-      color: var(--text);
-    }
-
-    .nav-links a.active {
-      color: var(--accent-strong);
-    }
-
-    
-    .nav-actions {
+    .glass-pill-nav .nav-links {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 4px;
     }
 
-    .nav-login {
-      font-size: 13px;
+    .glass-pill-nav .nav-links a {
+      font-size: 13.5px;
       font-weight: 500;
       color: var(--text-dim);
-      text-decoration: none;
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 8px 16px;
+      border-radius: 99px;
       transition: all 0.2s ease;
+      text-decoration: none;
     }
 
-    .nav-login:hover {
+    .glass-pill-nav .nav-links a:hover,
+    .glass-pill-nav .nav-links a.active {
       color: var(--text);
       background: rgba(255, 255, 255, 0.06);
     }
 
-.nav-cta {
+    .glass-pill-nav .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .glass-pill-nav .nav-login {
       font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
       padding: 8px 16px;
-      border-radius: 8px;
-      border: 1px solid var(--border-strong);
+      border-radius: 99px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .glass-pill-nav .nav-login:hover {
       color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
     }
 
-    .nav-cta:hover {
-      border-color: var(--accent);
-      color: var(--accent-strong);
+    .glass-pill-nav .nav-cta {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--on-accent);
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      padding: 8px 18px;
+      border-radius: 99px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(232, 98, 47, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-decoration: none;
     }
 
-    @media (max-width:720px) {
-      .nav-links {
+    .glass-pill-nav .nav-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(232, 98, 47, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 8px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .mobile-menu-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .mobile-menu-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+    }
+
+    .glass-mobile-menu {
+      position: fixed;
+      top: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px) scale(0.95);
+      width: calc(100% - 40px);
+      max-width: 360px;
+      background: rgba(14, 12, 11, 0.85);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 24px;
+      z-index: 90;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .glass-mobile-menu.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    .mobile-menu-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .mobile-menu-inner a {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-align: center;
+      padding: 10px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .mobile-menu-inner a:hover, .mobile-menu-inner a.active {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .mobile-menu-inner hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 8px 0;
+    }
+
+    .mobile-menu-inner .mobile-cta {
+      color: var(--on-accent);
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    }
+    
+    @media (max-width:768px) {
+      .glass-pill-nav {
+        top: 20px;
+        padding: 6px 8px;
+        gap: 8px;
+      }
+      .glass-pill-nav .nav-links {
         display: none;
       }
+      .glass-pill-nav .nav-actions {
+        display: none;
+      }
+      .mobile-menu-btn {
+        display: flex;
+      }
     }
+
+    
 
     .header {
       text-align: center;
@@ -575,22 +675,41 @@
 
 <body>
 
-  <nav class="nav">
-    <a href="rem-lays-hero.html" class="brand">
+  <nav class="glass-pill-nav">
+    <a href="/" class="brand">
       <img src="assets/logo_square.png" alt="RemLays" class="brand-mark">
-      <div class="brand-word"><b>Rem</b><span>Lays</span></div>
     </a>
     <div class="nav-links">
-      <a href="rem-lays-hero.html">Product</a>
-      <a href="rem-lays-features.html">Features</a>
-      <a href="rem-lays-about.html">About</a>
-      <a href="rem-lays-faq.html">FAQ</a>
+      <a href="/">Home</a>
+      <a href="features.html">Features</a>
+      <a href="about.html" class="active">About</a>
+      <a href="faq.html">FAQ</a>
     </div>
     <div class="nav-actions">
-      <a href="https://rem-lays.vercel.app" class="nav-login">Log in</a>
-      <a href="rem-lays-download.html" class="nav-cta">Get started</a>
+      <a href="/login" class="nav-login">Log in</a>
+      <a href="downloads.html" class="nav-cta">Get started</a>
     </div>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
   </nav>
+
+  <div class="glass-mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-inner">
+      <a href="/">Home</a>
+      <a href="features.html">Features</a>
+      <a href="about.html" class="active">About</a>
+      <a href="faq.html">FAQ</a>
+      <hr>
+      <a href="/login">Log in</a>
+      <a href="downloads.html" class="mobile-cta">Get started</a>
+    </div>
+  </div>
 
   <section class="header">
     <h1>built by someone who kept losing things too.</h1>
@@ -671,7 +790,7 @@
 
   <section class="cta-section reveal">
     <h2>come save your mess with us.</h2>
-    <a href="rem-lays-download.html" class="cta-btn">Download rem-lays </a>
+    <a href="downloads.html" class="cta-btn">Download rem-lays </a>
   </section>
 
   <footer>
@@ -680,11 +799,11 @@
       <span class="footer-brand-name"><b>Rem</b><span>Lays</span></span>
     </div>
     <div class="footer-links">
-      <a href="rem-lays-hero.html">Product</a>
-      <a href="rem-lays-features.html">Features</a>
-      <a href="rem-lays-about.html">About</a>
-      <a href="rem-lays-faq.html">FAQ</a>
-      <a href="rem-lays-changelog.html">Changelog</a>
+      <a href="/">Home</a>
+      <a href="features.html">Features</a>
+      <a href="about.html" class="active">About</a>
+      <a href="faq.html">FAQ</a>
+      <a href="changelog.html">Changelog</a>
     </div>
     <p class="footer-tag">rem-lays &middot; your digital vault</p>
   </footer>
@@ -706,6 +825,16 @@
         });
       }, { threshold: 0.15 });
       targets.forEach(function (el) { io.observe(el); });
+
+      // Mobile Menu Logic
+      var menuBtn = document.getElementById('mobileMenuBtn');
+      var mobileMenu = document.getElementById('mobileMenu');
+      if (menuBtn && mobileMenu) {
+        menuBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          mobileMenu.classList.toggle('open');
+        });
+      }
     })();
   </script>
 
