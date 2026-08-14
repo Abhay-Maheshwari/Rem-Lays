@@ -6,15 +6,12 @@
   </div>
 
   <!-- Error State -->
-  <div class="error-state" *ngIf="error() && !loading()">
-    <div class="error-card">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="15" y1="9" x2="9" y2="15"></line>
-        <line x1="9" y1="9" x2="15" y2="15"></line>
-      </svg>
-      <h2>Item Not Found</h2>
-      <p>This item doesn't exist or is no longer shared.</p>
+  <div class="error-page" *ngIf="error() && !loading()">
+    <div class="error-content">
+      <h1>404</h1>
+      <p class="error-sub">we lost this one.</p>
+      <p class="error-desc">the item you're looking for doesn't exist, is no longer shared, or maybe never was.</p>
+      <a href="/" class="back-home">Back to Home</a>
     </div>
   </div>
 
