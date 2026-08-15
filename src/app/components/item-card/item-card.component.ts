@@ -376,9 +376,29 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
     try {
       const response = await fetch(url);
       const blob = await response.blob();
+      
+      const pngBlob = await new Promise<Blob>((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return reject(new Error('Failed to get canvas context'));
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob((b) => {
+            if (b) resolve(b);
+            else reject(new Error('Failed to convert to png'));
+          }, 'image/png');
+        };
+        img.onerror = () => reject(new Error('Failed to load image for copying'));
+        img.src = URL.createObjectURL(blob);
+      });
+
       await navigator.clipboard.write([
         new (window as any).ClipboardItem({
-          [blob.type]: blob
+          'image/png': pngBlob
         })
       ]);
       this.toastSvc.show('Image copied!');
