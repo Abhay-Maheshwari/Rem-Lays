@@ -61,10 +61,11 @@ pub fn run() {
                 use tauri::menu::{Menu, MenuItem};
                 use tauri::tray::TrayIconBuilder;
                 use tauri::Manager;
-                use window_vibrancy::{apply_vibrancy, apply_mica, NSVisualEffectMaterial};
+                #[cfg(target_os = "macos")]
+                use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
 
+                #[cfg(target_os = "macos")]
                 if let Some(window) = app.get_webview_window("main") {
-                    #[cfg(target_os = "macos")]
                     apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
                         .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
                 }
