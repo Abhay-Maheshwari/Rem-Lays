@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Features — rem-lays</title>
 <link rel="icon" type="image/png" href="assets/logo_square.png">
@@ -9,6 +13,24 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="description" content="RemLays - Everything you save, instantly organized. One inbox for links, notes, screenshots, and ideas. Open-source on GitHub by Abhay Maheshwari.">
+<meta name="author" content="Abhay Maheshwari">
+<link rel="canonical" href="https://rem-lays.vercel.app/features.html" />
+<script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "RemLays",
+      "url": "https://rem-lays.vercel.app/",
+      "applicationCategory": "ProductivityApplication",
+      "author": {
+        "@type": "Person",
+        "name": "Abhay Maheshwari",
+        "url": "https://github.com/Abhay-Maheshwari"
+      },
+      "codeRepository": "https://github.com/Abhay-Maheshwari/Rem-Lays"
+    }
+</script>
 <style>
   :root{
     --bg:#0b0b0a; --surface:#17140f; --surface-2:#1f1b16;
@@ -386,152 +408,6 @@
 </style>
 <link rel="stylesheet" href="themes.css">
 <script src="theme-switcher.js"></script>
-</head>
-<body>
-
-<nav class="glass-pill-nav">
-    <a href="/" class="brand">
-      <img src="assets/logo_square.png" alt="RemLays" class="brand-mark">
-    </a>
-    <div class="nav-links">
-      <a href="/">Home</a>
-      <a href="features.html" class="active">Features</a>
-      <a href="about.html">About</a>
-      <a href="faq.html">FAQ</a>
-    </div>
-    <div class="nav-actions">
-      <a href="/login" class="nav-login">Log in</a>
-      <a href="downloads.html" class="nav-cta">Get started</a>
-    </div>
-    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-        stroke-linejoin="round">
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
-      </svg>
-    </button>
-  </nav>
-
-  <div class="glass-mobile-menu" id="mobileMenu">
-    <div class="mobile-menu-inner">
-      <a href="/">Home</a>
-      <a href="features.html" class="active">Features</a>
-      <a href="about.html">About</a>
-      <a href="faq.html">FAQ</a>
-      <hr>
-      <a href="/login">Log in</a>
-      <a href="downloads.html" class="mobile-cta">Get started</a>
-    </div>
-  </div>
-
-<section class="header">
-  <h1>your personal vault for the <em>digital web</em>.</h1>
-  <p>a beautiful, lightning-fast app that lets you save, organize, and instantly find your favorite links, notes, and ideas.</p>
-</section>
-
-<section class="spotlight" id="s1">
-  <div class="text">
-    <h2>find things instantly.</h2>
-    <p>Stop scrolling through a messy sea of browser bookmarks. Our powerful search and tagging system means you can find that specific link in seconds.</p>
-  </div>
-  <div class="visual">
-    <div class="mini-grid">
-      <div class="mini-card"><div class="thumb"></div><p class="label">moodboard_v3.png</p><span class="tag">#image</span></div>
-      <div class="mini-card"><div class="icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 12.5l2.5 2.5L16 9"/></svg></div><p class="label">ping design re: spacing tokens</p><span class="tag">#To-Do</span></div>
-      <div class="mini-card"><div class="icon"><svg viewBox="0 0 24 24"><path d="M9.5 14.5l5-5M8 8.2L9.6 6.6a3 3 0 014.9.9 3 3 0 01-.6 3.4L12.4 12.4M16 15.8l-1.6 1.6a3 3 0 01-4.9-.9 3 3 0 01.6-3.4l1.5-1.5"/></svg></div><p class="label">notion.so/sprint-notes-aug</p><span class="tag">#Dev</span></div>
-      <div class="mini-card accented"><div class="icon"><svg viewBox="0 0 24 24"><path d="M9.3 18h5.4M10.3 21h3.4M12 3.2a5.8 5.8 0 00-2.9 10.8c.6.5.9 1.2.9 1.9h4c0-.7.3-1.4.9-1.9A5.8 5.8 0 0012 3.2z"/></svg></div><p class="label">prompt: warm film grain portraits</p><span class="tag">#Gpt</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="spotlight reverse" id="s2">
-  <div class="text">
-    <h2>beautiful & clutter-free.</h2>
-    <p>A gorgeous, glass-like design that makes browsing your saved items a joy, not a chore. Organize your links and notes effortlessly.</p>
-  </div>
-  <div class="visual">
-    <div class="board-grid">
-      <div class="board-tile"><div class="b-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V6z"/><path d="M4 10h16"/></svg></div><span>Inbox</span></div>
-      <div class="board-tile"><div class="b-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg></div><span>Dev Board</span></div>
-      <div class="board-tile dashed"><div class="b-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div><span>New Board</span></div>
-      <div class="board-tile"><div class="b-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg></div><span>Launch Board</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="spotlight" id="s3">
-  <div class="text">
-    <h2>100% private & offline.</h2>
-    <p>Your data belongs to you. Everything is stored securely on your own device, meaning it loads instantly and works perfectly even without an internet connection.</p>
-  </div>
-  <div class="visual">
-    <div class="cal">
-      <p class="cal-head">Recent Activity</p>
-      <div class="cal-grid">
-        <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-        <span class="day">9</span><span class="day">10</span><span class="day">11</span><span class="day active">12</span><span class="day">13</span><span class="day">14</span><span class="day">15</span>
-      </div>
-      <div class="cal-upcoming">
-        <span class="dot"></span>
-        <div><p>Saved: 15 Links</p><span>No cloud tracking. 100% local.</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="spotlight reverse" id="s4">
-  <div class="text">
-    <h2>works everywhere you do.</h2>
-    <p>Available for Windows desktop and Android. Keep your digital life organized wherever you are with a unified, seamless experience.</p>
-  </div>
-  <div class="visual">
-    <div class="sync-visual">
-      <div class="sync-row">
-        <div class="device"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div>
-        <div class="sync-line"><div class="pulse"><svg viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6M4.5 15a8 8 0 0014.5 3M19.5 9A8 8 0 005 6"/></svg></div></div>
-        <div class="device"><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 18h2"/></svg></div>
-      </div>
-      <p class="sync-caption">available on windows and android</p>
-    </div>
-  </div>
-</section>
-
-<section class="grid-section">
-  <h2>and the small things that add up</h2>
-  <p>The details that make an app feel like it actually works for you.</p>
-  <div class="feat-grid">
-    <div class="feat-card"><div class="f-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg></div><h4>Find it instantly</h4><p>Powerful search gets you straight to the exact link or note you're looking for.</p></div>
-    <div class="feat-card"><div class="f-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></div><h4>Search by tag</h4><p>Type # and jump straight to everything tagged the way you'd expect.</p></div>
-    <div class="feat-card"><div class="f-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.4"/><path d="M21 15l-5-5-4 4-3-3-6 6"/></svg></div><h4>Clutter-free design</h4><p>A gorgeous, glass-like interface that makes browsing your saved items a joy.</p></div>
-    <div class="feat-card"><div class="f-icon"><svg viewBox="0 0 24 24"><path d="M12 4v12M6 12l6 6 6-6"/><path d="M5 20h14"/></svg></div><h4>100% Private</h4><p>Your data is yours. Stored securely on your device with no cloud snooping.</p></div>
-    <div class="feat-card"><div class="f-icon"><svg viewBox="0 0 24 24"><path d="M4 12h12M12 6l6 6-6 6"/></svg></div><h4>Quick capture</h4><p>Whenever you find a link you want to keep, just paste it into Rem-Lays.</p></div>
-    <div class="feat-card"><div class="f-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><rect x="8" y="19" width="8" height="1.5" rx="0.75"/><path d="M12 16v3"/></svg></div><h4>Works Everywhere</h4><p>Available as a desktop app for Windows and an APK for your Android phone.</p></div>
-  </div>
-</section>
-
-<section class="cta-section">
-  <h2>ready to stop losing track of things?</h2>
-  <a href="downloads.html" class="cta-btn">Download rem-lays</a>
-</section>
-
-<footer>
-  <div class="footer-brand">
-    <img src="assets/logo_square.png" alt="RemLays" class="footer-logo">
-    <span class="footer-brand-name"><b>Rem</b><span>Lays</span></span>
-  </div>
-  <div class="footer-links">
-    <a href="/">Home</a>
-    <a href="features.html" class="active">Features</a>
-    <a href="about.html">About</a>
-    <a href="faq.html">FAQ</a>
-
-  </div>
-  <p class="footer-tag">rem-lays &middot; your digital vault</p>
-</footer>
-
-<script>
-(function(){
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var targets = document.querySelectorAll('.spotlight, .feat-card');
   if (reduced || !('IntersectionObserver' in window)) {
