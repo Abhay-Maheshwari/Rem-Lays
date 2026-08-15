@@ -250,7 +250,7 @@
     /* --- hero scroll stage --- */
     .scrollstage {
       position: relative;
-      height: 340vh;
+      height: 500vh;
     }
 
     .sticky {
@@ -357,7 +357,7 @@
         0 1px 0 rgba(244, 240, 233, 0.06) inset,
         0 2px 5px rgba(6, 4, 3, 0.35),
         0 16px 32px rgba(6, 4, 3, 0.42);
-      will-change: transform, left, top, opacity, filter;
+      will-change: transform, opacity, filter;
       overflow: hidden;
       transition: box-shadow .25s ease;
     }
@@ -906,12 +906,11 @@
       if (document.fonts && document.fonts.ready) { document.fonts.ready.then(measureKeepout); }
 
       function applyProgress(progress) {
-        measureKeepout();
         var vw = window.innerWidth, vh = window.innerHeight;
 
         ACTIVE_POS.forEach(function (d, i) {
           var start = DEAD_ZONE + i * 0.03 + JITTER[i];
-          var denom = Math.max(0.001, 0.85 - start);
+          var denom = Math.max(0.001, 0.95 - start);
           var p = Math.min(1, Math.max(0, (progress - start) / denom));
           var pe = easeOutQuint(p);
           var pop = easeOutBack(p);
@@ -933,11 +932,9 @@
           var el = els[i];
           var paraX = window.mouseX ? window.mouseX * (1 + i * 0.12) : 0;
           var paraY = window.mouseY ? window.mouseY * (1 + i * 0.12) : 0;
-          el.style.left = x + '%';
-          el.style.top = y + '%';
           el.style.opacity = opacity;
           el.style.filter = blurPx > 0.05 ? 'blur(' + blurPx.toFixed(1) + 'px)' : '';
-          el.style.transform = 'translate(calc(-50% + ' + paraX + 'px), calc(-50% + ' + paraY + 'px)) rotate(' + rot + 'deg) scale(' + scale + ')';
+          el.style.transform = 'translate(calc(-50% + ' + (px + paraX) + 'px), calc(-50% + ' + (py + paraY) + 'px)) rotate(' + rot + 'deg) scale(' + scale + ')';
 
           var tagOpacity = Math.max(0, Math.min(1, (p - 0.3) / 0.4));
           var tagEl = el.querySelector('.tag');
@@ -987,6 +984,7 @@
           clearTimeout(resizeTimer);
           resizeTimer = setTimeout(function () {
             handleLayoutResize();
+            measureKeepout();
             update();
           }, 120);
         }

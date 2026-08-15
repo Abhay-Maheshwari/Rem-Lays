@@ -1,27 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FAQ — rem-lays</title>
-<link rel="icon" type="image/png" href="assets/logo_square.png">
-<link rel="apple-touch-icon" href="assets/logo_square.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#0b0b0a; --surface:#17140f; --surface-2:#1f1b16;
-    --border:rgba(244,240,233,0.08); --border-strong:rgba(244,240,233,0.15);
-    --text:#f2efe9; --text-dim:#a49a8c; --text-mute:#6b6255;
-    --accent:#e8622f; --accent-strong:#ff7a45; --on-accent:#fff6f0;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{ background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
-  a{color:inherit; text-decoration:none;}
-  :focus-visible{ outline:2px solid var(--accent-strong); outline-offset:3px; }
 
-  /* --- nav --- */
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ — rem-lays</title>
+  <link rel="icon" type="image/png" href="assets/logo_square.png">
+  <link rel="apple-touch-icon" href="assets/logo_square.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0b0a;
+      --surface: #17140f;
+      --surface-2: #1f1b16;
+      --border: rgba(244, 240, 233, 0.08);
+      --border-strong: rgba(244, 240, 233, 0.15);
+      --text: #f2efe9;
+      --text-dim: #a49a8c;
+      --text-mute: #6b6255;
+      --accent: #e8622f;
+      --accent-strong: #ff7a45;
+      --on-accent: #fff6f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent-strong);
+      outline-offset: 3px;
+    }
+
+    /* --- nav --- */
     .glass-pill-nav {
       position: fixed;
       top: 32px;
@@ -37,7 +66,7 @@
       backdrop-filter: blur(24px) saturate(180%);
       -webkit-backdrop-filter: blur(24px) saturate(180%);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 
+      box-shadow:
         0 4px 24px rgba(0, 0, 0, 0.4),
         0 1px 2px rgba(255, 255, 255, 0.05) inset;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -129,7 +158,7 @@
       justify-content: center;
       border-radius: 50%;
     }
-    
+
     .mobile-menu-btn:hover {
       background: rgba(255, 255, 255, 0.06);
     }
@@ -183,7 +212,8 @@
       text-decoration: none;
     }
 
-    .mobile-menu-inner a:hover, .mobile-menu-inner a.active {
+    .mobile-menu-inner a:hover,
+    .mobile-menu-inner a.active {
       color: var(--text);
       background: rgba(255, 255, 255, 0.06);
     }
@@ -198,72 +228,223 @@
       color: var(--on-accent);
       background: linear-gradient(135deg, var(--accent), var(--accent-strong));
     }
-    
+
     @media (max-width:768px) {
       .glass-pill-nav {
         top: 20px;
         padding: 6px 8px;
         gap: 8px;
       }
+
       .glass-pill-nav .nav-links {
         display: none;
       }
+
       .glass-pill-nav .nav-actions {
         display: none;
       }
+
       .mobile-menu-btn {
         display: flex;
       }
     }
-  
 
-  .header{ text-align:center; padding:180px 24px 48px; background:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(232,98,47,0.09), transparent 60%);}
-  .eyebrow{ font-size:12px; letter-spacing:0.08em; color:var(--accent-strong); margin-bottom:18px;}
-  .header h1{ font-family:'Fraunces',serif; font-weight:400; font-size:clamp(30px,5vw,48px); line-height:1.08; letter-spacing:-0.015em; max-width:600px; margin:0 auto;}
-  .header p{ margin-top:16px; font-size:15px; color:var(--text-dim);}
 
-  .faq-list{ max-width:640px; margin:0 auto; padding:0 28px 110px; display:flex; flex-direction:column; gap:16px;}
-  .faq-item{ border-radius:16px; padding:22px 24px;}
-  .faq-item summary{
-    cursor:pointer; list-style:none; display:flex; align-items:center; justify-content:space-between;
-    gap:16px; font-size:15px; font-weight:500;
-  }
-  .faq-item summary::-webkit-details-marker{ display:none;}
-  .faq-item summary .plus{
-    flex-shrink:0; width:22px; height:22px; border-radius:50%; background:var(--surface-2);
-    display:flex; align-items:center; justify-content:center; font-size:0; color:transparent;
-    transition:transform 0.2s ease; position:relative;
-  }
-  .faq-item summary .plus::before,
-  .faq-item summary .plus::after {
-    content:''; position:absolute; background-color:var(--accent-strong); border-radius:1px;
-  }
-  .faq-item summary .plus::before { width:10px; height:1.5px; }
-  .faq-item summary .plus::after { width:1.5px; height:10px; }
-  .faq-item[open] summary .plus{ transform:rotate(45deg);}
-  .faq-item .a{ margin-top:12px; font-size:14px; color:var(--text-dim); line-height:1.65; max-width:560px;}
+    .header {
+      text-align: center;
+      padding: 180px 24px 48px;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(232, 98, 47, 0.09), transparent 60%);
+    }
 
-  .support-strip{ max-width:640px; margin:0 auto 100px; padding:0 28px;}
-  .support-inner{
-    background:var(--surface); border:1px solid var(--border); border-radius:16px;
-    padding:22px 24px; text-align:center;
-  }
-  .support-inner p.title{ font-size:14.5px; font-weight:500; margin-bottom:6px;}
-  .support-inner p.sub{ font-size:13px; color:var(--text-mute); margin-bottom:16px;}
-  .support-inner a.mail{
-    display:inline-flex; align-items:center; gap:8px; font-size:13.5px; color:var(--accent-strong);
-    border:1px solid rgba(232,98,47,0.3); background:rgba(232,98,47,0.08); padding:9px 16px; border-radius:8px;
-  }
-  .support-inner a.mail:hover{ border-color:var(--accent-strong);}
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--accent-strong);
+      margin-bottom: 18px;
+    }
 
-  footer{ padding:40px 24px 28px; border-top:1px solid var(--border);}
-  .footer-brand{ display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:18px;}
-  .footer-logo{ width:22px; height:22px; border-radius:6px; object-fit:contain;}
-  .footer-brand-name{ font-size:14px; letter-spacing:0.01em; color:var(--text);}
-  .footer-brand-name span{ color:var(--text-dim);}
-  .footer-links{ display:flex; justify-content:center; flex-wrap:wrap; gap:22px; margin-bottom:16px; font-size:13px; color:var(--text-dim);}
-  .footer-links a:hover{ color:var(--accent-strong);}
-  .footer-tag{ text-align:center; font-size:11.5px; color:var(--text-mute);}
+    .header h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: 1.08;
+      letter-spacing: -0.015em;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .header p {
+      margin-top: 16px;
+      font-size: 15px;
+      color: var(--text-dim);
+    }
+
+    .faq-list {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 0 28px 110px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .faq-item {
+      border-radius: 16px;
+      padding: 22px 24px;
+    }
+
+    .faq-item summary {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .faq-item summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .faq-item summary .plus {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0;
+      color: transparent;
+      transition: transform 0.2s ease;
+      position: relative;
+    }
+
+    .faq-item summary .plus::before,
+    .faq-item summary .plus::after {
+      content: '';
+      position: absolute;
+      background-color: var(--accent-strong);
+      border-radius: 1px;
+    }
+
+    .faq-item summary .plus::before {
+      width: 10px;
+      height: 1.5px;
+    }
+
+    .faq-item summary .plus::after {
+      width: 1.5px;
+      height: 10px;
+    }
+
+    .faq-item[open] summary .plus {
+      transform: rotate(45deg);
+    }
+
+    .faq-item .a {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.65;
+      max-width: 560px;
+    }
+
+    .support-strip {
+      max-width: 640px;
+      margin: 0 auto 100px;
+      padding: 0 28px;
+    }
+
+    .support-inner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 24px;
+      text-align: center;
+    }
+
+    .support-inner p.title {
+      font-size: 14.5px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .support-inner p.sub {
+      font-size: 13px;
+      color: var(--text-mute);
+      margin-bottom: 16px;
+    }
+
+    .support-inner a.mail {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13.5px;
+      color: var(--accent-strong);
+      border: 1px solid rgba(232, 98, 47, 0.3);
+      background: rgba(232, 98, 47, 0.08);
+      padding: 9px 16px;
+      border-radius: 8px;
+    }
+
+    .support-inner a.mail:hover {
+      border-color: var(--accent-strong);
+    }
+
+    footer {
+      padding: 40px 24px 28px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .footer-logo {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+
+    .footer-brand-name {
+      font-size: 14px;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+
+    .footer-brand-name span {
+      color: var(--text-dim);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 22px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-strong);
+    }
+
+    .footer-tag {
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--text-mute);
+    }
+
     .nav-login {
       font-size: 13px;
       font-weight: 500;
@@ -278,13 +459,14 @@
       color: var(--text);
       background: rgba(255, 255, 255, 0.06);
     }
-</style>
-<link rel="stylesheet" href="themes.css">
-<script src="theme-switcher.js"></script>
+  </style>
+  <link rel="stylesheet" href="themes.css">
+  <script src="theme-switcher.js"></script>
 </head>
+
 <body>
 
-<nav class="glass-pill-nav">
+  <nav class="glass-pill-nav">
     <a href="/" class="brand">
       <img src="assets/logo_square.png" alt="RemLays" class="brand-mark">
     </a>
@@ -320,61 +502,67 @@
     </div>
   </div>
 
-<section class="header">
-  <h1>questions, answered.</h1>
-  <p>can't find what you're looking for? reach out below.</p>
-</section>
+  <section class="header">
+    <h1>questions, answered.</h1>
+    <p>can't find what you're looking for? reach out below.</p>
+  </section>
 
-<section class="faq-list">
-  <details class="faq-item" open>
-    <summary>What is rem-lays?<span class="plus">+</span></summary>
-    <p class="a">One inbox for everything you save — links, notes, screenshots, videos and ideas. Paste it in and tag it to stay organized.</p>
-  </details>
-  <details class="faq-item">
-    <summary>Which platforms is it available on?<span class="plus">+</span></summary>
-    <p class="a">rem-lays is available now on Windows and Android, with the same account and the same inbox synced across both. Mac and iOS are on the way — you can leave your email on the download page to get notified.</p>
-  </details>
-  <details class="faq-item">
-    <summary>Is my data private, and can I export it?<span class="plus">+</span></summary>
-    <p class="a">What you save is tied to your account and visible only to you. You can export everything at any point — nothing is locked in.</p>
-  </details>
+  <section class="faq-list">
+    <details class="faq-item" open>
+      <summary>What is rem-lays?<span class="plus">+</span></summary>
+      <p class="a">One inbox for everything you save — links, notes, screenshots, videos and ideas. Paste it in and tag
+        it to stay organized.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Which platforms is it available on?<span class="plus">+</span></summary>
+      <p class="a">rem-lays is available now on Windows and Android, with the same account and the same inbox synced
+        across both. Mac and iOS are on the way — you can leave your email on the download page to get notified.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Is my data private, and can I export it?<span class="plus">+</span></summary>
+      <p class="a">What you save is tied to your account and visible only to you. You can export everything at any point
+        — nothing is locked in.</p>
+    </details>
 
-  <details class="faq-item">
-    <summary>What's the difference between tags and boards?<span class="plus">+</span></summary>
-    <p class="a">Tags are labels you add to keep things organized. Boards are something you build on purpose — a dedicated space for a specific project, where you decide what goes in.</p>
-  </details>
-  <details class="faq-item">
-    <summary>Is rem-lays free?<span class="plus">+</span></summary>
-    <p class="a">Yes — rem-lays is free to use right now. If that ever changes, existing users will be the first to know, well before anything does.</p>
-  </details>
-  <details class="faq-item">
-    <summary>How do I get support?<span class="plus">+</span></summary>
-    <p class="a">Email us any time — see below. We read every message and usually reply within a day or two.</p>
-  </details>
-</section>
+    <details class="faq-item">
+      <summary>What's the difference between tags and boards?<span class="plus">+</span></summary>
+      <p class="a">Tags are labels you add to keep things organized. Boards are something you build on purpose — a
+        dedicated space for a specific project, where you decide what goes in.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Is rem-lays free?<span class="plus">+</span></summary>
+      <p class="a">Yes — rem-lays is free to use right now. If that ever changes, existing users will be the first to
+        know, well before anything does.</p>
+    </details>
+    <details class="faq-item">
+      <summary>How do I get support?<span class="plus">+</span></summary>
+      <p class="a">Email us any time — see below. We read every message and usually reply within a day or two.</p>
+    </details>
+  </section>
 
-<section class="support-strip">
-  <div class="support-inner">
-    <p class="title">still stuck?</p>
-    <p class="sub">send us a note and we'll sort it out.</p>
-    <a href="mailto:hello@rem-lays.com" class="mail">hello@rem-lays.com</a>
-  </div>
-</section>
+  <section class="support-strip">
+    <div class="support-inner">
+      <p class="title">still stuck?</p>
+      <p class="sub">send us a note and we'll sort it out.</p>
+      <a href="mailto:maheshwariabhay49@gmail.com" class="mail">maheshwariabhay49@gmail.com</a>
+    </div>
+  </section>
 
-<footer>
-  <div class="footer-brand">
-    <img src="assets/logo_square.png" alt="RemLays" class="footer-logo">
-    <span class="footer-brand-name"><b>Rem</b><span>Lays</span></span>
-  </div>
-  <div class="footer-links">
-    <a href="/">Home</a>
-    <a href="features.html">Features</a>
-    <a href="about.html">About</a>
-    <a href="faq.html" class="active">FAQ</a>
+  <footer>
+    <div class="footer-brand">
+      <img src="assets/logo_square.png" alt="RemLays" class="footer-logo">
+      <span class="footer-brand-name"><b>Rem</b><span>Lays</span></span>
+    </div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="features.html">Features</a>
+      <a href="about.html">About</a>
+      <a href="faq.html" class="active">FAQ</a>
 
-  </div>
-  <p class="footer-tag">rem-lays &middot; your digital vault</p>
-</footer>
+    </div>
+    <p class="footer-tag">rem-lays &middot; your digital vault</p>
+  </footer>
 
 </body>
+
 </html>

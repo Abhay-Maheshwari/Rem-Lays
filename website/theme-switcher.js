@@ -74,5 +74,24 @@
       if (shouldUpdate) addHoverListeners();
     });
     observer.observe(document.body, { childList: true, subtree: true });
+    
+    // Initialize Lenis Smooth Scrolling
+    const lenisScript = document.createElement('script');
+    lenisScript.src = "https://unpkg.com/lenis@1.1.13/dist/lenis.min.js";
+    lenisScript.onload = function() {
+      const lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        smoothTouch: false,
+      });
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+    };
+    document.head.appendChild(lenisScript);
+
   });
 })();
