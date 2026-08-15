@@ -35,4 +35,4 @@ jobs:
         run: npm run build
 
       - name: Build Tauri (Linux target, smoke test only)
-        run: npm run tauri:build
+        run: npm run tauri:build -- --no-bundle
