@@ -2,6 +2,7 @@
   color-scheme: dark;
   --bg-sidebar: #1e1e1e;
   --bg-main: #141414;
+  --bg-card: transparent;
   --border-subtle: rgba(255, 255, 255, 0.05);
   --border-strong: rgba(255, 255, 255, 0.12);
   --text-primary: #ffffff;
@@ -21,6 +22,7 @@ body.light-theme {
   color-scheme: light;
   --bg-sidebar: #f7f7f8;
   --bg-main: #ffffff;
+  --bg-card: transparent;
   --border-subtle: rgba(0, 0, 0, 0.08);
   --border-strong: rgba(0, 0, 0, 0.15);
   --text-primary: #1a1a1a;
@@ -31,6 +33,7 @@ body.light-theme {
 body.theme-vscode {
   --bg-sidebar: #252526;
   --bg-main: #1e1e1e;
+  --bg-card: transparent;
   --border-subtle: #2b2b2b;
   --border-strong: #3c3c3c;
   --text-primary: #cccccc;
@@ -43,6 +46,7 @@ body.theme-vscode {
 body.theme-dracula {
   --bg-sidebar: #21222c;
   --bg-main: #282a36;
+  --bg-card: transparent;
   --border-subtle: #44475a;
   --border-strong: #6272a4;
   --text-primary: #f8f8f2;
@@ -55,6 +59,7 @@ body.theme-dracula {
 body.theme-oled {
   --bg-sidebar: #000000;
   --bg-main: #000000;
+  --bg-card: transparent;
   --border-subtle: #1a1a1a;
   --border-strong: #333333;
   --text-primary: #ffffff;
@@ -64,6 +69,32 @@ body.theme-oled {
   --accent-soft: rgba(255, 255, 255, 0.15);
 }
 
+body.theme-translucent {
+  --bg-main: rgba(0, 0, 0, 0.50);
+  --bg-sidebar: rgba(0, 0, 0, 0.50);
+  --bg-card: rgba(255, 255, 255, 0.08);
+}
+body.theme-translucent.light-theme {
+  --bg-main: rgba(255, 255, 255, 0.85);
+  --bg-sidebar: rgba(255, 255, 255, 0.95);
+  --bg-card: rgba(0, 0, 0, 0.05);
+}
+body.theme-translucent.theme-vscode {
+  --bg-main: rgba(30, 30, 30, 0.85);
+  --bg-sidebar: rgba(37, 37, 38, 0.75);
+  --bg-card: rgba(255, 255, 255, 0.08);
+}
+body.theme-translucent.theme-dracula {
+  --bg-main: rgba(30, 32, 42, 0.85);
+  --bg-sidebar: rgba(40, 42, 54, 0.75);
+  --bg-card: rgba(255, 255, 255, 0.08);
+}
+body.theme-translucent.theme-oled {
+  --bg-main: rgba(0, 0, 0, 0.85);
+  --bg-sidebar: rgba(0, 0, 0, 0.65);
+  --bg-card: rgba(255, 255, 255, 0.12);
+}
+
 body.compact-mode {
   --radius-lg: 8px;
   --radius-md: 6px;
@@ -71,6 +102,8 @@ body.compact-mode {
 }
 
 * { box-sizing: border-box; }
+html { background: var(--bg-main); }
+html.theme-translucent { background: transparent; }
 html, body { height: 100%; margin: 0; }
 body {
   color: var(--text-primary);
@@ -78,4 +111,14 @@ body {
   overflow: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+body.theme-translucent {
+  background: transparent;
+}
+/* Disable all backdrop-filters when translucent theme is active, 
+   otherwise Chromium will render solid black boxes over transparent windows */
+body.theme-translucent * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 button { font-family: inherit; cursor: pointer; }

@@ -3,15 +3,13 @@
   flex-shrink: 0;
   position: relative;
   z-index: 10;
-  background: color-mix(in srgb, var(--bg-main) 85%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: transparent;
 }
 
 .action-bar { padding: 12px 24px 20px 24px; border-top: 1px solid var(--border-subtle); }
 .action-inner {
   display: flex; align-items: center; gap: 8px;
-  background: var(--bg-sidebar); border: 1px solid var(--border-subtle);
+  background: var(--bg-card, transparent); border: 1px solid var(--border-subtle);
   border-radius: 12px; padding: 8px 8px 8px 14px;
 }
 .action-inner:focus-within { border-color: var(--accent); }

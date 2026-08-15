@@ -61,6 +61,14 @@ pub fn run() {
                 use tauri::menu::{Menu, MenuItem};
                 use tauri::tray::TrayIconBuilder;
                 use tauri::Manager;
+                use window_vibrancy::{apply_vibrancy, apply_mica, NSVisualEffectMaterial};
+
+                if let Some(window) = app.get_webview_window("main") {
+                    #[cfg(target_os = "macos")]
+                    apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
+                        .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
+                }
+
 
                 let show_item = MenuItem::with_id(app, "show", "Show Rem-Lays", true, None::<&str>)?;
                 let quit_item = MenuItem::with_id(app, "quit", "Quit Rem-Lays", true, None::<&str>)?;

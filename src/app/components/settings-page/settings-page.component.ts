@@ -25,6 +25,7 @@ export class SettingsPageComponent implements OnInit {
   // States
   isAutostartEnabled = false;
   isCompactMode = false;
+  isTranslucentWindow = true;
   isMinimizeToTray = true;
   enablePinnedQuickNote = false;
   displayName = '';

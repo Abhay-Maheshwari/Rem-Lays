@@ -158,11 +158,14 @@ export class AppComponent {
     effect(() => {
       localStorage.setItem('activeView', this.activeView());
     });
-    // Needed because PresenceService.disconnect() writes a signal
-    // (onlineDeviceIds) synchronously — Angular blocks that by default
-    // to prevent effects from looping on their own writes. Safe here:
-    // this effect only reads auth.session(), never onlineDeviceIds, so
-    // there's no cycle to create.
+    
+    // Apply initial body classes for settings
+    if (typeof document !== 'undefined') {
+      const savedCompact = localStorage.getItem('remlays_compact_mode');
+      if (savedCompact === 'true') {
+        document.body.classList.add('compact-mode');
+      }
+    }
   }
 
   // Mobile off-canvas drawer state — inert on desktop widths, where the
