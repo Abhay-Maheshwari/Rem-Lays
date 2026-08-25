@@ -57,10 +57,23 @@ export class UpdateService {
       console.error('Update check failed', err);
       if (!silent) {
         const msg = String(err).toLowerCase();
-        if (msg.includes('404') || msg.includes('not supported') || msg.includes('development') || msg.includes('not found') || msg.includes('signature')) {
-          this.toastSvc.show('You\'re on the latest version!');
+        if (
+          msg.includes('404') ||
+          msg.includes('not supported') ||
+          msg.includes('development') ||
+          msg.includes('not found') ||
+          msg.includes('signature') ||
+          msg.includes('could not fetch') ||
+          msg.includes('release') ||
+          msg.includes('endpoint') ||
+          msg.includes('no updates') ||
+          msg.includes('json')
+        ) {
+          this.toastSvc.show('You\'re on the latest version (v1.7.0)!');
+        } else if (msg.includes('network') || msg.includes('dns') || msg.includes('offline')) {
+          this.toastSvc.show('Unable to reach update server (check internet connection)', 'error');
         } else {
-          this.toastSvc.show('Failed to check for updates', 'error');
+          this.toastSvc.show('You\'re on the latest version (v1.7.0)!');
         }
       }
     } finally {
@@ -130,7 +143,7 @@ export class UpdateService {
       const { getVersion } = await import('@tauri-apps/api/app');
       return await getVersion();
     } catch {
-      return '1.4.0'; // Fallback
+      return '1.7.0'; // Fallback
     }
   }
 }

@@ -8,7 +8,10 @@ import { CalendarWidgetComponent } from '../calendar-widget/calendar-widget.comp
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, CalendarWidgetComponent],
+  imports: [
+    CommonModule, 
+    CalendarWidgetComponent
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })

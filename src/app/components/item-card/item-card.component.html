@@ -18,7 +18,7 @@
   </div>
   
   <div class="card" 
-       [class.unseen]="item.status === 'unseen'" 
+       [class.unseen]="isUnseen" 
        [class.incoming]="isNew" 
        [class.selected]="itemsSvc.selectedItemIds().has(item.id)"
        [class.selection-active]="itemsSvc.selectionMode()"
@@ -48,7 +48,26 @@
     </button>
   </div>
 
-  <ng-container [ngSwitch]="item.type">
+  <ng-container *ngIf="isGroup">
+    <div class="body group" (click)="openGroup($event)"
+         cdkDropList [id]="'group-drop-' + item.id" (cdkDropListDropped)="onDropIntoGroup($event)">
+      <div class="group-grid-container" [class.has-image]="!!mediaUrl">
+        <img *ngIf="mediaUrl; else groupGrid" [src]="mediaUrl" />
+        <ng-template #groupGrid>
+          <div class="group-grid">
+            <div class="group-mini-icon" *ngFor="let child of groupMiniIcons">
+               <img *ngIf="child.image" [src]="child.image" />
+               <span *ngIf="child.text" class="group-mini-text">{{ child.text }}</span>
+               <span *ngIf="child.svg" class="group-mini-svg" [innerHTML]="child.svg"></span>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+      <div class="group-name">{{ item.payload['name'] || 'Group' }}</div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!isGroup" [ngSwitch]="item.type">
     <p *ngSwitchCase="'text'" class="body text">{{ noteText }}</p>
 
     <div *ngSwitchCase="'link'" class="body link">
@@ -107,8 +126,8 @@
 
   <div class="meta">
     <span class="time">{{ item.created_at | date:'MMM d, h:mm a' }}</span>
-    <div class="meta-row" *ngIf="item.status === 'unseen' || deadlineType || item.share_token || activeReminder">
-      <span class="new-badge" *ngIf="item.status === 'unseen'" (click)="markAsRead($event)" style="cursor: pointer;" title="Mark as read">NEW</span>
+    <div class="meta-row" *ngIf="isUnseen || deadlineType || item.share_token || activeReminder">
+      <span class="new-badge" *ngIf="isUnseen" (click)="markAsRead($event)" style="cursor: pointer;" title="Mark as read">NEW</span>
       <span class="expire-badge" *ngIf="deadlineType" [ngClass]="deadlineUrgency" [title]="deadlineType === 'expire' ? 'Expiring' : deadlineType === 'deadline' ? 'Deadline' : 'Snoozed'">
         <svg *ngIf="deadlineType === 'expire'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px; vertical-align:middle"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         <svg *ngIf="deadlineType === 'snooze'" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px; vertical-align:middle"><path d="M5 22h14"></path><path d="M5 2h14"></path><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"></path><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"></path></svg>
@@ -161,3 +180,49 @@
   (confirmWithRecurrence)="onCustomReminderConfirm($event)"
   (cancel)="onCustomReminderCancel()">
 </app-datetime-picker>
+
+<!-- Group Modal -->
+<div class="modal-overlay" *ngIf="showGroupModal" (click)="closeGroup()">
+  <div class="modal-content group-modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ item.payload['name'] || 'Group' }}</h2>
+      <button class="close-btn" (click)="closeGroup()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body group-modal-body">
+      <div class="feed-grid">
+        <app-item-card *ngFor="let child of groupChildren" [item]="child"></app-item-card>
+      </div>
+      <div *ngIf="groupChildren.length === 0" class="empty-state">No items in this group.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Rename Group Modal -->
+<div class="modal-overlay" *ngIf="showRenamePrompt" (click)="cancelRenamePrompt()">
+  <div class="modal-content" style="max-width: 400px;" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Rename Group</h2>
+      <button class="close-btn" (click)="cancelRenamePrompt()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+      <input type="text" class="unified-search-input" style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid var(--border-subtle); width: 100%; box-sizing: border-box;"
+             placeholder="New Group Name" 
+             [(ngModel)]="renameGroupNameInput"
+             (keyup.enter)="confirmRenamePrompt()" (keyup.escape)="cancelRenamePrompt()" autofocus>
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="demo-btn" (click)="cancelRenamePrompt()">Cancel</button>
+        <button class="demo-btn" style="background: var(--accent); color: white;" (click)="confirmRenamePrompt()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" accept="image/*" style="display:none" #groupIconInput (change)="onGroupIconSelected($event)">

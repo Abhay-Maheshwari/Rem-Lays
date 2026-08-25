@@ -1,6 +1,6 @@
 [package]
 name = "rem-lays"
-version = "1.6.0"
+version = "1.7.0"
 description = "Rem-Lays desktop and Android client shell"
 edition = "2021"
 

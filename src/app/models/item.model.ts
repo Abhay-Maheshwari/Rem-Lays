@@ -1,4 +1,4 @@
-export type ItemType = 'image' | 'video' | 'reel' | 'link' | 'text';
+export type ItemType = 'image' | 'video' | 'reel' | 'link' | 'text' | 'group';
 export type ItemStatus = 'unseen' | 'seen' | 'deleted' | 'archived';
 
 export interface Item {

@@ -320,3 +320,25 @@
   .hero-header .greeting { font-size: 2.2rem; margin-bottom: 16px; }
   .grid-section { margin-bottom: 48px; }
 }
+
+.widgets-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.widget-wrapper {
+  width: 100%;
+  max-width: 100%;
+  
+  &.small-widget {
+    width: calc(50% - 12px);
+    max-width: 200px;
+  }
+  
+  &.medium-widget {
+    width: 100%;
+    max-width: 400px;
+  }
+}

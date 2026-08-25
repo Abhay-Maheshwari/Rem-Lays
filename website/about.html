@@ -3,19 +3,14 @@
 
 <head>
   <meta charset="UTF-8">
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About — rem-lays</title>
+  <title>About — Rem-Lays</title>
   <link rel="icon" type="image/png" href="/assets/logo_square_192.png" sizes="192x192">
   <link rel="apple-touch-icon" href="/assets/logo_square_192.png" sizes="192x192">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap"
     rel="stylesheet">
   <meta name="description" content="RemLays - Everything you save, instantly organized. One inbox for links, notes, screenshots, and ideas. Open-source on GitHub by Abhay Maheshwari.">
   <meta name="author" content="Abhay Maheshwari">
@@ -267,8 +262,6 @@
         display: flex;
       }
     }
-
-    
 
     .header {
       text-align: center;
@@ -677,50 +670,151 @@
       opacity: 1;
       transform: translateY(0);
     }
-      .nav-login {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-dim);
-      text-decoration: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-    }
+  </style>
+  <link rel="stylesheet" href="themes.css">
+  <script src="theme-switcher.js"></script>
+</head>
 
-    .nav-login:hover {
-      color: var(--text);
-      background: rgba(255, 255, 255, 0.06);
-    }
-</style>
-<link rel="stylesheet" href="themes.css">
-<script src="theme-switcher.js"></script>
-      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      var targets = document.querySelectorAll('.reveal');
-      if (reduced || !('IntersectionObserver' in window)) {
-        targets.forEach(function (el) { el.classList.add('visible'); });
-        return;
-      }
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            io.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.15 });
-      targets.forEach(function (el) { io.observe(el); });
+<body>
 
-      // Mobile Menu Logic
-      var menuBtn = document.getElementById('mobileMenuBtn');
-      var mobileMenu = document.getElementById('mobileMenu');
-      if (menuBtn && mobileMenu) {
-        menuBtn.addEventListener('click', function (e) {
-          e.preventDefault();
-          mobileMenu.classList.toggle('open');
-        });
-      }
-    })();
-  </script>
+  <nav class="glass-pill-nav">
+    <a href="/" class="brand">
+      <img src="assets/logo_square.png" alt="RemLays" class="brand-mark">
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="features.html">Features</a>
+      <a href="docs.html">Docs</a>
+      <a href="about.html" class="active">About</a>
+      <a href="faq.html">FAQ</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/login" class="nav-login">Log in</a>
+      <a href="downloads.html" class="nav-cta">Get started</a>
+    </div>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </nav>
+
+  <div class="glass-mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-inner">
+      <a href="/">Home</a>
+      <a href="features.html">Features</a>
+      <a href="docs.html">Docs</a>
+      <a href="about.html" class="active">About</a>
+      <a href="faq.html">FAQ</a>
+      <hr>
+      <a href="/login">Log in</a>
+      <a href="downloads.html" class="mobile-cta">Get started</a>
+    </div>
+  </div>
+
+  <section class="header">
+    <div class="eyebrow">OUR STORY</div>
+    <h1>built by someone who kept losing things too.</h1>
+  </section>
+
+  <section class="story reveal">
+    <p>rem-lays didn't start as a product. It started as a folder of screenshots, a hundred open browser tabs, and a
+      note titled "watch later" that never got watched.</p>
+    <p>Every app had its own inbox — chat had its own saved messages, the browser had its own bookmarks, the camera roll
+      had its own mess. Nothing talked to anything else, and the good ideas kept getting buried under the ones that
+      didn't matter.</p>
+    <p>So the first version of rem-lays wasn't for anyone but its maker — one inbox, on every device, to capture what
+      mattered.</p>
+
+    <p>That personal tool is what you're looking at now. Same idea, just ready for more than one person's mess.</p>
+  </section>
+
+  <div class="founder-card reveal">
+    <div class="founder-avatar">A</div>
+    <div class="founder-info">
+      <p class="name">Abhay Maheshwari</p>
+      <p class="role">Creator of Rem-Lays</p>
+    </div>
+  </div>
+
+  <section class="mission">
+    <h2>what we believe</h2>
+    <div class="mission-grid">
+      <div class="mission-card reveal">
+        <div class="m-icon"><svg viewBox="0 0 24 24">
+            <path d="M4 6h16M4 12h10M4 18h6" />
+          </svg></div>
+        <h4>One inbox, not ten apps</h4>
+        <p>Everything you save deserves one home, not a different app for every type of thing.</p>
+      </div>
+      <div class="mission-card reveal">
+        <div class="m-icon"><svg viewBox="0 0 24 24">
+            <path d="M12 4v12M6 12l6 6 6-6" />
+            <path d="M5 20h14" />
+          </svg></div>
+        <h4>Yours to export, always</h4>
+        <p>Nothing you save is locked in. Pull it all out whenever you want, no questions asked.</p>
+      </div>
+      <div class="mission-card reveal">
+        <div class="m-icon"><svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" />
+            <path d="M12 8v4l3 2" />
+          </svg></div>
+        <h4>Built to be used daily</h4>
+        <p>Not a tool you set up once and forget — one you actually open every day.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="timeline">
+    <h2>how it got here</h2>
+    <div class="t-item reveal">
+      <p class="t-tag">the mess</p>
+      <h4>Scattered everywhere</h4>
+      <p>Links in one app, screenshots in another, ideas in sticky notes that never got read again.</p>
+    </div>
+    <div class="t-item reveal">
+      <p class="t-tag">the first version</p>
+      <h4>A personal inbox</h4>
+      <p>Built just to keep track of things across devices — no plan to ship it yet.</p>
+    </div>
+    <div class="t-item reveal">
+      <p class="t-tag">public beta</p>
+      <h4>rem-lays goes live</h4>
+      <p>Available now on Windows and Android, syncing the same inbox everywhere.</p>
+    </div>
+    <div class="t-item reveal">
+      <p class="t-tag">what's next</p>
+      <h4>Mac, iOS, and more</h4>
+      <p>More platforms and more ways to make sense of what you save, on the way.</p>
+    </div>
+  </section>
+
+  <section class="cta-section reveal">
+    <h2>come save your mess with us.</h2>
+    <a href="downloads.html" class="cta-btn">Download rem-lays</a>
+  </section>
+
+  <footer>
+    <div class="footer-brand">
+      <img src="assets/logo_square.png" alt="RemLays" class="footer-logo">
+      <span class="footer-brand-name"><b>Rem</b><span>Lays</span></span>
+    </div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="features.html">Features</a>
+      <a href="docs.html">Docs</a>
+      <a href="about.html" class="active">About</a>
+      <a href="faq.html">FAQ</a>
+      <a href="downloads.html">Downloads</a>
+      <a href="https://github.com/Abhay-Maheshwari/Rem-Lays" target="_blank">GitHub</a>
+    </div>
+    <p class="footer-tag">rem-lays &middot; your digital vault</p>
+  </footer>
+
 
 </body>
 

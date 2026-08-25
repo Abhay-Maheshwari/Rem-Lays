@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation & User Manual — Rem-Lays</title>
+  <link rel="icon" type="image/png" href="/assets/logo_square_192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="/assets/logo_square_192.png" sizes="192x192">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta name="description" content="Comprehensive User Documentation and Feature Reference for Rem-Lays. Learn how to capture, organize, sync, and automate your personal digital vault.">
+  <meta name="author" content="Abhay Maheshwari">
+  <link rel="canonical" href="https://rem-lays.vercel.app/docs.html" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Rem-Lays User Documentation & Feature Guide",
+    "description": "Comprehensive user manual for Rem-Lays digital vault: capture, search, boards, deadlines, widgets, and sync.",
+    "author": {
+      "@type": "Person",
+      "name": "Abhay Maheshwari"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="themes.css">
+  <script src="theme-switcher.js"></script>
+
+  <style>
+    /* Docs Specific Layout & Obsidian Pro Enhancements */
+    :root {
+      --docs-sidebar-w: 280px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg) !important;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1.5px, transparent 1.5px) !important;
+      background-size: 24px 24px !important;
+      color: var(--text);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
+
+    /* Navigation Bar */
+    .glass-pill-nav {
+      position: fixed;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 8px 12px;
+      border-radius: 99px;
+      background: rgba(14, 12, 11, 0.6);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(255, 255, 255, 0.05) inset;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-pill-nav .brand { display: flex; align-items: center; justify-content: center; }
+    .glass-pill-nav .brand-mark { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+    .glass-pill-nav .nav-links { display: flex; align-items: center; gap: 4px; }
+    .glass-pill-nav .nav-links a {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-dim);
+      padding: 8px 16px;
+      border-radius: 99px;
+      transition: all 0.2s ease;
+    }
+    .glass-pill-nav .nav-links a:hover,
+    .glass-pill-nav .nav-links a.active {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      font-weight: 600;
+    }
+    .glass-pill-nav .nav-actions { display: flex; align-items: center; gap: 8px; }
+    .glass-pill-nav .nav-login {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+      padding: 8px 16px;
+      border-radius: 99px;
+      transition: all 0.2s ease;
+    }
+    .glass-pill-nav .nav-login:hover { color: #ffffff; background: rgba(255, 255, 255, 0.06); }
+    .glass-pill-nav .nav-cta {
+      font-size: 13px;
+      font-weight: 600;
+      color: #050507;
+      background: var(--cta-gradient);
+      padding: 8px 18px;
+      border-radius: 99px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .glass-pill-nav .nav-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(255, 255, 255, 0.3);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+    }
+    .mobile-menu-btn svg { width: 20px; height: 20px; stroke: currentColor; }
+
+    .glass-mobile-menu {
+      position: fixed;
+      top: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px) scale(0.95);
+      width: calc(100% - 40px);
+      max-width: 360px;
+      background: rgba(14, 12, 11, 0.92);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 24px;
+      z-index: 99;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7);
+    }
+    .glass-mobile-menu.open { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0) scale(1); }
+    .mobile-menu-inner { display: flex; flex-direction: column; gap: 12px; }
+    .mobile-menu-inner a { font-size: 15px; font-weight: 500; color: var(--text-dim); padding: 10px 14px; border-radius: 12px; text-align: center; }
+    .mobile-menu-inner a.active, .mobile-menu-inner a:hover { color: #ffffff; background: rgba(255, 255, 255, 0.08); }
+    .mobile-menu-inner hr { border: none; border-top: 1px solid var(--border); margin: 6px 0; }
+    .mobile-menu-inner .mobile-cta { text-align: center; color: #050507; background: #ffffff; font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .glass-pill-nav { top: 20px; padding: 6px 8px; gap: 8px; }
+      .glass-pill-nav .nav-links, .glass-pill-nav .nav-actions { display: none; }
+      .mobile-menu-btn { display: flex; }
+    }
+
+    /* Header Section */
+    .docs-hero {
+      padding: 170px 24px 48px;
+      text-align: center;
+      max-width: 860px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .docs-hero h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(34px, 5.2vw, 54px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+      margin-bottom: 18px;
+    }
+    .docs-hero h1 em {
+      font-family: var(--font-heading);
+      font-style: normal;
+      font-weight: 800;
+      background: linear-gradient(180deg, #ffffff 20%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(255, 255, 255, 0.25);
+    }
+    .docs-hero p {
+      font-size: 16px;
+      color: var(--text-dim);
+      max-width: 640px;
+      margin: 0 auto 32px;
+      line-height: 1.6;
+    }
+
+    /* Search Bar & Autocomplete Dropdown */
+    .doc-search-wrapper {
+      max-width: 540px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .doc-search-input-container {
+      position: relative;
+      width: 100%;
+    }
+    .doc-search-input {
+      width: 100%;
+      padding: 14px 44px 14px 46px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      font-size: 14.5px;
+      font-family: var(--font-body);
+      transition: all 0.25s ease;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    .doc-search-input:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .doc-search-input::placeholder {
+      color: var(--text-mute);
+    }
+    .doc-search-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-mute);
+      pointer-events: none;
+    }
+    .doc-search-clear {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      line-height: 1;
+      transition: all 0.2s ease;
+    }
+    .doc-search-clear:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+    }
+
+    /* Floating Instant Search Results Dropdown */
+    .doc-search-dropdown {
+      position: absolute;
+      top: calc(100% + 12px);
+      left: 0;
+      right: 0;
+      background: rgba(14, 15, 20, 0.95);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      padding: 10px;
+      max-height: 380px;
+      overflow-y: auto;
+      z-index: 95;
+      display: none;
+      text-align: left;
+    }
+    .doc-search-dropdown.open {
+      display: block;
+      animation: dropdownFadeIn 0.2s ease forwards;
+    }
+    @keyframes dropdownFadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .doc-search-item {
+      padding: 12px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border: 1px solid transparent;
+    }
+    .doc-search-item:hover, .doc-search-item.selected {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    .doc-search-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .doc-search-item-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .doc-search-item-section {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-mute);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .doc-search-item-snippet {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      line-height: 1.45;
+    }
+    .doc-search-empty {
+      padding: 24px 16px;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 13.5px;
+    }
+
+    /* Live Search Status Bar */
+    .search-status-bar {
+      max-width: 1280px;
+      margin: -20px auto 30px;
+      padding: 10px 24px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13.5px;
+      color: var(--text-dim);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .search-status-bar strong { color: #ffffff; }
+    .search-status-clear {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 3px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.2s ease;
+    }
+    .search-status-clear:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    /* Search Pulse */
+    .pulse-highlight {
+      animation: cardPulse 1.4s ease-out;
+    }
+    @keyframes cardPulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); border-color: rgba(255, 255, 255, 0.6); }
+      50% { box-shadow: 0 0 16px 2px rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.5); }
+      100% { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); }
+    }
+
+    /* 2-Column Documentation Grid */
+    .docs-container {
+      max-width: 1280px;
+      margin: 0 auto 120px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: var(--docs-sidebar-w) 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    /* Sticky Obsidian Pro Sidebar */
+    .docs-sidebar {
+      position: sticky;
+      top: 100px;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      background: var(--surface);
+      background-image: var(--card-bg-gradient);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px 14px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.08) inset;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    }
+    .docs-sidebar::-webkit-scrollbar { width: 4px; }
+    .docs-sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+
+    .sidebar-group { margin-bottom: 20px; }
+    .sidebar-group:last-child { margin-bottom: 0; }
+    .sidebar-group-title {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-mute);
+      padding: 4px 10px;
+      margin-bottom: 4px;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+      padding: 8px 12px;
+      border-radius: 10px;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .sidebar-link-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .sidebar-link:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .sidebar-link.active {
+      color: #ffffff;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .sidebar-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 6px;
+      bottom: 6px;
+      width: 3px;
+      background: #ffffff;
+      border-radius: 99px;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+    }
+    .sidebar-link.dimmed {
+      opacity: 0.35;
+    }
+    .sidebar-match-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      padding: 2px 6px;
+      border-radius: 99px;
+      display: none;
+    }
+    .sidebar-link svg {
+      width: 15px;
+      height: 15px;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    /* Content Stream */
+    .docs-content {
+      min-width: 0;
+      padding-bottom: 60px;
+    }
+
+    .doc-section {
+      padding-top: 30px;
+      margin-top: -10px;
+      margin-bottom: 64px;
+      transition: opacity 0.2s ease;
+    }
+
+    .doc-section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .doc-section-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    .doc-section-icon svg { width: 18px; height: 18px; stroke: #ffffff; }
+
+    .doc-section h2 {
+      font-family: var(--font-heading);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    .doc-lead {
+      font-size: 15px;
+      color: var(--text-dim);
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+
+    /* Glass Cards */
+    .doc-block {
+      background-color: var(--surface);
+      background-image: var(--card-bg-gradient);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px 26px;
+      margin-bottom: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.08) inset;
+      transition: all 0.3s ease;
+    }
+    .doc-block:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 255, 255, 0.12) inset;
+    }
+
+    .doc-block h3 {
+      font-family: var(--font-heading);
+      font-size: 17px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.01em;
+    }
+    .doc-block p {
+      color: var(--text-dim);
+      font-size: 14.5px;
+      margin-bottom: 12px;
+      line-height: 1.65;
+    }
+    .doc-block p:last-child { margin-bottom: 0; }
+
+    .doc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 14px 0;
+    }
+    .doc-list li {
+      font-size: 14px;
+      color: var(--text-dim);
+      position: relative;
+      padding-left: 20px;
+      line-height: 1.55;
+    }
+    .doc-list li::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 8px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 0 6px #ffffff;
+    }
+    .doc-list li strong { color: #ffffff; font-weight: 600; }
+
+    /* Platform Badges */
+    .platform-tags {
+      display: inline-flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+    .plat-badge {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--badge-text);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .plat-badge.web { color: #e2e8f0; border-color: rgba(255, 255, 255, 0.16); }
+    .plat-badge.desktop { color: #ffffff; border-color: rgba(255, 255, 255, 0.22); background: rgba(255, 255, 255, 0.1); }
+    .plat-badge.android { color: #cbd5e1; border-color: rgba(255, 255, 255, 0.14); }
+
+    /* Callout Alerts */
+    .callout {
+      padding: 16px 20px;
+      border-radius: 14px;
+      margin: 18px 0;
+      font-size: 14px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      line-height: 1.6;
+    }
+    .callout svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; stroke: #ffffff; }
+    .callout.tip {
+      border-left: 3px solid #ffffff;
+      color: #f1f5f9;
+    }
+    .callout.note {
+      border-left: 3px solid rgba(255, 255, 255, 0.5);
+      color: #e2e8f0;
+    }
+    .callout.warning {
+      border-left: 3px solid #f87171;
+      color: #fee2e2;
+    }
+    .callout.warning svg { stroke: #f87171; }
+
+    /* Table Styles */
+    .doc-table-wrapper {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      text-align: left;
+    }
+    .doc-table th {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 12px 18px;
+      font-weight: 600;
+      color: #ffffff;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-heading);
+    }
+    .doc-table td {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+    .doc-table tr:last-child td { border-bottom: none; }
+    .doc-table kbd {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
+    }
+
+    /* Footer */
+    footer {
+      padding: 48px 24px 32px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .footer-logo {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+    .footer-brand-name {
+      font-size: 14px;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+    .footer-brand-name span { color: var(--text-dim); }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 22px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    .footer-links a:hover { color: #ffffff; }
+    .footer-tag {
+      font-size: 11.5px;
+      color: var(--text-mute);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .docs-container {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .docs-sidebar {
+        position: relative;
+        top: 0;
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Glass Pill Navbar -->
+  <nav class="glass-pill-nav">
+    <a href="/" class="brand">
+      <img src="assets/logo_square.png" alt="RemLays" class="brand-mark">
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="features.html">Features</a>
+      <a href="docs.html" class="active">Docs</a>
+      <a href="about.html">About</a>
+      <a href="faq.html">FAQ</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/login" class="nav-login">Log in</a>
+      <a href="downloads.html" class="nav-cta">Get started</a>
+    </div>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </nav>
+
+  <!-- Mobile Menu Drawer -->
+  <div class="glass-mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-inner">
+      <a href="/">Home</a>
+      <a href="features.html">Features</a>
+      <a href="docs.html" class="active">Docs</a>
+      <a href="about.html">About</a>
+      <a href="faq.html">FAQ</a>
+      <hr>
+      <a href="/login">Log in</a>
+      <a href="downloads.html" class="mobile-cta">Get started</a>
+    </div>
+  </div>
+
+  <!-- Hero Header -->
+  <header class="docs-hero">
+    <div class="eyebrow">DOCUMENTATION & MANUAL</div>
+    <h1>Rem-Lays <em>User Guide</em></h1>
+    <p>Everything you need to master your digital vault: from quick multi-device captures and auto-routing boards to deadlines, widgets, and offline sync.</p>
+    
+    <div class="doc-search-wrapper">
+      <div class="doc-search-input-container">
+        <svg class="doc-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="docSearch" class="doc-search-input" placeholder="Search documentation (e.g. hashtags, snooze, android widgets, export)..." autocomplete="off">
+        <button id="docSearchClear" class="doc-search-clear" title="Clear search (Esc)">✕</button>
+      </div>
+
+      <!-- Floating Instant Results Dropdown -->
+      <div id="docSearchDropdown" class="doc-search-dropdown"></div>
+    </div>
+  </header>
+
+  <!-- Live Search Status Bar -->
+  <div id="searchStatusBar" class="search-status-bar">
+    <span id="searchStatusText">Showing results for <strong></strong></span>
+    <button id="searchStatusClear" class="search-status-clear">Clear filter (Esc)</button>
+  </div>
+
+  <!-- Main Container: Sticky Sidebar + Content -->
+  <main class="docs-container">
+    
+    <!-- Sticky Sidebar Table of Contents -->
+    <aside class="docs-sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Getting Started</div>
+        <a href="#setup" class="sidebar-link active" data-target="setup">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M13 2v7h7"/></svg>
+            <span>Quick Start & Setup</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+        <a href="#capture" class="sidebar-link" data-target="capture">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            <span>Capturing Content</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+        <a href="#collections" class="sidebar-link" data-target="collections">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>Organizing & Collections</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Organization & Flow</div>
+        <a href="#tags-search" class="sidebar-link" data-target="tags-search">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            <span>Tags & Instant Search</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+        <a href="#snooze-deadlines" class="sidebar-link" data-target="snooze-deadlines">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Deadlines & Snooze</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+        <a href="#boards" class="sidebar-link" data-target="boards">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/></svg>
+            <span>Collaborative Boards</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+        <a href="#calendar" class="sidebar-link" data-target="calendar">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Calendar & Digest</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Platforms & Sync</div>
+        <a href="#sync-offline" class="sidebar-link" data-target="sync-offline">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.67"/></svg>
+            <span>Sync & Offline Mode</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+        <a href="#desktop" class="sidebar-link" data-target="desktop">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span>Desktop App (Tauri)</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+        <a href="#android" class="sidebar-link" data-target="android">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            <span>Android App & Widgets</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Preferences & Power</div>
+        <a href="#sharing-export" class="sidebar-link" data-target="sharing-export">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            <span>Sharing & Data Export</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+        <a href="#theming" class="sidebar-link" data-target="theming">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            <span>Customization & Themes</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+        <a href="#shortcuts" class="sidebar-link" data-target="shortcuts">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg>
+            <span>Keyboard Shortcuts</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+        <a href="#faq-troubleshoot" class="sidebar-link" data-target="faq-troubleshoot">
+          <div class="sidebar-link-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>FAQ & Troubleshooting</span>
+          </div>
+          <span class="sidebar-match-badge">0</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Stream -->
+    <article class="docs-content">
+
+      <!-- 1. Quick Start & Setup -->
+      <section id="setup" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M13 2v7h7"/></svg></div>
+          <h2>1. Quick Start & Account Setup</h2>
+          <div class="platform-tags">
+            <span class="plat-badge web">Web</span>
+            <span class="plat-badge desktop">Desktop</span>
+            <span class="plat-badge android">Android</span>
+          </div>
+        </div>
+        <p class="doc-lead">Rem-Lays is available anywhere you work. Set up your account once to enjoy real-time synchronization across your entire device fleet.</p>
+
+        <div class="doc-block">
+          <h3>Authentication & Sign-in</h3>
+          <p>You can sign in with one click using your Google Account or enter your email for a secure Magic Link authentication.</p>
+          <ul class="doc-list">
+            <li><strong>Google OAuth</strong>: Instant one-click authentication across Web, Desktop, and Android.</li>
+            <li><strong>Magic Link</strong>: Passwordless sign-in delivered straight to your email inbox.</li>
+            <li><strong>Session Persistence</strong>: Your authenticated session is securely cached locally so you can work offline without re-authenticating.</li>
+          </ul>
+        </div>
+
+        <div class="callout tip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div><strong>Pro Tip:</strong> Install the Windows or Android app to unlock native system tray quick-capture, background notifications, and home screen widgets.</div>
+        </div>
+      </section>
+
+      <!-- 2. Capturing Content -->
+      <section id="capture" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
+          <h2>2. Capturing Content</h2>
+          <div class="platform-tags">
+            <span class="plat-badge web">Web</span>
+            <span class="plat-badge desktop">Desktop</span>
+            <span class="plat-badge android">Android</span>
+          </div>
+        </div>
+        <p class="doc-lead">Save text notes, rich web links, Instagram reels, photos, videos, and camera snapshots in seconds.</p>
+
+        <div class="doc-block">
+          <h3>Content Types & Automatic Detection</h3>
+          <p>The Quick Action Bar automatically parses your inputs without requiring manual type selections:</p>
+          <ul class="doc-list">
+            <li><strong>Quick Notes</strong>: Type markdown, code snippets, or thoughts directly into the capture bar.</li>
+            <li><strong>Smart Links</strong>: Paste any URL starting with <code>http://</code> or <code>https://</code>. Rem-Lays automatically fetches the website title, description, favicon, and rich thumbnail preview.</li>
+            <li><strong>Instagram Reels & Posts</strong>: Paste Instagram links (<code>/reel/</code>, <code>/p/</code>, <code>/tv/</code>) to render responsive embedded players.</li>
+            <li><strong>Media Uploads</strong>: Drag-and-drop images or videos directly onto your feed, or browse files with multi-select support.</li>
+            <li><strong>Webcam / Direct Camera Snapping</strong>: Click the camera icon to snap a photo or record a quick video using your device camera.</li>
+            <li><strong>Clipboard Paste</strong>: Hit <code>Ctrl+V</code> (or <code>Cmd+V</code>) anywhere on the app to immediately save copied images, links, or text.</li>
+          </ul>
+        </div>
+
+        <div class="doc-block">
+          <h3>Bulk Upload Queue</h3>
+          <p>When dropping multiple files or pasting dozens of links at once, Rem-Lays opens a <strong>Bulk Upload Queue</strong> showing real-time file upload progress, batch tagging options, and destination board selector.</p>
+        </div>
+
+        <div class="callout note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div><strong>Duplicate Prevention:</strong> If you accidentally save an identical link or file, Rem-Lays notifies you immediately and highlights the existing item in your inbox.</div>
+        </div>
+      </section>
+
+      <!-- 3. Organizing & Collections -->
+      <section id="collections" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+          <h2>3. Organizing & Collections</h2>
+          <div class="platform-tags">
+            <span class="plat-badge web">Web</span>
+            <span class="plat-badge desktop">Desktop</span>
+            <span class="plat-badge android">Android</span>
+          </div>
+        </div>
+        <p class="doc-lead">Group related resources into neat collections, reorder items freely, and manage content in bulk.</p>
+
+        <div class="doc-block">
+          <h3>Collections & Bundles (Groups)</h3>
+          <p>Bundle multiple items together into an expandable collection card:</p>
+          <ul class="doc-list">
+            <li><strong>Drag-to-Group</strong>: Drag any item card onto another to create a new grouped collection.</li>
+            <li><strong>Custom Title & Cover</strong>: Click on a collection to rename it, choose a custom cover image, or pick a color swatch.</li>
+            <li><strong>Expandable Modal Drawer</strong>: Click any collection to view, reorder, or add items in a focused modal overlay.</li>
+            <li><strong>Ungrouping</strong>: Drag an item out or choose "Ungroup" from the context menu to return items to the main feed.</li>
+          </ul>
+        </div>
+
+        <div class="doc-block">
+          <h3>Bulk Selection & Floating Toolbar</h3>
+          <p>Hold <code>Shift</code> and click multiple cards (or tap "Select" on mobile) to activate the <strong>Bulk Actions Toolbar</strong>:</p>
+          <ul class="doc-list">
+            <li><strong>Batch Tagging</strong>: Add or remove tags across 50+ selected items simultaneously.</li>
+            <li><strong>Move to Board</strong>: Route selected cards into any personal or shared board.</li>
+            <li><strong>Pin / Star</strong>: Pin important items to stay at the top of your feed.</li>
+            <li><strong>Archive / Delete</strong>: Archive completed projects or send obsolete items to the 30-day trash.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 4. Tags & Instant Search -->
+      <section id="tags-search" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
+          <h2>4. Tags & Instant Search</h2>
+          <div class="platform-tags">
+            <span class="plat-badge web">Web</span>
+            <span class="plat-badge desktop">Desktop</span>
+            <span class="plat-badge android">Android</span>
+          </div>
+        </div>
+        <p class="doc-lead">Find any item in milliseconds with full-text search, hashtag auto-tagging, and deterministic color palettes.</p>
+
+        <div class="doc-block">
+          <h3>Dynamic Hashtags & Color Palettes</h3>
+          <p>Add tags using <code>#tagname</code> anywhere in your note or link descriptions. Tags automatically receive consistent, beautiful colors from a deterministic 10-palette color engine.</p>
+          <ul class="doc-list">
+            <li><strong>Tag Cloud Header</strong>: Click any tag in the feed header to filter your items instantly.</li>
+            <li><strong>Tag Matching Modes</strong>: Toggle between <strong>AND</strong> (match all tags) or <strong>OR</strong> (match any tag) modes in the search filter bar.</li>
+            <li><strong>Tag Exclusion</strong>: Hold <code>Alt</code> / <code>Option</code> and click a tag to exclude it (NOT filter).</li>
+          </ul>
+        </div>
+
+        <div class="doc-block">
+          <h3>Global Command Palette (Ctrl+K)</h3>
+          <p>Press <code>Ctrl+K</code> (or <code>Cmd+K</code> on macOS) to open the Command Palette. Instantly search titles, URLs, notes, hashtags, and boards with zero keystroke delay.</p>
+        </div>
+      </section>
+
+      <!-- 5. Deadlines, Reminders & Snooze -->
+      <section id="snooze-deadlines" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <h2>5. Deadlines, Reminders & Snooze</h2>
+          <div class="platform-tags">
+            <span class="plat-badge web">Web</span>
+            <span class="plat-badge desktop">Desktop</span>
+            <span class="plat-badge android">Android</span>
+          </div>
+        </div>
+        <p class="doc-lead">Keep your inbox clean by snoozing non-urgent items until you need them, and track hard deadlines effortlessly.</p>
+
+        <div class="doc-block">
+          <h3>Snoozing Items</h3>
+          <p>Click the <strong>Snooze</strong> icon on any card to hide it from your active inbox until a later time:</p>
+          <ul class="doc-list">
+            <li><strong>Quick Presets</strong>: <em>Tonight (6:00 PM)</em>, <em>Tomorrow Morning (9:00 AM)</em>, <em>This Weekend</em>, or <em>Next Week</em>.</li>
+            <li><strong>Custom Date & Time</strong>: Pick an exact date and minute from the interactive picker.</li>
+            <li><strong>Automatic Wakeup</strong>: When the snooze period expires, the card automatically re-appears at the top of your feed with a notification.</li>
+          </ul>
+        </div>
+
+        <div class="doc-block">
+          <h3>Task Deadlines & Visual Urgency</h3>
+          <p>Attach a <strong>Deadline</strong> to any note or saved task. Rem-Lays highlights upcoming due dates with progressive urgency indicators:</p>
+          <ul class="doc-list">
+            <li><strong>Due in &gt; 3 Days</strong>: Subtle badge with remaining days countdown.</li>
+            <li><strong>Due Today / Tomorrow</strong>: Glowing yellow/amber card outline.</li>
+            <li><strong>Overdue</strong>: Red alert banner with prominent notification banner.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 6. Collaborative Boards -->
+      <section id="boards" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/></svg></div>
+          <h2>6. Collaborative Boards</h2>
+          <div class="platform-tags">
+            <span class="plat-badge web">Web</span>
+            <span class="plat-badge desktop">Desktop</span>
+            <span class="plat-badge android">Android</span>
+          </div>
+        </div>
+        <p class="doc-lead">Create dedicated project boards, invite teammates, and auto-route items using hashtag rules.</p>
+
+        <div class="doc-block">
+          <h3>Board Management & Sharing</h3>
+          <p>Organize your knowledge base into distinct workspaces:</p>
+          <ul class="doc-list">
+            <li><strong>Custom Icons & Colors</strong>: Personalize your board tabs with custom Lucide icons and accent colors.</li>
+            <li><strong>Automatic Hashtag Routing</strong>: Bind tags like <code>#design</code> to a board so any new items with that tag are automatically categorized.</li>
+            <li><strong>Granular Permissions</strong>: Share boards with <em>Editor</em> (can add/edit items) or <em>Viewer</em> (read-only access) privileges.</li>
+            <li><strong>Invite Links</strong>: Generate secure 7-day invite links or invite collaborators directly via email.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 7. Calendar View & Weekly Digest -->
+      <section id="calendar" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <h2>7. Calendar View & Weekly Digest</h2>
+          <div class="platform-tags">
+            <span class="plat-badge web">Web</span>
+            <span class="plat-badge desktop">Desktop</span>
+            <span class="plat-badge android">Android</span>
+          </div>
+        </div>
+        <p class="doc-lead">Visualize your saved links and deadlines on an interactive calendar and review past accomplishments.</p>
+
+        <div class="doc-block">
+          <h3>Interactive Calendar & Agenda Split</h3>
+          <p>Switch from Feed view to Calendar view to see your timeline at a glance:</p>
+          <ul class="doc-list">
+            <li><strong>Month Grid</strong>: See daily dots representing saved notes, media, and due deadlines.</li>
+            <li><strong>Agenda Sidebar</strong>: Click any date to view scheduled items in an adjacent agenda list.</li>
+            <li><strong>Mini-Calendar Home Widget</strong>: Collapse the calendar into a compact header widget on your home dashboard.</li>
+          </ul>
+        </div>
+
+        <div class="doc-block">
+          <h3>Weekly Digest</h3>
+          <p>Every Sunday evening, Rem-Lays summarizes your top saved articles, completed deadlines, and tag analytics in a clean <strong>Weekly Digest</strong> modal.</p>
+        </div>
+      </section>
+
+      <!-- 8. Sync & Offline Mode -->
+      <section id="sync-offline" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.67"/></svg></div>
+          <h2>8. Sync & Offline Mode</h2>
+          <div class="platform-tags">
+            <span class="plat-badge web">Web</span>
+            <span class="plat-badge desktop">Desktop</span>
+            <span class="plat-badge android">Android</span>
+          </div>
+        </div>
+        <p class="doc-lead">Work anywhere — on an airplane, in subway tunnels, or on spotty Wi-Fi — with zero disruption.</p>
+
+        <div class="doc-block">
+          <h3>Local-First Offline Architecture</h3>
+          <p>Rem-Lays stores all items in local IndexedDB storage before syncing with the cloud:</p>
+          <ul class="doc-list">
+            <li><strong>Instant UI Response</strong>: Creating, editing, or deleting items updates the interface instantly with optimistic updates.</li>
+            <li><strong>Offline Mutation Queue</strong>: Actions performed while disconnected are queued locally and automatically synced once a network connection is detected.</li>
+            <li><strong>Active Devices Manager</strong>: In Settings, view all active desktop and mobile sessions with device names, IP locations, and remote logout options.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 9. Desktop App (Tauri) -->
+      <section id="desktop" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <h2>9. Desktop App (Tauri)</h2>
+          <div class="platform-tags">
+            <span class="plat-badge desktop">Desktop</span>
+          </div>
+        </div>
+        <p class="doc-lead">A native, lightweight desktop app built with Tauri and Rust for Windows, macOS, and Linux.</p>
+
+        <div class="doc-block">
+          <h3>Desktop Exclusive Features</h3>
+          <ul class="doc-list">
+            <li><strong>Frameless Glassmorphic Window</strong>: Native OS window styling with custom window controls and acrylic blur.</li>
+            <li><strong>System Tray Daemon</strong>: Minimize the app to the system tray to keep Rem-Lays running quietly in the background.</li>
+            <li><strong>Launch at Startup</strong>: Toggle "Auto-start on Windows boot" in Settings to keep your vault ready at all times.</li>
+            <li><strong>Native Notification Toasts with Quick Reply</strong>: When a reminder or deadline fires, an interactive toast appears with an inline quick-reply and snooze actions.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 10. Android App & Widgets -->
+      <section id="android" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+          <h2>10. Android App & Home Screen Widgets</h2>
+          <div class="platform-tags">
+            <span class="plat-badge android">Android</span>
+          </div>
+        </div>
+        <p class="doc-lead">Access your vault on Android with Jetpack Glance home screen widgets, system share sheet integration, and notification shade capture.</p>
+
+        <div class="doc-block">
+          <h3>Home Screen Glance Widgets</h3>
+          <p>Choose from 5 interactive home screen widgets:</p>
+          <ul class="doc-list">
+            <li><strong>Inbox Widget</strong>: Scrollable feed of your recent links and notes with quick checkoff.</li>
+            <li><strong>Quick Capture Bar</strong>: 1-tap launcher to write a note or snap a photo from your home screen.</li>
+            <li><strong>Calendar Month Widget</strong>: Full month calendar displaying deadline dots and task counts.</li>
+            <li><strong>iOS-Style Split Date Widget</strong>: Minimalist current day badge with next due task.</li>
+            <li><strong>Agenda Medium Widget</strong>: Upcoming 7-day schedule with one-tap snooze.</li>
+          </ul>
+        </div>
+
+        <div class="doc-block">
+          <h3>Android System Integration</h3>
+          <ul class="doc-list">
+            <li><strong>System Share Sheet</strong>: Share links, photos, or tweets from any app directly to Rem-Lays.</li>
+            <li><strong>Notification Shade Quick Capture</strong>: An ongoing pinned notification with a <code>RemoteInput</code> text field to save thoughts without opening the app.</li>
+            <li><strong>Swipe Gestures</strong>: In the Android feed, swipe right on a card to Archive and swipe left to Snooze or Delete.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 11. Sharing & Data Export -->
+      <section id="sharing-export" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+          <h2>11. Sharing & 1-Click Data Export</h2>
+          <div class="platform-tags">
+            <span class="plat-badge web">Web</span>
+            <span class="plat-badge desktop">Desktop</span>
+            <span class="plat-badge android">Android</span>
+          </div>
+        </div>
+        <p class="doc-lead">You own 100% of your data. Share individual links publicly or export your entire archive at any time.</p>
+
+        <div class="doc-block">
+          <h3>Public Share Links</h3>
+          <p>Click "Share" on any card or collection to generate a secret <code>rem-lays.vercel.app/shared/:token</code> URL. The recipient can read your notes and view media in a clean, read-only web viewer. You can revoke the share link anytime in 1 click.</p>
+        </div>
+
+        <div class="doc-block">
+          <h3>1-Click Complete Data Export</h3>
+          <p>Export your full vault anytime in your preferred format from <em>Settings &rarr; Data Export</em>:</p>
+          <ul class="doc-list">
+            <li><strong>Markdown (.zip)</strong>: Clean markdown files with frontmatter metadata and downloaded media assets.</li>
+            <li><strong>JSON (.json)</strong>: Raw structured data dump ideal for developer backups or custom scripts.</li>
+            <li><strong>CSV (.csv)</strong>: Spreadsheet format compatible with Notion, Excel, or Google Sheets.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 12. Customization & Themes -->
+      <section id="theming" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+          <h2>12. Customization & Themes</h2>
+          <div class="platform-tags">
+            <span class="plat-badge web">Web</span>
+            <span class="plat-badge desktop">Desktop</span>
+            <span class="plat-badge android">Android</span>
+          </div>
+        </div>
+        <p class="doc-lead">Tailor Rem-Lays to match your exact aesthetic and workflow preference.</p>
+
+        <div class="doc-block">
+          <h3>7 Built-in Themes</h3>
+          <p>Choose your theme in <em>Settings &rarr; Appearance</em>:</p>
+          <ul class="doc-list">
+            <li><strong>Obsidian Dark</strong>: High-contrast glassmorphism with pure black backgrounds (Default).</li>
+            <li><strong>OLED Pure Black</strong>: 100% #000000 true black for maximum battery savings on OLED screens.</li>
+            <li><strong>Clean Light</strong>: Crisp paper-white with soft gray borders and high legibility.</li>
+            <li><strong>VS Code</strong>: The familiar developer dark aesthetic.</li>
+            <li><strong>Dracula</strong>: Purple, pink, and cyan neon accents over deep purple background.</li>
+            <li><strong>Translucent Glass</strong>: Heavy frosted glass with desktop wallpaper passthrough.</li>
+            <li><strong>System Auto</strong>: Automatically matches your operating system light/dark mode schedule.</li>
+          </ul>
+        </div>
+
+        <div class="doc-block">
+          <h3>Feed Layout Modes</h3>
+          <ul class="doc-list">
+            <li><strong>Masonry Grid</strong>: Dynamic multi-column Pinterest-style feed.</li>
+            <li><strong>Compact Rows</strong>: Single-line density mode for power users with thousands of items.</li>
+            <li><strong>Media Gallery</strong>: Visual grid prioritizing image thumbnails, Instagram videos, and previews.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 13. Keyboard Shortcuts -->
+      <section id="shortcuts" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg></div>
+          <h2>13. Keyboard Shortcuts Reference</h2>
+          <div class="platform-tags">
+            <span class="plat-badge web">Web</span>
+            <span class="plat-badge desktop">Desktop</span>
+          </div>
+        </div>
+        <p class="doc-lead">Control almost every action in Rem-Lays without touching your mouse.</p>
+
+        <div class="doc-table-wrapper">
+          <table class="doc-table">
+            <thead>
+              <tr>
+                <th>Shortcut</th>
+                <th>Action</th>
+                <th>Scope</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><kbd>Ctrl</kbd> + <kbd>K</kbd> / <kbd>Cmd</kbd> + <kbd>K</kbd></td>
+                <td>Open Global Search & Command Palette</td>
+                <td>Global</td>
+              </tr>
+              <tr>
+                <td><kbd>N</kbd></td>
+                <td>Focus Quick Action Bar for new note</td>
+                <td>Feed</td>
+              </tr>
+              <tr>
+                <td><kbd>L</kbd></td>
+                <td>Paste and save link from clipboard</td>
+                <td>Global</td>
+              </tr>
+              <tr>
+                <td><kbd>B</kbd></td>
+                <td>Switch to Boards view</td>
+                <td>Global</td>
+              </tr>
+              <tr>
+                <td><kbd>C</kbd></td>
+                <td>Switch to Calendar view</td>
+                <td>Global</td>
+              </tr>
+              <tr>
+                <td><kbd>Esc</kbd></td>
+                <td>Close modal / clear selection</td>
+                <td>Global</td>
+              </tr>
+              <tr>
+                <td><kbd>Delete</kbd> / <kbd>Backspace</kbd></td>
+                <td>Send selected item(s) to Trash</td>
+                <td>Feed</td>
+              </tr>
+              <tr>
+                <td><kbd>?</kbd></td>
+                <td>Show Keyboard Shortcuts Cheat Sheet</td>
+                <td>Global</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 14. FAQ & Troubleshooting -->
+      <section id="faq-troubleshoot" class="doc-section">
+        <div class="doc-section-header">
+          <div class="doc-section-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <h2>14. FAQ & Troubleshooting</h2>
+          <div class="platform-tags">
+            <span class="plat-badge web">Web</span>
+            <span class="plat-badge desktop">Desktop</span>
+            <span class="plat-badge android">Android</span>
+          </div>
+        </div>
+        <p class="doc-lead">Answers to common setup questions and troubleshooting tips.</p>
+
+        <div class="doc-block">
+          <h3>Why isn't a link preview showing thumbnail images?</h3>
+          <p>Some websites block automatic scrapers or require login cookies (like private Twitter posts). Rem-Lays still preserves the URL, domain icon, and title.</p>
+        </div>
+
+        <div class="doc-block">
+          <h3>How do I reset my local offline cache?</h3>
+          <p>If you encounter sync discrepancies, navigate to <em>Settings &rarr; Storage &rarr; Reset Cache</em>. Your remote Supabase database will freshly populate your local storage without losing any saved data.</p>
+        </div>
+
+        <div class="doc-block">
+          <h3>Can I run Rem-Lays completely self-hosted?</h3>
+          <p>Yes! Rem-Lays is fully open-source under the MIT license on GitHub. You can supply your own Supabase project URL and API keys in your environment variables.</p>
+        </div>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Global Footer -->
+  <footer>
+    <div class="footer-brand">
+      <img src="assets/logo_square.png" alt="RemLays" class="footer-logo">
+      <span class="footer-brand-name"><b>Rem</b><span>Lays</span></span>
+    </div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="features.html">Features</a>
+      <a href="docs.html" class="active">Docs</a>
+      <a href="about.html">About</a>
+      <a href="faq.html">FAQ</a>
+      <a href="downloads.html">Downloads</a>
+      <a href="https://github.com/Abhay-Maheshwari/Rem-Lays" target="_blank">GitHub</a>
+    </div>
+    <p class="footer-tag">RemLays &middot; your digital vault</p>
+  </footer>
+
+  <!-- Interactive Scripts: Algolia-Style Live Search, Highlight & Scroll-Spy -->
+  <script>
+
+
+    // Build Search Index
+    const searchIndex = [];
+    document.querySelectorAll('.doc-section').forEach(section => {
+      const sectionId = section.getAttribute('id');
+      const sectionTitle = section.querySelector('h2')?.textContent.trim() || '';
+      
+      // Index the whole section lead
+      const leadText = section.querySelector('.doc-lead')?.textContent.trim() || '';
+      if (leadText) {
+        searchIndex.push({
+          sectionId,
+          sectionTitle,
+          blockTitle: sectionTitle,
+          text: leadText,
+          element: section
+        });
+      }
+
+      // Index individual doc blocks
+      section.querySelectorAll('.doc-block').forEach(block => {
+        const blockTitle = block.querySelector('h3')?.textContent.trim() || '';
+        const blockText = block.textContent.trim();
+        searchIndex.push({
+          sectionId,
+          sectionTitle,
+          blockTitle: blockTitle || sectionTitle,
+          text: blockText,
+          element: block
+        });
+      });
+
+      // Index callout alerts
+      section.querySelectorAll('.callout').forEach(callout => {
+        searchIndex.push({
+          sectionId,
+          sectionTitle,
+          blockTitle: `${sectionTitle} (Note/Tip)`,
+          text: callout.textContent.trim(),
+          element: callout
+        });
+      });
+
+      // Index tables
+      section.querySelectorAll('.doc-table-wrapper').forEach(table => {
+        searchIndex.push({
+          sectionId,
+          sectionTitle,
+          blockTitle: `${sectionTitle} (Table)`,
+          text: table.textContent.trim(),
+          element: table
+        });
+      });
+    });
+
+    const docSearch = document.getElementById('docSearch');
+    const docSearchClear = document.getElementById('docSearchClear');
+    const docSearchDropdown = document.getElementById('docSearchDropdown');
+    const searchStatusBar = document.getElementById('searchStatusBar');
+    const searchStatusText = document.getElementById('searchStatusText');
+    const searchStatusClear = document.getElementById('searchStatusClear');
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    const sections = document.querySelectorAll('.doc-section');
+
+    let selectedIndex = -1;
+
+    function jumpToElement(el) {
+      if (!el) return;
+      docSearchDropdown.classList.remove('open');
+      
+      // Make sure parent section and element are visible
+      const parentSection = el.closest('.doc-section') || el;
+      parentSection.style.display = 'block';
+      el.style.display = '';
+
+      const yOffset = -110;
+      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+
+      el.classList.remove('pulse-highlight');
+      void el.offsetWidth; // force reflow
+      el.classList.add('pulse-highlight');
+      setTimeout(() => el.classList.remove('pulse-highlight'), 2000);
+    }
+
+    function clearSearch() {
+      docSearch.value = '';
+      docSearchClear.style.display = 'none';
+      docSearchDropdown.classList.remove('open');
+      searchStatusBar.style.display = 'none';
+
+      // Reset all sections and blocks visibility
+      sections.forEach(sec => {
+        sec.style.display = 'block';
+        sec.querySelectorAll('.doc-block, .callout, .doc-table-wrapper').forEach(b => {
+          b.style.display = '';
+        });
+      });
+
+      // Reset sidebar
+      sidebarLinks.forEach(link => {
+        link.classList.remove('dimmed');
+        const badge = link.querySelector('.sidebar-match-badge');
+        if (badge) badge.style.display = 'none';
+      });
+
+      docSearch.focus();
+    }
+
+    if (docSearchClear) docSearchClear.addEventListener('click', clearSearch);
+    if (searchStatusClear) searchStatusClear.addEventListener('click', clearSearch);
+
+    if (docSearch) {
+      docSearch.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+
+        if (!query) {
+          clearSearch();
+          return;
+        }
+
+        docSearchClear.style.display = 'flex';
+        selectedIndex = -1;
+
+        // Perform Matching
+        const matches = [];
+        const sectionMatchCounts = {};
+
+        searchIndex.forEach(item => {
+          const itemText = item.text.toLowerCase();
+          const itemTitle = item.blockTitle.toLowerCase();
+          const secTitle = item.sectionTitle.toLowerCase();
+
+          let score = 0;
+          if (itemTitle.includes(query)) score += 10;
+          if (secTitle.includes(query)) score += 5;
+          if (itemText.includes(query)) score += 2;
+
+          if (score > 0) {
+            matches.push({ ...item, score });
+            sectionMatchCounts[item.sectionId] = (sectionMatchCounts[item.sectionId] || 0) + 1;
+          }
+        });
+
+        // Sort matches by relevance score
+        matches.sort((a, b) => b.score - a.score);
+
+        // Update In-Page Content Stream
+        sections.forEach(sec => {
+          const secId = sec.getAttribute('id');
+          const hasMatch = !!sectionMatchCounts[secId];
+
+          if (hasMatch) {
+            sec.style.display = 'block';
+            
+            // Only show matching blocks inside this section
+            sec.querySelectorAll('.doc-block, .callout, .doc-table-wrapper').forEach(b => {
+              const bText = b.textContent.toLowerCase();
+              if (bText.includes(query) || sec.querySelector('h2').textContent.toLowerCase().includes(query)) {
+                b.style.display = '';
+              } else {
+                b.style.display = 'none';
+              }
+            });
+          } else {
+            sec.style.display = 'none';
+          }
+        });
+
+        // Update Sidebar Matches
+        sidebarLinks.forEach(link => {
+          const targetId = link.getAttribute('data-target');
+          const count = sectionMatchCounts[targetId] || 0;
+          const badge = link.querySelector('.sidebar-match-badge');
+
+          if (count > 0) {
+            link.classList.remove('dimmed');
+            if (badge) {
+              badge.textContent = count;
+              badge.style.display = 'inline-block';
+            }
+          } else {
+            link.classList.add('dimmed');
+            if (badge) badge.style.display = 'none';
+          }
+        });
+
+        // Update Search Status Bar
+        searchStatusBar.style.display = 'flex';
+        searchStatusText.innerHTML = `Showing matches for <strong>"${query}"</strong> (${matches.length} found)`;
+
+        // Render Floating Results Dropdown
+        if (matches.length > 0) {
+          let html = '';
+          matches.slice(0, 8).forEach((m, idx) => {
+            // Extract snippet
+            const lower = m.text.toLowerCase();
+            const qIdx = lower.indexOf(query);
+            let snippet = m.text;
+            if (qIdx > -1) {
+              const start = Math.max(0, qIdx - 40);
+              const end = Math.min(m.text.length, qIdx + query.length + 60);
+              snippet = (start > 0 ? '...' : '') + m.text.substring(start, end) + (end < m.text.length ? '...' : '');
+            } else {
+              snippet = snippet.substring(0, 100) + '...';
+            }
+
+            html += `
+              <div class="doc-search-item" data-index="${idx}">
+                <div class="doc-search-item-header">
+                  <span class="doc-search-item-title">${m.blockTitle}</span>
+                  <span class="doc-search-item-section">${m.sectionTitle.split('.')[0] || ''}</span>
+                </div>
+                <div class="doc-search-item-snippet">${snippet}</div>
+              </div>
+            `;
+          });
+          docSearchDropdown.innerHTML = html;
+          docSearchDropdown.classList.add('open');
+
+          // Attach click handlers to dropdown items
+          docSearchDropdown.querySelectorAll('.doc-search-item').forEach((itemEl, idx) => {
+            itemEl.addEventListener('click', () => {
+              jumpToElement(matches[idx].element);
+            });
+          });
+        } else {
+          docSearchDropdown.innerHTML = `
+            <div class="doc-search-empty">
+              No documentation matches "<strong>${query}</strong>".<br>
+              <span style="font-size:12px; color:var(--text-mute); margin-top:4px; display:inline-block;">Try searching for <em>shortcuts</em>, <em>snooze</em>, <em>hashtags</em>, <em>sync</em>, or <em>android</em>.</span>
+            </div>
+          `;
+          docSearchDropdown.classList.add('open');
+        }
+      });
+
+      // Keyboard Navigation on Search Bar
+      docSearch.addEventListener('keydown', (e) => {
+        const items = docSearchDropdown.querySelectorAll('.doc-search-item');
+        if (!docSearchDropdown.classList.contains('open') || items.length === 0) {
+          if (e.key === 'Escape') clearSearch();
+          return;
+        }
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedIndex = (selectedIndex + 1) % items.length;
+          items.forEach((it, i) => it.classList.toggle('selected', i === selectedIndex));
+          items[selectedIndex]?.scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+          items.forEach((it, i) => it.classList.toggle('selected', i === selectedIndex));
+          items[selectedIndex]?.scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (selectedIndex >= 0 && items[selectedIndex]) {
+            items[selectedIndex].click();
+          } else if (items[0]) {
+            items[0].click();
+          }
+        } else if (e.key === 'Escape') {
+          clearSearch();
+        }
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!docSearch.contains(e.target) && !docSearchDropdown.contains(e.target)) {
+          docSearchDropdown.classList.remove('open');
+        }
+      });
+
+      // Open dropdown on focus if input has value
+      docSearch.addEventListener('focus', () => {
+        if (docSearch.value.trim() && docSearchDropdown.innerHTML) {
+          docSearchDropdown.classList.add('open');
+        }
+      });
+    }
+
+    // Scroll-Spy for Table of Contents Sidebar
+    window.addEventListener('scroll', () => {
+      if (docSearch && docSearch.value.trim()) return; // Pause scroll-spy during active filtering
+
+      let currentSectionId = '';
+      const scrollPos = window.scrollY + 180;
+
+      sections.forEach(sec => {
+        if (sec.offsetTop <= scrollPos) {
+          currentSectionId = sec.getAttribute('id');
+        }
+      });
+
+      sidebarLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('data-target') === currentSectionId) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

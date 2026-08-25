@@ -1,11 +1,11 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Rem-Lays",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "identifier": "app.remlays.desktop",
   "build": {
-    "beforeDevCommand": "npm run start",
-    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm.cmd run start",
+    "beforeBuildCommand": "npm.cmd run build",
     "devUrl": "http://localhost:4200",
     "frontendDist": "../dist/rem-lays/browser"
   },
@@ -37,7 +37,7 @@
       "endpoints": [
         "https://github.com/Abhay-Maheshwari/Rem-Lays/releases/latest/download/latest.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEFCQkMzMDY2MzY2RjZGQUQKUldTdGIyODJaakM4cXpZT0kwYW00RlBEYmpxSDlwc2J3c3IxQXRGQWllWG95QnU3TVZ3NU5QZlMK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IENFNTE3OEEzNkVFMUUyOEEKUldTSzR1RnVvM2hSenI5Y1o3SkNKYXZpaFZabjVkTUVtckNLZy9vZUV5TWpBaHVQN1FYMnZja2oK"
     }
   },
   "bundle": {

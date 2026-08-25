@@ -1,14 +1,26 @@
 <div class="action-bar">
   <div class="action-inner">
-    <input type="file" accept="image/*,video/*" #fileInput style="display:none" (change)="onFileSelected($event)" />
+    <input type="file" accept="image/*,video/*" multiple #fileInput style="display:none" (change)="onFileSelected($event)" />
+    <input type="file" accept="image/*" capture="environment" #cameraInput style="display:none" (change)="onFileSelected($event)" />
     <button
       class="action-icon-btn"
-      title="Attach an image or video"
-      [disabled]="uploading()"
+      title="Attach images or videos (multi-select)"
+      [disabled]="uploading() || itemsSvc.bulkUploadState().active"
       (click)="fileInput.click()"
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <path d="M21.44 11.05 12.25 20.24a5 5 0 0 1-7.07-7.07L14.36 4a3.5 3.5 0 0 1 4.95 4.95L10.13 18.1a2 2 0 0 1-2.83-2.83l8.49-8.49"/>
+      </svg>
+    </button>
+    <button
+      class="action-icon-btn"
+      title="Capture from camera"
+      [disabled]="uploading() || itemsSvc.bulkUploadState().active"
+      (click)="openCamera(cameraInput)"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <circle cx="12" cy="13" r="4"/>
       </svg>
     </button>
     <textarea
@@ -19,22 +31,97 @@
       (paste)="onPaste($event)"
       (input)="autoGrow($event)"
       [placeholder]="uploading() ? 'Uploading…' : 'Paste a link, or write a quick note…'"
-      [disabled]="uploading()"
+      [disabled]="uploading() || itemsSvc.bulkUploadState().active"
       rows="1"
     ></textarea>
-    <button class="send-btn" [class.sent]="isSent()" [class.active]="value.trim().length > 0" (click)="submit()" [disabled]="uploading()">{{ isSent() ? 'Sent!' : 'Send' }}</button>
+    <button class="send-btn" [class.sent]="isSent()" [class.active]="value.trim().length > 0 || itemsSvc.stagedFiles().length > 0" (click)="submit()" [disabled]="uploading() || itemsSvc.bulkUploadState().active || (value.trim().length === 0 && itemsSvc.stagedFiles().length === 0)">{{ isSent() ? 'Sent!' : 'Send' }}</button>
+  </div>
+  
+  <!-- Staged Files Preview -->
+  <div class="staged-files-wrap" *ngIf="itemsSvc.stagedFiles().length > 0">
+    <div class="staged-file-chip" *ngFor="let file of itemsSvc.stagedFiles(); let i = index">
+      <span class="staged-file-icon">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </span>
+      <span class="staged-file-name" [title]="file.name">{{ file.name }}</span>
+      <button class="remove-staged-btn" (click)="removeStagedFile(i)" title="Remove file">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="group-options" *ngIf="itemsSvc.stagedFiles().length > 1">
+      <label class="group-staged-label">
+        <input type="checkbox" [(ngModel)]="groupStaged" /> Group files
+      </label>
+      <input 
+        *ngIf="groupStaged" 
+        type="text" 
+        class="group-name-input" 
+        [(ngModel)]="groupName" 
+        placeholder="Group Name (optional)" 
+        (keydown.enter)="submit()"
+      />
+    </div>
   </div>
   <div class="tags-input-wrap">
     <app-tag-input
       [(tags)]="tags"
       placeholder="Add tags (Enter or comma to confirm)"
-      [disabled]="uploading()"
+      [disabled]="uploading() || itemsSvc.bulkUploadState().active"
     ></app-tag-input>
   </div>
-  <p class="hint" *ngIf="offlineQueue.pendingCount() === 0">
+
+  <!-- Bulk Upload Progress Panel -->
+  <div class="bulk-upload-panel" *ngIf="itemsSvc.bulkUploadState().active">
+    <div class="bulk-upload-header">
+      <div class="bulk-upload-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <span>Uploading {{ itemsSvc.bulkUploadState().completed + itemsSvc.bulkUploadState().failed }} / {{ itemsSvc.bulkUploadState().total }}</span>
+      </div>
+      <button class="bulk-cancel-btn" (click)="cancelBulkUpload()" title="Cancel remaining uploads">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Cancel
+      </button>
+    </div>
+    <div class="bulk-progress-bar">
+      <div class="bulk-progress-fill" [style.width.%]="((itemsSvc.bulkUploadState().completed + itemsSvc.bulkUploadState().failed) / itemsSvc.bulkUploadState().total) * 100"></div>
+    </div>
+    <div class="bulk-file-list">
+      <div class="bulk-file-item" *ngFor="let f of itemsSvc.bulkUploadState().files" [class.done]="f.status === 'done'" [class.error]="f.status === 'error'" [class.uploading]="f.status === 'uploading'">
+        <span class="bulk-file-status">
+          <ng-container [ngSwitch]="f.status">
+            <svg *ngSwitchCase="'done'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg *ngSwitchCase="'error'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <span *ngSwitchCase="'uploading'" class="bulk-spinner"></span>
+            <span *ngSwitchDefault class="bulk-pending-dot"></span>
+          </ng-container>
+        </span>
+        <span class="bulk-file-name">{{ f.filename }}</span>
+        <span class="bulk-file-error" *ngIf="f.error">{{ f.error }}</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint" *ngIf="offlineQueue.pendingCount() === 0 && !itemsSvc.bulkUploadState().active">
     Text, links, and images/video all save now.
   </p>
   <p class="hint pending" *ngIf="offlineQueue.pendingCount() > 0">
     {{ offlineQueue.pendingCount() }} {{ offlineQueue.pendingCount() === 1 ? 'share' : 'shares' }} waiting to send once you're back online.
   </p>
 </div>
+
+<app-webcam-capture-modal 
+  *ngIf="showWebcamModal" 
+  (cancel)="showWebcamModal = false" 
+  (capture)="onWebcamCapture($event)">
+</app-webcam-capture-modal>

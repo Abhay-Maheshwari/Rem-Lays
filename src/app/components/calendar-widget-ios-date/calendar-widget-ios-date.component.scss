@@ -1,0 +1,53 @@
+.ios-date-widget {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.month-header {
+  background: #ff3b30; /* iOS Calendar Red */
+  color: white;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 8px 0;
+}
+
+.date-num {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  font-weight: 300;
+  color: #000000;
+  line-height: 1;
+  margin-top: -4px;
+}
+
+.day-footer {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #8e8e93; /* iOS Gray */
+  padding-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+
+:host-context(body.dark-theme) {
+  .ios-date-widget {
+    background: #1c1c1e;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .date-num {
+    color: white;
+  }
+}

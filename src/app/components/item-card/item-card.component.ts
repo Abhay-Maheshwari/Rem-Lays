@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, OnDestroy, HostListener, OnChanges, SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, OnDestroy, HostListener, OnChanges, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Item } from '../../models/item.model';
@@ -15,16 +15,18 @@ import { DatetimePickerComponent } from '../datetime-picker/datetime-picker.comp
 import { Clipboard } from '@angular/cdk/clipboard';
 
 import { FormsModule } from '@angular/forms';
+import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-item-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, TagInputComponent, DatetimePickerComponent],
+  imports: [CommonModule, FormsModule, TagInputComponent, DatetimePickerComponent, DragDropModule],
   templateUrl: './item-card.component.html',
   styleUrl: './item-card.component.scss'
 })
 export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   @Input({ required: true }) item!: Item;
+  @ViewChild('groupIconInput') groupIconInput!: ElementRef<HTMLInputElement>;
   mediaUrl: string | null = null;
   reelEmbedHtml: SafeHtml | null = null;
   private lastReelHtml: string | null = null;
@@ -71,7 +73,7 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
   ) {}
 
   async ngOnInit() {
-    if ((this.item.type === 'image' || this.item.type === 'video') && this.item.storage_key) {
+    if ((this.item.type === 'image' || this.item.type === 'video' || this.isGroup) && this.item.storage_key) {
       this.mediaUrl = await this.itemsSvc.getSignedDownloadUrl(this.item.storage_key);
     }
 
@@ -98,6 +100,13 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['item'] && !changes['item'].isFirstChange()) {
+      if ((this.item.type === 'image' || this.item.type === 'video' || this.isGroup) && changes['item'].previousValue?.storage_key !== this.item.storage_key) {
+        if (this.item.storage_key) {
+          this.itemsSvc.getSignedDownloadUrl(this.item.storage_key).then(url => this.mediaUrl = url);
+        } else {
+          this.mediaUrl = null;
+        }
+      }
       if (this.item.type === 'reel') {
         const html = this.item.payload?.['embedHtml'];
         if (typeof html === 'string' && html && html !== this.lastReelHtml) {
@@ -190,7 +199,17 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
   }
 
   get isNew(): boolean {
+    if (this.isGroup) {
+      return this.groupChildren.some(child => this.realtimeSvc.recentlyArrivedIds().has(child.id));
+    }
     return this.realtimeSvc.recentlyArrivedIds().has(this.item.id);
+  }
+
+  get isUnseen(): boolean {
+    if (this.isGroup) {
+      return this.groupChildren.some(child => child.status === 'unseen');
+    }
+    return this.item.status === 'unseen';
   }
 
   get activeReminder(): { type: string, next_at: string } | null {
@@ -247,6 +266,96 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
   get reelAuthorName(): string {
     const v = this.item.payload?.['authorName'];
     return typeof v === 'string' && v ? v : 'Instagram';
+  }
+
+  get isGroup(): boolean {
+    return this.item.type === 'group' || !!this.item.payload?.['is_group'];
+  }
+
+  get groupMiniIcons(): { image?: string, text?: string, svg?: SafeHtml }[] {
+    if (!this.isGroup) return [];
+    const childrenIds = this.item.payload?.['children'] as string[] || [];
+    const allItems = this.itemsSvc.items();
+    const children = childrenIds.map(id => allItems.find(i => i.id === id)).filter(i => !!i) as Item[];
+    const firstNine = children.slice(0, 9);
+    
+    return firstNine.map(child => {
+      if (child.type === 'link') {
+        return { image: child.payload['image'] as string || `https://www.google.com/s2/favicons?domain=${child.payload['domain']}&sz=64` };
+      } else if (child.type === 'video') {
+        return { svg: this.sanitizer.bypassSecurityTrustHtml('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>') };
+      } else if (child.type === 'image') {
+        return { svg: this.sanitizer.bypassSecurityTrustHtml('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>') };
+      } else if (child.type === 'reel') {
+        return { svg: this.sanitizer.bypassSecurityTrustHtml('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>') };
+      } else {
+        return { svg: this.sanitizer.bypassSecurityTrustHtml('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>') };
+      }
+    });
+  }
+
+  showGroupModal = false;
+
+  get groupChildren(): Item[] {
+    if (!this.isGroup) return [];
+    const childrenIds = this.item.payload?.['children'] as string[] || [];
+    const allItems = this.itemsSvc.items();
+    return childrenIds.map(id => allItems.find(i => i.id === id)).filter(i => !!i) as Item[];
+  }
+
+  onDropIntoGroup(event: CdkDragDrop<any>) {
+    if (!this.isGroup) return;
+    const droppedItem = event.item.data as Item;
+    if (droppedItem.id === this.item.id) return;
+    this.itemsSvc.addToGroup(this.item.id, [droppedItem.id]);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    if (this.showGroupModal) {
+      this.closeGroup();
+    }
+  }
+
+  openGroup(ev: Event) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    this.showGroupModal = true;
+  }
+
+  closeGroup() {
+    this.showGroupModal = false;
+  }
+
+  showRenamePrompt = false;
+  renameGroupNameInput = '';
+
+  openRenamePrompt(ev: Event) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    this.renameGroupNameInput = this.item.payload?.['name'] as string || 'Group';
+    this.showRenamePrompt = true;
+    this.contextMenuSvc.close();
+  }
+
+  cancelRenamePrompt() {
+    this.showRenamePrompt = false;
+  }
+
+  confirmRenamePrompt() {
+    if (this.renameGroupNameInput.trim()) {
+      this.itemsSvc.renameGroup(this.item.id, this.renameGroupNameInput.trim());
+    }
+    this.showRenamePrompt = false;
+  }
+
+  async onGroupIconSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    
+    await this.itemsSvc.uploadGroupIcon(this.item.id, file);
   }
 
   async openLink(ev: Event) {
@@ -600,6 +709,41 @@ export class ItemCardComponent implements OnInit, AfterViewInit, OnDestroy, OnCh
         action: () => this.togglePin(event)
       }
     ];
+
+    if (this.isGroup) {
+      items.push({
+        label: 'Set Group Icon',
+        icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>',
+        action: () => {
+          this.groupIconInput?.nativeElement.click();
+          this.contextMenuSvc.close();
+        }
+      });
+      if (this.item.storage_key) {
+        items.push({
+          label: 'Remove Group Icon',
+          icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+          danger: true,
+          action: () => {
+            this.itemsSvc.removeGroupIcon(this.item.id);
+            this.contextMenuSvc.close();
+          }
+        });
+      }
+      items.push({
+        label: 'Rename Group',
+        icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>',
+        action: (e) => this.openRenamePrompt(e!)
+      });
+      items.push({
+        label: 'Ungroup',
+        icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><line x1="3" y1="3" x2="21" y2="21"></line></svg>',
+        action: () => {
+          this.itemsSvc.ungroup(this.item.id);
+          this.contextMenuSvc.close();
+        }
+      });
+    }
 
     if (this.item.status === 'seen') {
       items.push({

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ItemsService } from '../../services/items.service';
@@ -17,6 +17,8 @@ export class FeedComponent implements OnInit {
   streakCount = 0;
   loading = signal(true);
   showBoardPicker = false;
+  isDragOver = signal(false);
+  private dragCounter = 0;
 
   constructor(public itemsSvc: ItemsService, public boardsSvc: BoardsService) {}
 
@@ -28,7 +30,11 @@ export class FeedComponent implements OnInit {
   }
 
   get connectedBoardDropLists(): string[] {
-    return this.boardsSvc.boards().map(b => 'board-drop-' + b.id);
+    const boardDrops = this.boardsSvc.boards().map(b => 'board-drop-' + b.id);
+    const groupDrops = this.itemsSvc.filteredItems()
+      .filter(i => i.type === 'group' || !!i.payload?.['is_group'])
+      .map(i => 'group-drop-' + i.id);
+    return [...boardDrops, ...groupDrops];
   }
 
   async ngOnInit() {
@@ -56,6 +62,82 @@ export class FeedComponent implements OnInit {
   async selectBoard(boardId: string | null) {
     this.showBoardPicker = false;
     await this.itemsSvc.moveSelectedToBoard(boardId);
+  }
+
+  showGroupPrompt = false;
+  groupNameInput = '';
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscape(event: KeyboardEvent) {
+    if (this.showGroupPrompt) {
+      this.cancelGroupPrompt();
+    }
+  }
+
+  // ─── Drag & Drop File Upload ─────────────────────────────
+  @HostListener('dragenter', ['$event'])
+  onDragEnter(event: DragEvent) {
+    event.preventDefault();
+    this.dragCounter++;
+    if (event.dataTransfer?.types?.includes('Files')) {
+      this.isDragOver.set(true);
+    }
+  }
+
+  @HostListener('dragover', ['$event'])
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'copy';
+    }
+  }
+
+  @HostListener('dragleave', ['$event'])
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    this.dragCounter--;
+    if (this.dragCounter <= 0) {
+      this.dragCounter = 0;
+      this.isDragOver.set(false);
+    }
+  }
+
+  @HostListener('drop', ['$event'])
+  async onDrop(event: DragEvent) {
+    event.preventDefault();
+    this.dragCounter = 0;
+    this.isDragOver.set(false);
+
+    const dt = event.dataTransfer;
+    if (!dt?.files || dt.files.length === 0) return;
+
+    // Filter to images and videos only
+    const mediaFiles = Array.from(dt.files).filter(f =>
+      f.type.startsWith('image/') || f.type.startsWith('video/')
+    );
+
+    if (mediaFiles.length === 0) return;
+
+    this.itemsSvc.stagedFiles.update(current => [...current, ...mediaFiles]);
+  }
+
+  startGroupSelected() {
+    const selectedIds = Array.from(this.itemsSvc.selectedItemIds());
+    if (selectedIds.length === 0) return;
+    this.groupNameInput = '';
+    this.showGroupPrompt = true;
+  }
+
+  cancelGroupPrompt() {
+    this.showGroupPrompt = false;
+  }
+
+  async confirmGroupPrompt() {
+    this.showGroupPrompt = false;
+    const selectedIds = Array.from(this.itemsSvc.selectedItemIds());
+    if (selectedIds.length === 0) return;
+    const name = this.groupNameInput.trim() || 'New Group';
+    await this.itemsSvc.groupItems(name, selectedIds);
   }
 
   startSelection() {

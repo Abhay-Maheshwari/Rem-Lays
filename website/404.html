@@ -350,6 +350,7 @@
     <div class="nav-links">
       <a href="/">Home</a>
       <a href="features.html">Features</a>
+      <a href="docs.html">Docs</a>
       <a href="about.html">About</a>
       <a href="faq.html">FAQ</a>
     </div>
@@ -371,6 +372,7 @@
     <div class="mobile-menu-inner">
       <a href="/">Home</a>
       <a href="features.html">Features</a>
+      <a href="docs.html">Docs</a>
       <a href="about.html">About</a>
       <a href="faq.html">FAQ</a>
       <hr>
@@ -396,29 +398,17 @@
     <div class="footer-links">
       <a href="/">Home</a>
       <a href="features.html">Features</a>
+      <a href="docs.html">Docs</a>
       <a href="about.html">About</a>
       <a href="faq.html">FAQ</a>
+      <a href="downloads.html">Downloads</a>
+      <a href="https://github.com/Abhay-Maheshwari/Rem-Lays" target="_blank">GitHub</a>
     </div>
     <p class="footer-tag">RemLays &middot; your digital vault</p>
   </footer>
 
   <script>
-    // Mobile menu toggle
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const mobileMenu = document.getElementById('mobileMenu');
-    
-    if(mobileMenuBtn && mobileMenu) {
-      mobileMenuBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        mobileMenu.classList.toggle('open');
-      });
 
-      document.addEventListener('click', (e) => {
-        if (!mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-          mobileMenu.classList.remove('open');
-        }
-      });
-    }
   </script>
 
 </body>

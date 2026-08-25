@@ -662,6 +662,7 @@
     <div class="nav-links">
       <a href="/" class="active">Home</a>
       <a href="features.html">Features</a>
+      <a href="docs.html">Docs</a>
       <a href="about.html">About</a>
       <a href="faq.html">FAQ</a>
     </div>
@@ -683,6 +684,7 @@
     <div class="mobile-menu-inner">
       <a href="/" class="active">Home</a>
       <a href="features.html">Features</a>
+      <a href="docs.html">Docs</a>
       <a href="about.html">About</a>
       <a href="faq.html">FAQ</a>
       <hr>
@@ -728,8 +730,10 @@
       style="display:flex; justify-content:center; flex-wrap:wrap; gap:22px; margin-bottom:16px; font-size:13px; color:var(--text-dim);">
       <a href="/" style="text-decoration:none; color:inherit;">Home</a>
       <a href="features.html" style="text-decoration:none; color:inherit;">Features</a>
+      <a href="docs.html" style="text-decoration:none; color:inherit;">Docs</a>
       <a href="about.html" style="text-decoration:none; color:inherit;">About</a>
       <a href="faq.html" style="text-decoration:none; color:inherit;">FAQ</a>
+      <a href="downloads.html" style="text-decoration:none; color:inherit;">Downloads</a>
       <a href="https://github.com/Abhay-Maheshwari/Rem-Lays" style="text-decoration:none; color:inherit;" target="_blank">GitHub</a>
     </div>
     <p class="footer-tag">RemLays &middot; your digital vault</p>
@@ -846,14 +850,7 @@
 
       function isMobileWidth() { return window.innerWidth <= 768; }
 
-      var menuBtn = document.getElementById('mobileMenuBtn');
-      var mobileMenu = document.getElementById('mobileMenu');
-      if (menuBtn && mobileMenu) {
-        menuBtn.addEventListener('click', function (e) {
-          e.preventDefault();
-          mobileMenu.classList.toggle('open');
-        });
-      }
+
 
       var navEl = document.querySelector('.glass-pill-nav');
       function updateNavState() {

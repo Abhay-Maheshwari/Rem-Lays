@@ -15,9 +15,24 @@ import { Clipboard } from '@angular/cdk/clipboard';
 
 export type FeedFilter = 'all' | 'unseen' | 'link' | 'media' | 'archived' | 'snoozed' | 'shared' | 'deleted' | 'untagged' | 'pending';
 
+export interface BulkUploadFileStatus {
+  filename: string;
+  status: 'pending' | 'uploading' | 'done' | 'error';
+  error?: string;
+}
+
+export interface BulkUploadState {
+  active: boolean;
+  total: number;
+  completed: number;
+  failed: number;
+  files: BulkUploadFileStatus[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class ItemsService {
   items = signal<Item[]>([]);
+  stagedFiles = signal<File[]>([]);
   filter = signal<FeedFilter>('all');
   searchQuery = signal('');
   selectedTags = signal<Set<string>>(new Set());
@@ -27,6 +42,12 @@ export class ItemsService {
 
   selectionMode = signal<boolean>(false);
   selectedItemIds = signal<Set<string>>(new Set());
+
+  /** Tracks progress of a multi-file upload batch. */
+  bulkUploadState = signal<BulkUploadState>({
+    active: false, total: 0, completed: 0, failed: 0, files: []
+  });
+  private bulkUploadCancelled = false;
 
   currentTime = signal<number>(Date.now());
   private snoozeCheckInterval: any;
@@ -189,20 +210,21 @@ export class ItemsService {
       return (i.board_id || null) === activeBoard;
     };
     
-    // Filter out expired and archived items locally, unless viewing archive
+    // Filter out expired, archived, and grouped items locally
     if (this.filter() === 'archived') {
-      all = all.filter(i => i.status === 'archived' && boardMatch(i));
+      all = all.filter(i => i.status === 'archived' && boardMatch(i) && !i.payload?.['parent_id']);
     } else if (this.filter() === 'snoozed') {
-      all = all.filter(i => i.snooze_until && i.snooze_until > nowStr && i.status !== 'archived' && boardMatch(i));
+      all = all.filter(i => i.snooze_until && i.snooze_until > nowStr && i.status !== 'archived' && boardMatch(i) && !i.payload?.['parent_id']);
     } else if (this.filter() === 'deleted') {
-      all = all.filter(i => i.status === 'deleted' && boardMatch(i));
+      all = all.filter(i => i.status === 'deleted' && boardMatch(i) && !i.payload?.['parent_id']);
     } else {
       all = all.filter(i => 
         (!i.expires_at || i.expires_at > nowStr) && 
         i.status !== 'archived' &&
         i.status !== 'deleted' &&
         (!i.snooze_until || i.snooze_until <= nowStr) &&
-        boardMatch(i)
+        boardMatch(i) &&
+        !i.payload?.['parent_id']
       );
     }
 
@@ -631,6 +653,35 @@ export class ItemsService {
     }
   }
 
+  async uploadGroupIcon(groupId: string, file: File) {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+
+    const { data: presign, error: presignError } = await supabase.functions.invoke('presign-upload', {
+      body: { contentType: file.type, sizeBytes: file.size }
+    });
+    if (presignError || !presign) {
+      console.error('presign-upload failed for group icon', presignError);
+      return;
+    }
+
+    const { storageKey, token } = presign as { storageKey: string; token: string };
+
+    const { error: uploadError } = await supabase.storage.from('media').uploadToSignedUrl(storageKey, token, file);
+    if (uploadError) {
+      console.error('uploadToSignedUrl failed for group icon', uploadError);
+      return;
+    }
+
+    this.optimisticUpdate(groupId, { storage_key: storageKey } as Partial<Item>);
+    await supabase.from('items').update({ storage_key: storageKey }).eq('id', groupId);
+  }
+
+  async removeGroupIcon(groupId: string) {
+    this.optimisticUpdate(groupId, { storage_key: null } as Partial<Item>);
+    await supabase.from('items').update({ storage_key: null }).eq('id', groupId);
+  }
+
   /**
    * Desktop only for now — see the design notes on why Android's share
    * pipeline can't reuse this yet (it needs a native upload bridge that
@@ -683,6 +734,164 @@ export class ItemsService {
     await this.refresh();
   }
 
+  /**
+   * Upload multiple files concurrently with a cap of 3 parallel uploads.
+   * Exposes progress via bulkUploadState signal for UI binding.
+   * Reuses the existing presign → uploadToSignedUrl → insert pipeline.
+   */
+  async addMediaBulk(files: File[], tags?: string[]): Promise<string[]> {
+    const MAX_CONCURRENT = 3;
+    const MAX_BATCH = 20;
+    const batch = files.slice(0, MAX_BATCH);
+    const insertedIds: string[] = [];
+
+    console.log(`[BulkUpload] Starting bulk upload of ${batch.length} files`);
+
+    if (batch.length === 0) {
+      this.toastSvc.show('No files selected', 'error');
+      return [];
+    }
+
+    this.bulkUploadCancelled = false;
+
+    const fileStatuses: BulkUploadFileStatus[] = batch.map(f => ({
+      filename: f.name,
+      status: 'pending' as const
+    }));
+
+    this.bulkUploadState.set({
+      active: true,
+      total: batch.length,
+      completed: 0,
+      failed: 0,
+      files: [...fileStatuses]
+    });
+
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
+      console.error('[BulkUpload] No authenticated user');
+      this.toastSvc.show('Please sign in to upload files', 'error');
+      this.bulkUploadState.update(s => ({ ...s, active: false }));
+      return [];
+    }
+
+    console.log(`[BulkUpload] Authenticated as ${userData.user.id}, starting queue`);
+
+
+    let completed = 0;
+    let failed = 0;
+    let nextIndex = 0;
+
+    const uploadOne = async (index: number): Promise<void> => {
+      if (this.bulkUploadCancelled) {
+        fileStatuses[index].status = 'error';
+        fileStatuses[index].error = 'Cancelled';
+        failed++;
+        this.bulkUploadState.update(s => ({
+          ...s, failed, files: [...fileStatuses]
+        }));
+        return;
+      }
+
+      const file = batch[index];
+      fileStatuses[index].status = 'uploading';
+      this.bulkUploadState.update(s => ({ ...s, files: [...fileStatuses] }));
+
+      try {
+        // 1. Presign
+        const { data: presign, error: presignError } = await supabase.functions.invoke('presign-upload', {
+          body: { contentType: file.type, sizeBytes: file.size }
+        });
+        if (presignError || !presign) throw new Error(presignError?.message || 'Presign failed');
+
+        const { storageKey, token } = presign as { storageKey: string; token: string };
+
+        // 2. Upload
+        const { error: uploadError } = await supabase.storage.from('media').uploadToSignedUrl(storageKey, token, file);
+        if (uploadError) throw new Error(uploadError.message);
+
+        // 3. Insert item row
+        const type: ItemType = file.type.startsWith('video/') ? 'video' : 'image';
+        const insertPayload: any = {
+          user_id: userData.user!.id,
+          source_device_id: this.devicesService.currentDeviceId,
+          type,
+          payload: { filename: file.name, tags },
+          storage_key: storageKey
+        };
+        const mappedBoardId = this.getBoardIdFromTags(tags);
+        if (mappedBoardId) {
+          insertPayload.board_id = mappedBoardId;
+        } else if (this.activeBoardId() && this.activeBoardId() !== '*') {
+          insertPayload.board_id = this.activeBoardId();
+        }
+
+        const { data: inserted, error: insertError } = await supabase.from('items').insert(insertPayload).select('id').single();
+        if (insertError) throw new Error(insertError.message);
+        
+        if (inserted?.id) {
+          insertedIds.push(inserted.id);
+        }
+
+        fileStatuses[index].status = 'done';
+        completed++;
+      } catch (err: any) {
+        fileStatuses[index].status = 'error';
+        fileStatuses[index].error = err?.message || 'Unknown error';
+        failed++;
+        console.error(`Bulk upload failed for ${file.name}`, err);
+      }
+
+      this.bulkUploadState.update(s => ({
+        ...s, completed, failed, files: [...fileStatuses]
+      }));
+    };
+
+    // Concurrency-limited queue using a worker pool pattern
+    const runQueue = async () => {
+      const workers: Promise<void>[] = [];
+
+      const spawnWorker = async () => {
+        while (nextIndex < batch.length) {
+          const idx = nextIndex++;
+          await uploadOne(idx);
+        }
+      };
+
+      for (let i = 0; i < Math.min(MAX_CONCURRENT, batch.length); i++) {
+        workers.push(spawnWorker());
+      }
+
+      await Promise.all(workers);
+    };
+
+    await runQueue();
+
+    // Single refresh after all uploads complete
+    await this.refresh();
+
+    // Show summary toast
+    if (failed === 0) {
+      this.toastSvc.show(`All ${completed} files uploaded successfully!`);
+    } else {
+      this.toastSvc.show(`${completed} uploaded, ${failed} failed`, 'error');
+    }
+
+    // Keep the state visible for 2 seconds after completion so the user sees the final status
+    setTimeout(() => {
+      this.bulkUploadState.set({
+        active: false, total: 0, completed: 0, failed: 0, files: []
+      });
+    }, 2000);
+    
+    return insertedIds;
+  }
+
+  /** Cancel any remaining uploads in the current bulk batch. */
+  cancelBulkUpload() {
+    this.bulkUploadCancelled = true;
+  }
+
   /** Used when the upload itself already happened natively (Android's
    * share pipeline, via the Kotlin bridge) — skips presign/upload
    * entirely, just writes the row once Kotlin hands back a storage key. */
@@ -708,6 +917,127 @@ export class ItemsService {
     const { error } = await supabase.from('items').insert(insertPayload);
     if (error) console.error('addMediaFromStorageKey insert failed', error);
     await this.refresh();
+  }
+
+  async groupItems(name: string, childIds: string[]) {
+    if (childIds.length === 0) return;
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+
+    // Create the group item
+    const groupPayload = { name, children: childIds, is_group: true };
+    const insertPayload: any = {
+      user_id: userData.user.id,
+      source_device_id: this.devicesService.currentDeviceId,
+      type: 'text',
+      payload: groupPayload
+    };
+    if (this.activeBoardId() && this.activeBoardId() !== '*') {
+      insertPayload.board_id = this.activeBoardId();
+    }
+
+    const { data: inserted, error } = await supabase
+      .from('items')
+      .insert(insertPayload)
+      .select('id')
+      .single();
+
+    if (error || !inserted) {
+      console.error('groupItems failed to create group', error);
+      return;
+    }
+
+    const groupId = inserted.id;
+
+    // Update child items to have parent_id
+    // Supabase JS doesn't easily do a bulk JSONB update with different payloads,
+    // so we can loop and update or just fetch them, patch payload, and save.
+    const childItems = this.items().filter(i => childIds.includes(i.id));
+    for (const child of childItems) {
+      const newPayload = { ...(child.payload || {}), parent_id: groupId };
+      // Optimistic update
+      this.optimisticUpdate(child.id, { payload: newPayload });
+      // Fire-and-forget DB update
+      supabase.from('items').update({ payload: newPayload }).eq('id', child.id).then();
+    }
+    
+    // Clear selection
+    this.selectedItemIds.set(new Set());
+    this.selectionMode.set(false);
+
+    await this.refresh();
+  }
+
+  async addToGroup(groupId: string, childIds: string[]) {
+    const group = this.items().find(i => i.id === groupId);
+    if (!group) return;
+
+    const existingChildren = (group.payload?.['children'] as string[]) || [];
+    const newChildIds = childIds.filter(id => id !== groupId && !existingChildren.includes(id));
+    if (newChildIds.length === 0) return;
+
+    const updatedChildren = [...existingChildren, ...newChildIds];
+    const groupPayload = { ...group.payload, children: updatedChildren };
+    
+    this.optimisticUpdate(groupId, { payload: groupPayload });
+    supabase.from('items').update({ payload: groupPayload }).eq('id', groupId).then();
+
+    const childItems = this.items().filter(i => newChildIds.includes(i.id));
+    for (const child of childItems) {
+      const newPayload = { ...(child.payload || {}), parent_id: groupId };
+      this.optimisticUpdate(child.id, { payload: newPayload });
+      supabase.from('items').update({ payload: newPayload }).eq('id', child.id).then();
+    }
+    this.clearSelection();
+  }
+
+  async renameGroup(groupId: string, newName: string) {
+    const group = this.items().find(i => i.id === groupId);
+    if (!group) return;
+
+    const groupPayload = { ...group.payload, name: newName };
+    this.optimisticUpdate(groupId, { payload: groupPayload });
+    supabase.from('items').update({ payload: groupPayload }).eq('id', groupId).then();
+  }
+
+  async ungroup(groupId: string) {
+    const group = this.items().find(i => i.id === groupId);
+    if (!group) return;
+
+    const childIds = group.payload?.['children'] as string[] || [];
+    const childItems = this.items().filter(i => childIds.includes(i.id));
+    const parentGroupId = group.payload?.['parent_id'] as string | undefined;
+
+    // 1. Update the parent group (if this group was nested)
+    if (parentGroupId) {
+      const parentGroup = this.items().find(i => i.id === parentGroupId);
+      if (parentGroup) {
+        const parentChildren = (parentGroup.payload?.['children'] as string[]) || [];
+        // Remove the nested group, insert its children
+        const newParentChildren = parentChildren.filter(id => id !== groupId);
+        newParentChildren.push(...childIds);
+        
+        const parentPayload = { ...parentGroup.payload, children: newParentChildren };
+        this.optimisticUpdate(parentGroupId, { payload: parentPayload });
+        supabase.from('items').update({ payload: parentPayload }).eq('id', parentGroupId).then();
+      }
+    }
+
+    // 2. Update the children
+    for (const child of childItems) {
+      const newPayload = { ...child.payload };
+      if (parentGroupId) {
+        newPayload['parent_id'] = parentGroupId;
+      } else {
+        delete newPayload['parent_id'];
+      }
+      this.optimisticUpdate(child.id, { payload: newPayload });
+      supabase.from('items').update({ payload: newPayload }).eq('id', child.id).then();
+    }
+
+    // 3. Delete the group itself
+    this.optimisticUpdate(groupId, { status: 'deleted' } as Partial<Item>);
+    supabase.from('items').update({ status: 'deleted' }).eq('id', groupId).then();
   }
 
   /** Signed, time-limited download URL — the bucket is private, so this

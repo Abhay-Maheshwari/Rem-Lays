@@ -9,6 +9,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { isTauri } from '../../services/platform';
 import { UpdateService } from '../../services/update.service';
 import { NativeNotificationService } from '../../services/native-notification.service';
+import { WidgetBridgeService } from '../../services/widget-bridge.service';
 
 @Component({
   selector: 'app-settings-page',
@@ -31,7 +32,7 @@ export class SettingsPageComponent implements OnInit {
   displayName = '';
   isEditingName = false;
   currentVersion = '';
-  
+
   presets = [
     { id: 'default', name: 'Default', style: 'var(--bg-main)' },
     { id: 'blue', name: 'Blue', style: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, var(--bg-main) 100%)' },
@@ -47,7 +48,8 @@ export class SettingsPageComponent implements OnInit {
     public itemsSvc: ItemsService,
     public themeSvc: ThemeService,
     public updateSvc: UpdateService,
-    private notificationSvc: NativeNotificationService
+    private notificationSvc: NativeNotificationService,
+    private widgetBridge: WidgetBridgeService
   ) {}
 
   async ngOnInit() {

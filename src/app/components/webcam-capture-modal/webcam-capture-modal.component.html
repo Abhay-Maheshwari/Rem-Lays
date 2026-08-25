@@ -1,0 +1,52 @@
+<div class="modal-overlay" (click)="onCancel()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Take Photo</h3>
+      <button class="close-btn" (click)="onCancel()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="camera-container">
+        <!-- Live feed -->
+        <video 
+          #videoElement 
+          autoplay 
+          playsinline 
+          [class.hidden]="photoDataUrl !== null"
+        ></video>
+        
+        <!-- Hidden canvas for capture -->
+        <canvas #canvasElement style="display: none;"></canvas>
+
+        <!-- Preview image -->
+        <img 
+          *ngIf="photoDataUrl" 
+          [src]="photoDataUrl" 
+          alt="Captured photo" 
+          class="photo-preview"
+        />
+
+        <div *ngIf="error" class="error-msg">
+          {{ error }}
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <ng-container *ngIf="!photoDataUrl">
+        <button class="capture-btn" (click)="takePhoto()" [disabled]="!stream">
+          <div class="capture-inner"></div>
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="photoDataUrl">
+        <button class="btn secondary" (click)="retake()">Retake</button>
+        <button class="btn primary" (click)="confirm()">Confirm</button>
+      </ng-container>
+    </div>
+  </div>
+</div>

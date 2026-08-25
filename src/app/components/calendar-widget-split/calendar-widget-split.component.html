@@ -1,0 +1,30 @@
+<div class="split-widget-container">
+  <div class="split-widget">
+    <div class="left-pane">
+      <div class="date-big">
+        <span class="month">{{ now | date:'MMM' }}</span>
+        <span class="day">{{ now | date:'d' }}</span>
+      </div>
+      <div class="day-word">{{ now | date:'EEEE' }}</div>
+      <div class="event-count">{{ totalUpcomingCount }} events</div>
+    </div>
+    
+    <div class="right-pane">
+      <div class="upcoming-header">UPCOMING</div>
+      
+      <div class="event-list">
+        <div class="event-item" *ngFor="let item of upcomingItems; let i = index" (click)="openItem(item)">
+          <div class="event-indicator" [class.color-2]="i % 2 !== 0"></div>
+          <div class="event-info">
+            <div class="title">{{ getItemTitle(item) }}</div>
+            <div class="time">{{ getItemTargetTime(item) | date:'H:mm' }} - {{ getItemTargetTime(item) | date:'H:mm' }}</div>
+          </div>
+        </div>
+
+        <div *ngIf="upcomingItems.length === 0" class="empty-state">
+          No upcoming events
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

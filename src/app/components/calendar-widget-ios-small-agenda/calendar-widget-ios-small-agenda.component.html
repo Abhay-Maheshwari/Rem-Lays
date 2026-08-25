@@ -1,0 +1,19 @@
+<div class="ios-small-agenda-widget">
+  <div class="header">
+    <span class="day-word">{{ now | date:'EEEE' | uppercase }}</span>
+    <span class="day-num">{{ now | date:'d' }}</span>
+  </div>
+  
+  <div class="events-list">
+    <div class="event-pill-wrap" *ngFor="let item of upcomingItems; let i = index" (click)="openItem(item)">
+      <div class="event-pill" [style.backgroundColor]="colors[i % colors.length]">
+        <span class="title">{{ getItemTitle(item) }}</span>
+      </div>
+      <div class="event-time">{{ getItemTargetTime(item) | date:'h:mm a' }}</div>
+    </div>
+    
+    <div *ngIf="upcomingItems.length === 0" class="empty-state">
+      No upcoming events
+    </div>
+  </div>
+</div>

@@ -70,6 +70,15 @@
 
   <div class="header-actions">
     <ng-container *ngIf="itemsSvc.selectionMode()">
+      <button class="demo-btn" [disabled]="itemsSvc.selectedItemIds().size === 0" (click)="startGroupSelected()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+          <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+          <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+        </svg>
+        <span class="btn-text">Group ({{ itemsSvc.selectedItemIds().size }})</span>
+      </button>
       <button class="demo-btn" *ngIf="boardsSvc.boards().length > 0" [disabled]="itemsSvc.selectedItemIds().size === 0"
         (click)="showBoardPicker = !showBoardPicker" style="position:relative">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -142,6 +151,19 @@
 
 
 
+<!-- Drag & Drop File Overlay -->
+<div class="drop-overlay" *ngIf="isDragOver()" (drop)="onDrop($event)">
+  <div class="drop-overlay-content">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </svg>
+    <div class="drop-overlay-title">Drop files to upload</div>
+    <div class="drop-overlay-sub">Images and videos will be added to your feed</div>
+  </div>
+</div>
+
 <div class="feed-scroll">
   <!-- Skeleton Loading State -->
   <div class="skeleton-container" *ngIf="loading()">
@@ -175,6 +197,7 @@
     </div>
 
     <div class="feed-grid" *ngIf="itemsSvc.filteredItems().length > 0; else empty" cdkDropList id="feedDropList"
+      [cdkDropListSortingDisabled]="true"
       [cdkDropListConnectedTo]="connectedBoardDropLists">
       <app-item-card *ngFor="let item of itemsSvc.filteredItems(); trackBy: trackById" [item]="item" cdkDrag [cdkDragStartDelay]="{mouse: 0, touch: 250}" [cdkDragData]="item">
         <div *cdkDragPlaceholder style="display: none;"></div>
@@ -192,4 +215,28 @@
       </div>
     </ng-template>
   </ng-container>
+</div>
+
+<!-- Group Name Prompt Modal -->
+<div class="modal-overlay" *ngIf="showGroupPrompt" (click)="cancelGroupPrompt()">
+  <div class="modal-content" style="max-width: 400px;" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Enter group name (optional)</h2>
+      <button class="close-btn" (click)="cancelGroupPrompt()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+      <input type="text" class="unified-search-input" style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid var(--border-subtle); width: 100%; box-sizing: border-box;"
+             placeholder="New Group" 
+             [(ngModel)]="groupNameInput"
+             (keyup.enter)="confirmGroupPrompt()" (keyup.escape)="cancelGroupPrompt()" autofocus>
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="demo-btn" (click)="cancelGroupPrompt()">Cancel</button>
+        <button class="demo-btn" style="background: var(--accent); color: white;" (click)="confirmGroupPrompt()">OK</button>
+      </div>
+    </div>
+  </div>
 </div>

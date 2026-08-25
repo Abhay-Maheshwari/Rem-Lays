@@ -1,0 +1,48 @@
+<div class="month-widget">
+  <div class="calendar-header">
+    <button class="icon-btn" (click)="prevMonth()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <div class="month-year">{{ currentMonthDate | date:'MMMM yyyy' }}</div>
+    <button class="icon-btn" (click)="nextMonth()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+  </div>
+
+  <div class="calendar-grid">
+    <div class="weekday" *ngFor="let wd of weekDays">{{ wd }}</div>
+    
+    <div class="day" 
+         *ngFor="let day of daysInMonth" 
+         [class.other-month]="!day.isCurrentMonth"
+         [class.selected]="isSameDay(selectedDate, day.fullDate)"
+         (click)="selectDate(day.fullDate)">
+      
+      <span class="date-num" [class.today]="isToday(day.fullDate)">{{ day.date }}</span>
+      
+      <div class="indicators" *ngIf="day.items.length > 0">
+        <div class="dot" *ngFor="let item of day.items.slice(0, 1)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="agenda-section">
+    <div class="agenda-header">{{ selectedDate | date:'MMMM d' }}</div>
+    
+    <div class="agenda-list">
+      <div class="agenda-item" *ngFor="let item of displayedItems" (click)="openItem(item)">
+        <div class="item-meta">{{ selectedDate | date:'MMMM d' }} &#64; {{ getItemTargetTime(item) | date:'h:mm a' }}</div>
+        <div class="item-title">{{ getItemTitle(item) }}</div>
+        <div class="item-desc" *ngIf="item.payload?.['note']">{{ item.payload?.['note'] }}</div>
+      </div>
+      
+      <div *ngIf="displayedItems.length === 0" class="empty-state">
+        No events for this day
+      </div>
+    </div>
+    
+    <a class="view-calendar-link">View Calendar</a>
+  </div>
+</div>

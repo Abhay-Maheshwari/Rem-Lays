@@ -1,0 +1,122 @@
+.agenda-widget {
+  background: var(--bg-main);
+  border-radius: 16px;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text-primary);
+  /* Light mode override to match screenshot perfectly, if needed, but let's use variables for dark mode support */
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.widget-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0 0 20px 0;
+  color: var(--text-secondary);
+}
+
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.event-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.event-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40px;
+  
+  .month {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  
+  .day {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+}
+
+.event-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.event-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.broadcast-icon {
+  background: var(--border-subtle);
+  border-radius: 12px;
+  padding: 2px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+}
+
+.event-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.empty-state {
+  color: var(--text-tertiary);
+  font-size: 0.9rem;
+  padding: 12px 0;
+}
+
+.view-more {
+  display: inline-block;
+  margin-top: 24px;
+  color: #4f46e5; /* Distinct blue link color */
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Ensure it looks great in light theme (matching the white screenshot) */
+:host-context(body.light-theme) {
+  .agenda-widget {
+    background: #ffffff;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+  .broadcast-icon {
+    background: #f1f5f9;
+    color: #475569;
+  }
+  .view-more {
+    color: #4338ca;
+  }
+}

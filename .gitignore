@@ -37,3 +37,8 @@ supabase/.temp/
 .supabase/
 testsprite_tests/tmp/
 testsprite_tests/tmp/config.json
+
+# Large files
+website/downloads/*.exe
+website/downloads/*.msi
+website/downloads/*.apk

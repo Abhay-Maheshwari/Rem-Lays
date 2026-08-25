@@ -13,6 +13,8 @@ import { BoardsService } from './services/boards.service';
 import { UpdateService } from './services/update.service';
 import { LocalDbService } from './services/local-db.service';
 import { CacheService } from './services/cache.service';
+import { WidgetBridgeService } from './services/widget-bridge.service';
+import { ItemViewerService } from './services/item-viewer.service';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { FeedComponent } from './components/feed/feed.component';
 import { QuickActionBarComponent } from './components/quick-action-bar/quick-action-bar.component';
@@ -79,7 +81,9 @@ export class AppComponent {
     private boardsSvc: BoardsService,
     private updateSvc: UpdateService,
     private localDb: LocalDbService,
-    private cacheSvc: CacheService
+    private cacheSvc: CacheService,
+    private widgetBridge: WidgetBridgeService,
+    private viewerSvc: ItemViewerService
   ) {
     // Flush whatever's queued the moment connectivity actually returns —
     // not gated on sign-in state below, since 'online' can fire at any
@@ -112,12 +116,19 @@ export class AppComponent {
       const session = this.auth.session();
       if (session?.user?.id) {
         this.realtimeSvc.connect(session.user.id);
-        this.itemsSvc.refresh();
+        this.itemsSvc.refresh().then(() => {
+          this.widgetBridge.updateWidgetData(this.itemsSvc.items(), this.itemsSvc.items().length);
+        });
         this.boardsSvc.refresh();
         this.autostartSvc.ensureEnabled();
         this.notificationSvc.init();
         this.shareIntentSvc.startListening();
         this.updateSvc.checkOnStartup();
+
+        // Push auth token to widget data bridge for WorkManager sync
+        if (session.access_token) {
+          this.widgetBridge.updateAuthToken(session.access_token);
+        }
         // Also catch up here, not just on 'online' — covers the case
         // where the app was fully closed while something sat queued and
         // connectivity already came back before this launch.
@@ -148,10 +159,63 @@ export class AppComponent {
     if (typeof document !== 'undefined') {
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible' && this.auth.session()?.user) {
-          this.itemsSvc.refresh();
+          this.itemsSvc.refresh().then(() => {
+            this.widgetBridge.updateWidgetData(this.itemsSvc.items(), this.itemsSvc.items().length);
+          });
           this.boardsSvc.refresh();
         }
       });
+
+      // Listen for deep-link actions dispatched by native Android widgets
+      window.addEventListener('rem-lays-widget-action', ((event: CustomEvent) => {
+        const { target, itemId } = event.detail || {};
+        switch (target) {
+          case 'quick_note':
+            this.activeView.set('feed');
+            setTimeout(() => {
+              const actionInput = document.querySelector('.action-input') as HTMLInputElement | null;
+              actionInput?.focus();
+            }, 300);
+            break;
+          case 'feed':
+            this.activeView.set('feed');
+            break;
+          case 'camera_capture':
+            this.activeView.set('feed');
+            // A small delay to let the feed render, then trigger file picker
+            setTimeout(() => {
+              const fileInput = document.querySelector('.media-upload-input') as HTMLInputElement | null;
+              fileInput?.click();
+            }, 500);
+            break;
+          case 'paste_link':
+            this.activeView.set('feed');
+            // Read clipboard and auto-add if it's a URL
+            if (navigator.clipboard?.readText) {
+              navigator.clipboard.readText().then(text => {
+                const trimmed = text?.trim();
+                if (trimmed && /^https?:\/\//i.test(trimmed)) {
+                  this.itemsSvc.addLink(trimmed);
+                  this.toastSvc.show('Link saved from clipboard', 'success');
+                } else {
+                  this.toastSvc.show('No URL found in clipboard', 'error');
+                }
+              }).catch(() => {
+                this.toastSvc.show('Could not read clipboard', 'error');
+              });
+            }
+            break;
+          case 'item':
+            if (itemId) {
+              this.activeView.set('feed');
+              const item = this.itemsSvc.items().find(i => i.id === itemId);
+              if (item) {
+                this.viewerSvc.open(item);
+              }
+            }
+            break;
+        }
+      }) as EventListener);
     }
     
     // Persist active view across reloads
