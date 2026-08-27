@@ -1,0 +1,3 @@
+# Ignore the massive downloads directory from being embedded into the executable
+../dist/rem-lays/browser/downloads/
+**/downloads/

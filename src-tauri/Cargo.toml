@@ -1,6 +1,6 @@
 [package]
 name = "rem-lays"
-version = "1.7.0"
+version = "1.8.0"
 description = "Rem-Lays desktop and Android client shell"
 edition = "2021"
 
@@ -32,3 +32,12 @@ window-vibrancy = "0.8.0"
 [[bin]]
 name = "rem-lays"
 path = "src/main.rs"
+
+[profile.release]
+# Optimize for size
+lto = true
+codegen-units = 1
+opt-level = "z"
+strip = true
+panic = "abort"
+
