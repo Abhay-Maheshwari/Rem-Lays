@@ -20,7 +20,7 @@
         "minHeight": 480,
         "transparent": true,
         "decorations": false,
-        "shadow": false
+        "shadow": true
       }
     ],
     "macOSPrivateApi": true,
