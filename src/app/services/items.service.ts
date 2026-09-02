@@ -1477,7 +1477,9 @@ export class ItemsService {
   static async fetchSharedItem(token: string): Promise<Item | null> {
     const { createClient } = await import('@supabase/supabase-js');
     const { environment } = await import('../../environments/environment');
-    const anonClient = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
+    const anonClient = createClient(environment.supabaseUrl, environment.supabaseAnonKey, {
+      auth: { persistSession: false }
+    });
 
     const { data, error } = await anonClient
       .from('items')
@@ -1496,7 +1498,9 @@ export class ItemsService {
   static async fetchSharedMediaUrl(shareToken: string): Promise<string | null> {
     const { createClient } = await import('@supabase/supabase-js');
     const { environment } = await import('../../environments/environment');
-    const anonClient = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
+    const anonClient = createClient(environment.supabaseUrl, environment.supabaseAnonKey, {
+      auth: { persistSession: false }
+    });
 
     const { data, error } = await anonClient.functions.invoke('shared-media', {
       body: { shareToken }

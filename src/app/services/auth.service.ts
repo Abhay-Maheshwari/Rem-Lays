@@ -186,6 +186,7 @@ export class AuthService {
       '__TAURI_INVOKE__' in window ||
       '__TAURI__' in window
     );
+    
     const isMobile = typeof navigator !== 'undefined' && /android|iphone|ipad|ipod/i.test(navigator.userAgent);
     const useDeepLink = isTauri && isMobile;
 
@@ -206,8 +207,8 @@ export class AuthService {
       const options: any = {
         queryParams: { prompt: 'select_account' }
       };
-      if (!isTauri && typeof window !== 'undefined') {
-        options.redirectTo = `${window.location.origin}/login`;
+      if (typeof window !== 'undefined') {
+        options.redirectTo = window.location.origin;
       }
       // Desktop (or pure Web): Use standard embedded WebView / Browser redirect
       await supabase.auth.signInWithOAuth({

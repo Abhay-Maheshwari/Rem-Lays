@@ -33,10 +33,18 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec![]),
         )).plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-            use tauri::Manager;
+            use tauri::{Manager, Emitter};
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.show();
                 let _ = window.set_focus();
+                
+                // Manually route the deep link arguments to the frontend
+                if _args.len() > 1 {
+                    #[derive(serde::Serialize, Clone)]
+                    struct IntentPayload { data: String }
+                    let url = _args[1].clone();
+                    let _ = window.emit("tauri://intent", IntentPayload { data: url });
+                }
             }
         }))
         .plugin(tauri_plugin_updater::Builder::new().build())

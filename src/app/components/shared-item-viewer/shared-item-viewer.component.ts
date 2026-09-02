@@ -98,7 +98,10 @@ export class SharedItemViewerComponent implements OnInit {
   get formattedDate(): string {
     const item = this.item();
     if (!item) return '';
-    return new Date(item.created_at).toLocaleDateString('en-US', {
+    // Safari strict date parsing requires a standard ISO 8601 string.
+    // Ensure 'YYYY-MM-DD HH:mm:ss' is formatted as 'YYYY-MM-DDTHH:mm:ss'
+    const safeDateStr = item.created_at.replace(' ', 'T');
+    return new Date(safeDateStr).toLocaleDateString('en-US', {
       year: 'numeric', month: 'long', day: 'numeric',
       hour: '2-digit', minute: '2-digit'
     });

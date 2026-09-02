@@ -47,13 +47,13 @@ export class AppComponent {
   private parseSharedToken(): string | null {
     const path = window.location.pathname;
     const match = path.match(/^\/shared\/([^\/]+)\/?$/i);
-    return match ? match[1] : null;
+    return match ? decodeURIComponent(match[1]) : null;
   }
 
   private parseInviteToken(): string | null {
     const path = window.location.pathname;
     const match = path.match(/^\/invite\/([^\/]+)\/?$/i);
-    return match ? match[1] : null;
+    return match ? decodeURIComponent(match[1]) : null;
   }
 
   minimize() {
