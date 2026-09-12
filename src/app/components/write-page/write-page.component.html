@@ -1,0 +1,55 @@
+<div class="write-container">
+
+  <div class="write-header">
+    <div class="header-left">
+      <button class="icon-btn header-btn" (click)="goBack()" title="Back">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="draft-status">Draft</div>
+    </div>
+    
+    <div class="header-right">
+      <button class="save-btn" (click)="saveNote()" [disabled]="(!titleContent().trim() && !noteContent().trim()) || isSaving()">
+        <svg *ngIf="!isSaving()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span class="btn-text">{{ isSaving() ? 'Saving...' : 'Save Note' }}</span>
+        <span class="btn-shortcut" *ngIf="!isSaving()">Ctrl+Enter</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="editor-content">
+    <div class="page-sheet">
+      <div class="editor-wrapper">
+        <input 
+          #titleInput
+          type="text"
+          class="title-editor-input"
+          placeholder="Document Title"
+          [value]="titleContent()"
+          (input)="onTitleInput($event)"
+          (keydown)="handleKeydown($event)"
+        />
+
+        <textarea
+          #noteInput
+          class="main-editor-input"
+          placeholder="Start writing..."
+          [value]="noteContent()"
+          (input)="onInput($event)"
+          (keydown)="handleKeydown($event)"
+        ></textarea>
+      </div>
+
+      <div class="editor-footer">
+        <div class="tags-metadata-label">Metadata</div>
+        <div class="tags-row">
+          <app-tag-input 
+            [tags]="tags()" 
+            (tagsChange)="tags.set($event)" 
+            placeholder="Add tags to organize...">
+          </app-tag-input>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

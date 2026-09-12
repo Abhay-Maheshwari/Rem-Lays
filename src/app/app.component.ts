@@ -27,12 +27,14 @@ import { SettingsPageComponent } from './components/settings-page/settings-page.
 import { TagInputComponent } from './components/tag-input/tag-input.component';
 import { HomeComponent } from './components/home/home.component';
 import { CalendarComponent } from './components/calendar/calendar.component';
+import { CollectionsPageComponent } from './components/collections-page/collections-page.component';
+import { WritePageComponent } from './components/write-page/write-page.component';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, FeedComponent, QuickActionBarComponent, ItemViewerComponent, DeviceNicknameModalComponent, ContextMenuComponent, WeeklyDigestComponent, SharedItemViewerComponent, SettingsPageComponent, TagInputComponent, HomeComponent, CalendarComponent],
+  imports: [CommonModule, SidebarComponent, FeedComponent, QuickActionBarComponent, ItemViewerComponent, DeviceNicknameModalComponent, ContextMenuComponent, WeeklyDigestComponent, SharedItemViewerComponent, SettingsPageComponent, TagInputComponent, HomeComponent, CalendarComponent, CollectionsPageComponent, WritePageComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -42,7 +44,7 @@ export class AppComponent {
   // URL-based routing for shared item public pages
   sharedToken = signal<string | null>(this.parseSharedToken());
   inviteToken = signal<string | null>(this.parseInviteToken());
-  activeView = signal<'home' | 'feed' | 'settings' | 'calendar'>((localStorage.getItem('activeView') as any) || 'home');
+  activeView = signal<'home' | 'feed' | 'settings' | 'calendar' | 'collections' | 'write'>((localStorage.getItem('activeView') as any) || 'home');
 
   private parseSharedToken(): string | null {
     const path = window.location.pathname;

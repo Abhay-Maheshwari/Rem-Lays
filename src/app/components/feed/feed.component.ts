@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, HostListener } from '@angular/core';
+import { Component, OnInit, signal, HostListener, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ItemsService } from '../../services/items.service';
@@ -14,6 +14,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   styleUrl: './feed.component.scss'
 })
 export class FeedComponent implements OnInit {
+  @Output() openWrite = new EventEmitter<void>();
+
   streakCount = 0;
   loading = signal(true);
   showBoardPicker = false;

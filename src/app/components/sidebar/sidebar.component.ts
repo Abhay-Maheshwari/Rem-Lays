@@ -31,6 +31,8 @@ export class SidebarComponent implements OnInit {
   @Output() navigated = new EventEmitter<void>();
   @Output() openDigest = new EventEmitter<void>();
   @Output() openHome = new EventEmitter<void>();
+  @Output() openCollections = new EventEmitter<void>();
+  @Output() openWrite = new EventEmitter<void>();
 
   isCollapsed = signal(false);
 

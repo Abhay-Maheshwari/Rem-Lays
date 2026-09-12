@@ -1,15 +1,15 @@
 {
-    "version": "1.8.0",
-    "notes": "Rem-Lays v1.8.0: Latest Release",
-    "pub_date": "2026-08-27T14:48:00Z",
+    "version": "1.9.0",
+    "notes": "Rem-Lays v1.9.0: Latest Release",
+    "pub_date": "2026-09-03T15:28:00Z",
     "platforms": {
         "windows-x86_64": {
-            "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIG1pbmlzaWduIHNlY3JldCBrZXkKUldTSzR1RnVvM2hSemdhUEtIQkxuQXZ5VTJmOVQza2FWKzlSbGlHNDRYMFZYQ0FCcmZKdUwxQlRXSjBqMjR5NG9NNm96S3NOQ2c4bjZwSmZqcXlOVTY1U2N3TVRDSzY2S1E4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg3ODQ1MDM2CWZpbGU6UmVtLUxheXNfMS44LjBfeDY0LXNldHVwLmV4ZQpoUkdiSzk0c0JtcDBXWkp2TnNoV056QVZ4b3MweWtmUFBMTjl3UXZ2LzUwdDU3NUFuTEJxajEzeU45TmpNOU1IQVY2UnUveTYrNkZ4QUU1SFh3MDVBUT09Cg==",
-            "url": "https://github.com/Abhay-Maheshwari/Rem-Lays/releases/download/v1.8.0/Rem-Lays_1.8.0_x64-setup.exe"
+            "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTSzR1RnVvM2hSemhqUzBRRlMvckZsMzJIWE5XcGtPbTlEaGJvdnc2cmYzWnNBditpWm9UUXUrTjRybVBRa29lQllxZW05RXQ2bzR6dGw4OGloQU45WjAwbzJrWVdUcGdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg4NDQ4NzYxCWZpbGU6UmVtLUxheXNfMS45LjBfeDY0LXNldHVwLmV4ZQpLTW1lZ2lBM2lURTFWenA5TW5ZMjRDOUtzODdlR0R5b3AzaGJFaFdpWUpxVTk4Vk5VMkV5QWRrWGU5WWRKWXJ3ektWSEx3MlVhVUFsb2gyVnpmQ3NBZz09Cg==",
+            "url": "https://github.com/Abhay-Maheshwari/Rem-Lays/releases/download/v1.9.0/Rem-Lays_1.9.0_x64-setup.exe"
         },
         "android": {
             "signature": "",
-            "url": "https://github.com/Abhay-Maheshwari/Rem-Lays/releases/download/v1.8.0/Rem-Lays_1.8.0.apk"
+            "url": "https://github.com/Abhay-Maheshwari/Rem-Lays/releases/download/v1.9.0/Rem-Lays_1.9.0.apk"
         }
     }
 }

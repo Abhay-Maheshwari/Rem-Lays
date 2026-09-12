@@ -6,15 +6,17 @@ import { AuthService } from '../../services/auth.service';
 import { ItemsService } from '../../services/items.service';
 import { ThemeService, Theme } from '../../services/theme.service';
 import { invoke } from '@tauri-apps/api/core';
-import { isTauri } from '../../services/platform';
+import { isTauri, isAndroid } from '../../services/platform';
 import { UpdateService } from '../../services/update.service';
 import { NativeNotificationService } from '../../services/native-notification.service';
 import { WidgetBridgeService } from '../../services/widget-bridge.service';
+import { WallpaperBridgeService } from '../../services/wallpaper-bridge.service';
+import { CalendarWallpaperSettingsComponent } from '../calendar-wallpaper-settings/calendar-wallpaper-settings.component';
 
 @Component({
   selector: 'app-settings-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CalendarWallpaperSettingsComponent],
   templateUrl: './settings-page.component.html',
   styleUrl: './settings-page.component.scss'
 })
@@ -22,6 +24,8 @@ export class SettingsPageComponent implements OnInit {
   @Output() closeSettings = new EventEmitter<void>();
   
   activeTab: 'account' | 'appearance' | 'system' | 'data' = 'account';
+  subView: 'main' | 'wallpaper' = 'main';
+  isAndroidDevice = isAndroid();
   
   // States
   isAutostartEnabled = false;
@@ -49,7 +53,8 @@ export class SettingsPageComponent implements OnInit {
     public themeSvc: ThemeService,
     public updateSvc: UpdateService,
     private notificationSvc: NativeNotificationService,
-    private widgetBridge: WidgetBridgeService
+    private widgetBridge: WidgetBridgeService,
+    public wallpaperBridge: WallpaperBridgeService
   ) {}
 
   async ngOnInit() {

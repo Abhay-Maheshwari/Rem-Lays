@@ -1,17 +1,17 @@
 {
   "name": "rem-lays",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "private": true,
   "scripts": {
     "start": "ng serve --host 0.0.0.0",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "tauri": "tauri",
-    "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build",
-    "tauri:android:init": "tauri android init",
-    "tauri:android:dev": "tauri android dev",
-    "tauri:android:build": "tauri android build"
+    "tauri": "dotenv -- tauri",
+    "tauri:dev": "dotenv -- tauri dev",
+    "tauri:build": "dotenv -- tauri build",
+    "tauri:android:init": "dotenv -- tauri android init",
+    "tauri:android:dev": "dotenv -- tauri android dev",
+    "tauri:android:build": "dotenv -- tauri android build"
   },
   "dependencies": {
     "@angular/animations": "^18.2.0",
@@ -31,8 +31,8 @@
     "@tauri-apps/plugin-fs": "^2.5.1",
     "@tauri-apps/plugin-notification": "^2.0.0",
     "@tauri-apps/plugin-opener": "^2.5.4",
-    "@tauri-apps/plugin-updater": "^2.0.0",
     "@tauri-apps/plugin-process": "^2.0.0",
+    "@tauri-apps/plugin-updater": "^2.0.0",
     "rxjs": "~7.8.0",
     "tauri-plugin-fcm": "^0.2.0",
     "tslib": "^2.6.0",
@@ -43,6 +43,7 @@
     "@angular/cli": "^18.2.0",
     "@angular/compiler-cli": "^18.2.0",
     "@tauri-apps/cli": "^2.0.0",
+    "dotenv-cli": "^11.0.0",
     "typescript": "~5.5.0"
   }
 }

@@ -36,7 +36,7 @@
               "fileReplacements": [
                 { "replace": "src/environments/environment.ts", "with": "src/environments/environment.prod.ts" }
               ],
-              "budgets": [{ "type": "initial", "maximumWarning": "600kb", "maximumError": "1mb" }],
+              "budgets": [{ "type": "initial", "maximumWarning": "1mb", "maximumError": "1.5mb" }],
               "outputHashing": "all"
             },
             "development": {

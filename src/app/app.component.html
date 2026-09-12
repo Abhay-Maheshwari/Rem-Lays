@@ -38,13 +38,13 @@
     </svg>
   </button>
   <div class="backdrop" [class.visible]="sidebarOpen()" (click)="closeSidebar()"></div>
-  <app-sidebar [open]="sidebarOpen()" [activeView]="activeView()" (navigated)="activeView.set('feed'); closeSidebar()" (openHome)="activeView.set('home'); closeSidebar()" (openDigest)="showWeeklyDigest.set(true); closeSidebar()" (openSettingsPage)="activeView.set('settings'); closeSidebar()"></app-sidebar>
+  <app-sidebar [open]="sidebarOpen()" [activeView]="activeView()" (navigated)="activeView.set('feed'); closeSidebar()" (openHome)="activeView.set('home'); closeSidebar()" (openDigest)="showWeeklyDigest.set(true); closeSidebar()" (openSettingsPage)="activeView.set('settings'); closeSidebar()" (openCollections)="activeView.set('collections'); closeSidebar()" (openWrite)="activeView.set('write'); closeSidebar()"></app-sidebar>
   <main class="main-pane">
     <ng-container *ngIf="activeView() === 'home'">
       <app-home (navigate)="$event === 'digest' ? showWeeklyDigest.set(true) : activeView.set($event)"></app-home>
     </ng-container>
     <ng-container *ngIf="activeView() === 'feed'">
-      <app-feed></app-feed>
+      <app-feed (openWrite)="activeView.set('write')"></app-feed>
       <app-quick-action-bar></app-quick-action-bar>
     </ng-container>
     <ng-container *ngIf="activeView() === 'settings'">
@@ -52,6 +52,12 @@
     </ng-container>
     <ng-container *ngIf="activeView() === 'calendar'">
       <app-calendar (navigate)="$event === 'digest' ? showWeeklyDigest.set(true) : activeView.set($event)"></app-calendar>
+    </ng-container>
+    <ng-container *ngIf="activeView() === 'collections'">
+      <app-collections-page></app-collections-page>
+    </ng-container>
+    <ng-container *ngIf="activeView() === 'write'">
+      <app-write-page></app-write-page>
     </ng-container>
   </main>
 </div>

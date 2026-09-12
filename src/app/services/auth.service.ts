@@ -25,13 +25,53 @@ export class AuthService {
       '__TAURI__' in window
     );
 
+    // Helper to log URLs without leaking access/refresh tokens
+    const sanitizeUrl = (u: string) => {
+      try {
+        const parsed = new URL(u);
+        return `${parsed.protocol}//${parsed.host}${parsed.pathname}`;
+      } catch {
+        return 'invalid-url';
+      }
+    };
+
+    // Helper to safely process implicit flow URLs without overwriting a healthy session
+    const processImplicitFlow = async (urlStr: string, source: string) => {
+      try {
+        let hash = '';
+        if (urlStr.includes('#')) {
+          hash = urlStr.split('#')[1];
+        } else {
+          const parsedUrl = new URL(urlStr);
+          hash = parsedUrl.hash.substring(1);
+        }
+        
+        const params = new URLSearchParams(hash);
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+
+        if (access_token && refresh_token) {
+          // Prevent an old cached deep link from overwriting an active, valid session
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session && session.access_token !== access_token) {
+             console.log(`[Auth] Ignoring implicit flow tokens from ${source} - active session exists.`);
+             return;
+          }
+          await supabase.auth.setSession({ access_token, refresh_token });
+          console.log(`[Auth] Session set from ${source}`);
+        }
+      } catch (err) {
+        console.error(`[Auth] Error processing implicit flow from ${source}:`, err);
+      }
+    };
+
     // Mobile specific: Auto-refresh tokens when app comes to foreground.
     // If the device sleeps, Supabase's setTimeout for auto-refresh won't fire.
     if (typeof document !== 'undefined') {
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
-          console.log('[Auth] App became visible, refreshing session');
-          supabase.auth.refreshSession().catch(e => console.error(e));
+          console.log('[Auth] App became visible, checking session');
+          supabase.auth.getSession().catch(e => console.error(e));
         }
       });
     }
@@ -39,36 +79,29 @@ export class AuthService {
     if (isTauri) {
       import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
         getCurrentWindow().listen('tauri://focus', () => {
-          console.log('[Auth] Window focused, refreshing session');
-          supabase.auth.refreshSession().catch(e => console.error(e));
+          console.log('[Auth] Window focused, checking session');
+          supabase.auth.getSession().catch(e => console.error(e));
         });
       });
       import('@tauri-apps/api/event').then(module => {
         module.listen('tauri://resume', () => {
-          console.log('[Auth] App resumed, refreshing session');
-          supabase.auth.refreshSession().catch(e => console.error(e));
+          console.log('[Auth] App resumed, checking session');
+          supabase.auth.getSession().catch(e => console.error(e));
         });
       });
       
       // Handle deep links from OAuth redirects in Tauri apps
       console.log('[Auth] Registering onOpenUrl listener');
       onOpenUrl((urls) => {
-        console.log('[Auth] onOpenUrl triggered with urls:', JSON.stringify(urls));
+        console.log('[Auth] onOpenUrl triggered with urls:', JSON.stringify(urls.map(sanitizeUrl)));
         for (const url of urls) {
           try {
             const parsedUrl = new URL(url);
-            console.log('[Auth] Parsed URL search:', parsedUrl.search, 'hash:', parsedUrl.hash);
             
             // Handle Implicit Flow (hash)
             if (url.includes('access_token=')) {
-              console.log('[Auth] Found access_token in URL');
-              const hash = parsedUrl.hash.substring(1);
-              const params = new URLSearchParams(hash);
-              const access_token = params.get('access_token');
-              const refresh_token = params.get('refresh_token');
-              if (access_token && refresh_token) {
-                supabase.auth.setSession({ access_token, refresh_token }).then(() => console.log('[Auth] Session set from implicit flow'));
-              }
+              console.log('[Auth] Found access_token in URL (onOpenUrl)');
+              processImplicitFlow(url, 'onOpenUrl');
             } 
             // Handle PKCE Flow (query)
             const code = parsedUrl.searchParams.get('code');
@@ -80,7 +113,7 @@ export class AuthService {
               continue;
             }
           } catch (e) {
-            console.error('[Auth] Error parsing deep link URL:', url, e);
+            console.error('[Auth] Error parsing deep link URL:', sanitizeUrl(url), e);
           }
         }
       }).catch(err => console.error('[Auth] Error registering onOpenUrl:', err));
@@ -88,47 +121,33 @@ export class AuthService {
       // Also listen to any raw intent events from Tauri core
       import('@tauri-apps/api/event').then(module => {
         module.listen('tauri://intent', (event) => {
-          console.log('[Auth] Received tauri://intent event:', JSON.stringify(event));
           if (event.payload && (event.payload as any).data) {
             const url = (event.payload as any).data;
             if (typeof url === 'string') {
-              console.log('[Auth] Processing raw intent URL:', url);
+              console.log('[Auth] Processing raw intent URL:', sanitizeUrl(url));
               if (url.includes('access_token=')) {
-                try {
-                  const hash = url.split('#')[1];
-                  const params = new URLSearchParams(hash);
-                  const access_token = params.get('access_token');
-                  const refresh_token = params.get('refresh_token');
-                  if (access_token && refresh_token) {
-                    supabase.auth.setSession({ access_token, refresh_token })
-                      .then(() => console.log('[Auth] Session set from raw intent'));
-                  }
-                } catch (e) { console.error(e); }
+                processImplicitFlow(url, 'tauri://intent');
               }
             }
           }
         });
         
         module.listen('deep-link://new-url', (event) => {
-          console.log('[Auth] Received raw deep-link://new-url event:', JSON.stringify(event));
+          if (event.payload) {
+             const url = typeof event.payload === 'string' ? event.payload : (event.payload as any).url;
+             if (url) console.log('[Auth] Received raw deep-link://new-url event:', sanitizeUrl(url));
+          }
         });
       });
       
       if (typeof window !== 'undefined') {
         window.addEventListener('android-deep-link', (e: any) => {
-          console.log('[Auth] Received android-deep-link custom event!', e.detail);
           const url = e.detail;
-          if (typeof url === 'string' && url.includes('access_token=')) {
-            try {
-              const hash = url.split('#')[1];
-              const params = new URLSearchParams(hash);
-              const access_token = params.get('access_token');
-              const refresh_token = params.get('refresh_token');
-              if (access_token && refresh_token) {
-                supabase.auth.setSession({ access_token, refresh_token })
-                  .then(() => console.log('[Auth] Session set from custom android-deep-link'));
-              }
-            } catch (err) { console.error(err); }
+          if (typeof url === 'string') {
+            console.log('[Auth] Received android-deep-link custom event!', sanitizeUrl(url));
+            if (url.includes('access_token=')) {
+              processImplicitFlow(url, 'android-deep-link');
+            }
           }
         });
       }
@@ -137,20 +156,11 @@ export class AuthService {
       import('@tauri-apps/plugin-deep-link').then(module => {
         if (module.getCurrent) {
           module.getCurrent().then(urls => {
-            console.log('[Auth] getCurrent() returned:', JSON.stringify(urls));
             if (urls && urls.length > 0) {
+              console.log('[Auth] getCurrent() returned:', JSON.stringify(urls.map(sanitizeUrl)));
               urls.forEach(url => {
                 if (typeof url === 'string' && url.includes('access_token=')) {
-                  try {
-                    const hash = url.split('#')[1];
-                    const params = new URLSearchParams(hash);
-                    const access_token = params.get('access_token');
-                    const refresh_token = params.get('refresh_token');
-                    if (access_token && refresh_token) {
-                      supabase.auth.setSession({ access_token, refresh_token })
-                        .then(() => console.log('[Auth] Session set from getCurrent()'));
-                    }
-                  } catch (e) { console.error(e); }
+                  processImplicitFlow(url, 'getCurrent');
                 }
               });
             }

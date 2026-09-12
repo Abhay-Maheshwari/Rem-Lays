@@ -11,6 +11,7 @@
 
   .brand-logo, 
   .brand-spacer, 
+  .settings-btn,
   .search-wrap, 
   .nav-section-label, 
   .filter-item span.label, 
@@ -36,6 +37,10 @@
   .nav-section-header {
     justify-content: center;
     padding-right: 0;
+  }
+
+  .brand {
+    justify-content: center;
   }
 
   .icon-btn.collapse-btn svg {
@@ -775,8 +780,8 @@
 // drawer instead of a permanent column — see AppComponent for the
 // hamburger button and backdrop that control [open].
 @media (max-width: 760px) {
-  :host {
-    width: 0;
+  :host, :host(.collapsed) {
+    width: 0 !important;
   }
 
   .sidebar {
