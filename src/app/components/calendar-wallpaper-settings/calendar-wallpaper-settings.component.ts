@@ -22,6 +22,7 @@ export class CalendarWallpaperSettingsComponent implements OnInit, OnDestroy {
   accounts: CalendarAccount[] = [];
   previewSrc = '';
   isLoadingPreview = false;
+  hasCustomBackground = false;
 
   // Local state for editing
   enabled = false;
@@ -41,7 +42,10 @@ export class CalendarWallpaperSettingsComponent implements OnInit, OnDestroy {
     { id: 'dark_glass', name: 'Dark Glass', desc: 'Translucent dark', colors: ['#000000', '#0A84FF'] },
     { id: 'light_frost', name: 'Light Frost', desc: 'Frosted light', colors: ['#FFFFFF', '#007AFF'] },
     { id: 'amoled', name: 'AMOLED', desc: 'Pure black minimal', colors: ['#000000', '#30D158'] },
-    { id: 'gradient_accent', name: 'Gradient', desc: 'Vibrant accent', colors: ['#1A1A2E', '#E94560'] }
+    { id: 'gradient_accent', name: 'Gradient', desc: 'Vibrant accent', colors: ['#1A1A2E', '#E94560'] },
+    { id: 'image_blur', name: 'Image Blur', desc: 'For custom images', colors: ['#000000', '#FFFFFF'] },
+    { id: 'gradient_sunset', name: 'Sunset', desc: 'Warm gradient', colors: ['#FF512F', '#DD2476'] },
+    { id: 'week_agenda', name: 'Week View', desc: '7-day overview', colors: ['#1A1A2E', '#0A84FF'] }
   ];
 
   dayLabels = [
@@ -73,6 +77,12 @@ export class CalendarWallpaperSettingsComponent implements OnInit, OnDestroy {
       }
     };
     window.addEventListener('rem-lays-calendar-permission', this.permissionListener);
+
+    // Listen for image picked
+    window.addEventListener('wallpaper-image-picked', () => {
+      this.hasCustomBackground = true;
+      this.refreshPreview();
+    });
   }
 
   ngOnDestroy() {
@@ -96,6 +106,7 @@ export class CalendarWallpaperSettingsComponent implements OnInit, OnDestroy {
       this.activeEnd = this.status.activeEnd;
       this.activeDays = new Set(this.status.activeDays);
       this.selectedCalendars = new Set(this.status.calendars);
+      this.hasCustomBackground = this.status.hasCustomBackground || false;
     }
     if (this.enabled) {
       this.refreshPreview();
@@ -117,6 +128,15 @@ export class CalendarWallpaperSettingsComponent implements OnInit, OnDestroy {
       // otherwise the permission dialog is shown and result comes via event
       setTimeout(() => this.loadStatus(), 500);
     }
+  }
+
+  pickImage() {
+    this.wpBridge.pickBackgroundImage();
+  }
+
+  clearImage() {
+    this.hasCustomBackground = false;
+    this.applyConfig({ backgroundUri: '' });
   }
 
   setTarget(target: 'home' | 'lock' | 'both') {

@@ -197,8 +197,9 @@ export class AuthService {
       '__TAURI__' in window
     );
     
-    const isMobile = typeof navigator !== 'undefined' && /android|iphone|ipad|ipod/i.test(navigator.userAgent);
-    const useDeepLink = isTauri && isMobile;
+    // Use deep linking (system browser) for all Tauri apps (desktop & mobile).
+    // This prevents embedded WebView redirect issues that land the user on the live website.
+    const useDeepLink = isTauri;
 
     if (useDeepLink) {
       const { data, error } = await supabase.auth.signInWithOAuth({

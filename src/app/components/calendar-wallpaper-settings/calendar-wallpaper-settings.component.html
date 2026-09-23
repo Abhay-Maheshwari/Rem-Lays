@@ -83,6 +83,24 @@
         </div>
       </div>
 
+      <!-- ── Custom Background Image ── -->
+      <div class="section">
+        <h3 class="section-title">Background Image</h3>
+        <p class="section-desc">Choose a custom image from your gallery to act as the base wallpaper.</p>
+        
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-label">Custom Image</span>
+            <span class="setting-desc" *ngIf="hasCustomBackground">Custom image is active.</span>
+            <span class="setting-desc" *ngIf="!hasCustomBackground">Using theme default background.</span>
+          </div>
+          <div class="action-buttons">
+            <button class="btn-secondary sm" *ngIf="hasCustomBackground" (click)="clearImage()">Clear</button>
+            <button class="btn-primary sm" (click)="pickImage()">Pick Image</button>
+          </div>
+        </div>
+      </div>
+
       <!-- ── Active Time Window ── -->
       <div class="section">
         <h3 class="section-title">

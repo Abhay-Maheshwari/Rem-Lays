@@ -16,6 +16,7 @@ export interface WallpaperStatus {
   activeEnd: string;
   activeDays: number[];
   calendars: number[];
+  hasCustomBackground?: boolean;
 }
 
 export interface CalendarAccount {
@@ -38,6 +39,7 @@ export interface WallpaperConfig {
   activeEnd?: string;
   activeDays?: number[];
   calendars?: number[];
+  backgroundUri?: string;
 }
 
 /**
@@ -147,6 +149,18 @@ export class WallpaperBridgeService {
       this.bridge.refreshWallpaperNow();
     } catch (err) {
       console.error('[WallpaperBridge] refreshNow failed:', err);
+    }
+  }
+
+  /**
+   * Launch the Android system image picker to choose a custom background.
+   */
+  pickBackgroundImage(): void {
+    if (!this.isAvailable) return;
+    try {
+      this.bridge.pickBackgroundImage();
+    } catch (err) {
+      console.error('[WallpaperBridge] pickBackgroundImage failed:', err);
     }
   }
 }
