@@ -3,6 +3,7 @@ import { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase-client';
 import { onOpenUrl } from '@tauri-apps/plugin-deep-link';
 import { openUrl } from '@tauri-apps/plugin-opener';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -77,6 +78,12 @@ export class AuthService {
     }
 
     if (isTauri) {
+      import('@tauri-apps/plugin-deep-link').then(module => {
+        if (module.register) {
+          module.register('remlays').catch(e => console.log('[Auth] Error registering deep link (expected on non-Windows platforms):', e));
+        }
+      });
+
       import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
         getCurrentWindow().listen('tauri://focus', () => {
           console.log('[Auth] Window focused, checking session');
@@ -90,31 +97,35 @@ export class AuthService {
         });
       });
       
+      // Helper to process any deep link URL (Implicit Flow or PKCE)
+      const processDeepLinkUrl = (url: string, source: string) => {
+        try {
+          const parsedUrl = new URL(url);
+          
+          // Handle Implicit Flow (hash)
+          if (url.includes('access_token=')) {
+            console.log(`[Auth] Found access_token in URL (${source})`);
+            processImplicitFlow(url, source);
+          } 
+          // Handle PKCE Flow (query)
+          const code = parsedUrl.searchParams.get('code');
+          if (code) {
+            console.log(`[Auth] Found code in deep link (${source}), exchanging for session`);
+            supabase.auth.exchangeCodeForSession(code).catch(err => {
+              console.error(`[Auth] Error exchanging code for session (${source}):`, err);
+            });
+          }
+        } catch (e) {
+          console.error(`[Auth] Error parsing deep link URL from ${source}:`, sanitizeUrl(url), e);
+        }
+      };
+
       // Handle deep links from OAuth redirects in Tauri apps
       console.log('[Auth] Registering onOpenUrl listener');
       onOpenUrl((urls) => {
         console.log('[Auth] onOpenUrl triggered with urls:', JSON.stringify(urls.map(sanitizeUrl)));
         for (const url of urls) {
-          try {
-            const parsedUrl = new URL(url);
-            
-            // Handle Implicit Flow (hash)
-            if (url.includes('access_token=')) {
-              console.log('[Auth] Found access_token in URL (onOpenUrl)');
-              processImplicitFlow(url, 'onOpenUrl');
-            } 
-            // Handle PKCE Flow (query)
-            const code = parsedUrl.searchParams.get('code');
-            if (code) {
-              console.log('[Auth] Found code in deep link, exchanging for session');
-              supabase.auth.exchangeCodeForSession(code).catch(err => {
-                console.error('[Auth] Error exchanging code for session:', err);
-              });
-              continue;
-            }
-          } catch (e) {
-            console.error('[Auth] Error parsing deep link URL:', sanitizeUrl(url), e);
-          }
+          processDeepLinkUrl(url, 'onOpenUrl');
         }
       }).catch(err => console.error('[Auth] Error registering onOpenUrl:', err));
 
@@ -125,9 +136,7 @@ export class AuthService {
             const url = (event.payload as any).data;
             if (typeof url === 'string') {
               console.log('[Auth] Processing raw intent URL:', sanitizeUrl(url));
-              if (url.includes('access_token=')) {
-                processImplicitFlow(url, 'tauri://intent');
-              }
+              processDeepLinkUrl(url, 'tauri://intent');
             }
           }
         });
@@ -135,7 +144,10 @@ export class AuthService {
         module.listen('deep-link://new-url', (event) => {
           if (event.payload) {
              const url = typeof event.payload === 'string' ? event.payload : (event.payload as any).url;
-             if (url) console.log('[Auth] Received raw deep-link://new-url event:', sanitizeUrl(url));
+             if (url) {
+               console.log('[Auth] Received raw deep-link://new-url event:', sanitizeUrl(url));
+               processDeepLinkUrl(url, 'deep-link://new-url');
+             }
           }
         });
       });
@@ -145,9 +157,7 @@ export class AuthService {
           const url = e.detail;
           if (typeof url === 'string') {
             console.log('[Auth] Received android-deep-link custom event!', sanitizeUrl(url));
-            if (url.includes('access_token=')) {
-              processImplicitFlow(url, 'android-deep-link');
-            }
+            processDeepLinkUrl(url, 'android-deep-link');
           }
         });
       }
@@ -159,8 +169,8 @@ export class AuthService {
             if (urls && urls.length > 0) {
               console.log('[Auth] getCurrent() returned:', JSON.stringify(urls.map(sanitizeUrl)));
               urls.forEach(url => {
-                if (typeof url === 'string' && url.includes('access_token=')) {
-                  processImplicitFlow(url, 'getCurrent');
+                if (typeof url === 'string') {
+                  processDeepLinkUrl(url, 'getCurrent');
                 }
               });
             }
@@ -205,7 +215,7 @@ export class AuthService {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'remlays://auth/callback',
+          redirectTo: environment.publicWebAppUrl + '/assets/desktop-auth.html',
           queryParams: { prompt: 'select_account' },
           skipBrowserRedirect: true
         }

@@ -42,3 +42,13 @@ testsprite_tests/tmp/config.json
 website/downloads/*.exe
 website/downloads/*.msi
 website/downloads/*.apk
+
+# Brag & Feature Video Generation
+.agents/skills/brag/
+brag-features/
+brag-output*/
+brag-output/
+brag*.mp4
+brag*.jpg
+generate_feature_videos.js
+render_all.ps1

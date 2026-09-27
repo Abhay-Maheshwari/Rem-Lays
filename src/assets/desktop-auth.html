@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rem-Lays - Login Successful</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #141414;
+            --bg-card: #1e1e1e;
+            --border-subtle: rgba(255, 255, 255, 0.05);
+            --border-strong: rgba(255, 255, 255, 0.12);
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #34d399;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            background-image: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.15), transparent 60%);
+        }
+
+        .container {
+            background-color: var(--bg-card);
+            padding: 48px 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid var(--border-strong);
+            max-width: 440px;
+            width: 90%;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px var(--border-subtle) inset;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .icon-wrapper {
+            width: 64px;
+            height: 64px;
+            background: rgba(52, 211, 153, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px auto;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            color: var(--success);
+        }
+
+        .icon-wrapper svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        h1 {
+            margin: 0 0 12px 0;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin: 0 0 24px 0;
+            font-size: 15px;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border-strong);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        a.btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            background-color: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.1) inset;
+        }
+
+        a.btn:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .close-hint {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 24px;
+            margin-bottom: 0;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon-wrapper" id="success-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+        <div class="spinner" id="loading-spinner"></div>
+        
+        <h1>Authentication Successful</h1>
+        <p>You have securely logged in to Rem-Lays. We are redirecting you back to the desktop app.</p>
+        
+        <a id="manual-link" href="#" class="btn">Open Rem-Lays App</a>
+        <p class="close-hint">You can safely close this browser tab once the app opens.</p>
+    </div>
+
+    <script>
+        var targetUrl = 'remlays://auth/callback' + window.location.search + window.location.hash;
+        document.getElementById('manual-link').href = targetUrl;
+        
+        setTimeout(function() {
+            document.getElementById('success-icon').style.display = 'none';
+            document.getElementById('loading-spinner').style.display = 'block';
+            window.location.replace(targetUrl);
+        }, 1200);
+    </script>
+</body>
+</html>

@@ -18,7 +18,9 @@
               "output": "app.html"
             },
             "browser": "src/main.ts",
-            "polyfills": ["zone.js"],
+            "polyfills": [
+              "zone.js"
+            ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/assets",
@@ -28,20 +30,26 @@
                 "output": "/"
               }
             ],
-            "styles": ["src/styles.scss"],
+            "styles": [
+              "src/styles.scss"
+            ],
             "scripts": []
           },
           "configurations": {
             "production": {
-              "optimization": {
-                "fonts": {
-                  "inline": false
-                }
-              },
               "fileReplacements": [
-                { "replace": "src/environments/environment.ts", "with": "src/environments/environment.prod.ts" }
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
               ],
-              "budgets": [{ "type": "initial", "maximumWarning": "1mb", "maximumError": "1.5mb" }],
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1mb",
+                  "maximumError": "1.5mb"
+                }
+              ],
               "outputHashing": "all"
             },
             "development": {
@@ -55,8 +63,12 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
-            "production": { "buildTarget": "rem-lays:build:production" },
-            "development": { "buildTarget": "rem-lays:build:development" }
+            "production": {
+              "buildTarget": "rem-lays:build:production"
+            },
+            "development": {
+              "buildTarget": "rem-lays:build:development"
+            }
           },
           "defaultConfiguration": "development"
         }
