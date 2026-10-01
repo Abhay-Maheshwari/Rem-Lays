@@ -148,11 +148,27 @@
         var targetUrl = 'remlays://auth/callback' + window.location.search + window.location.hash;
         document.getElementById('manual-link').href = targetUrl;
         
+        // Check for error in URL
+        var isError = window.location.search.includes('error=') || window.location.hash.includes('error=');
+        var errorDesc = new URLSearchParams(window.location.search).get('error_description') || new URLSearchParams(window.location.hash.substring(1)).get('error_description');
+        
+        if (isError) {
+            document.querySelector('h1').innerText = 'Authentication Failed';
+            document.querySelector('p').innerText = errorDesc ? decodeURIComponent(errorDesc).replace(/\+/g, ' ') : 'An error occurred during sign-in.';
+            document.getElementById('success-icon').innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>';
+            document.getElementById('success-icon').style.color = '#ef4444';
+            document.getElementById('success-icon').style.background = 'rgba(239, 68, 68, 0.1)';
+            document.getElementById('success-icon').style.borderColor = 'rgba(239, 68, 68, 0.2)';
+            document.getElementById('manual-link').innerText = 'Return to App';
+        }
+
         setTimeout(function() {
-            document.getElementById('success-icon').style.display = 'none';
-            document.getElementById('loading-spinner').style.display = 'block';
+            if (!isError) {
+                document.getElementById('success-icon').style.display = 'none';
+                document.getElementById('loading-spinner').style.display = 'block';
+            }
             window.location.replace(targetUrl);
-        }, 1200);
+        }, isError ? 3000 : 1200); // Give user more time to read the error
     </script>
 </body>
 </html>

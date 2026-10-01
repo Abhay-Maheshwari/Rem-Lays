@@ -102,6 +102,18 @@ export class AuthService {
         try {
           const parsedUrl = new URL(url);
           
+          // Check for OAuth errors
+          const hashParams = new URLSearchParams(parsedUrl.hash.substring(1));
+          const errorDesc = parsedUrl.searchParams.get('error_description') || hashParams.get('error_description');
+          if (errorDesc) {
+            console.error(`[Auth] OAuth error from ${source}:`, decodeURIComponent(errorDesc).replace(/\+/g, ' '));
+            // Dispatch a custom event on window so app.component.ts can show a toast
+            try {
+               window.dispatchEvent(new CustomEvent('auth-error', { detail: decodeURIComponent(errorDesc).replace(/\+/g, ' ') }));
+            } catch(e) {}
+            return;
+          }
+
           // Handle Implicit Flow (hash)
           if (url.includes('access_token=')) {
             console.log(`[Auth] Found access_token in URL (${source})`);
@@ -113,6 +125,7 @@ export class AuthService {
             console.log(`[Auth] Found code in deep link (${source}), exchanging for session`);
             supabase.auth.exchangeCodeForSession(code).catch(err => {
               console.error(`[Auth] Error exchanging code for session (${source}):`, err);
+              window.dispatchEvent(new CustomEvent('auth-error', { detail: err.message || 'Error exchanging code' }));
             });
           }
         } catch (e) {

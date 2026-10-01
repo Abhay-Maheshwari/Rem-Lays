@@ -220,6 +220,14 @@ export class AppComponent {
       }) as EventListener);
     }
     
+    // Listen for auth errors emitted from AuthService
+    if (typeof window !== 'undefined') {
+      window.addEventListener('auth-error', ((event: CustomEvent) => {
+        const errMsg = event.detail || 'Authentication failed.';
+        this.toastSvc.show(errMsg, 'error');
+      }) as EventListener);
+    }
+    
     // Persist active view across reloads
     effect(() => {
       localStorage.setItem('activeView', this.activeView());
